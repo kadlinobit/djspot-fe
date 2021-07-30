@@ -1,0 +1,23 @@
+{
+    "welcome_message": "Vítejte na DJSpot!",
+    "user" : {
+        "register": "Nový účet",
+        "do_register": "Vytvořit účet",
+        "username": "Uživatelské jméno",
+        "email": "Email",
+        "password": "Heslo",
+        "password_again": "Heslo znovu",
+        "passwords_do_not_match" : "Hesla se neshodují",
+        "forgot_password" : "Zapomenuté heslo",
+        "already_got_an_account" : "Už máš účet?",
+        "dont_have_an_account" : "Ještě nemáš účet?",
+        "do_login" : "Přihlásit",
+        "login": "Přihlášení",
+        "register_success_message": "Odkaz k potvrzení nového účtu byl právě odeslán na tvůj email - klikni na něj k dokončení registrace."
+    },
+    "validation" : {
+        "required": "Toto pole je povinné",
+        "email": "Pole musí obsahovat email"
+    },
+    "Email is already taken." : "Tento email už existuje v naší databázi."
+}
