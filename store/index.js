@@ -1,9 +1,6 @@
-export const getters = {
-    isAuthenticated(state) {
-        return state.auth.loggedIn
-    },
+import Vue from 'vue'
+import Vuex, { Store } from 'vuex'
 
-    loggedInUser(state) {
-        return state.auth.user
-    }
-}
+Vue.use(Vuex)
+
+export const store = new Store({})

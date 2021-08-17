@@ -24,8 +24,9 @@ export default {
 
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
-        { src: '~plugins/axios', ssr: false },
-        { src: '~/plugins/vee-validate.js', ssr: false }
+        { src: '~plugins/axios', ssr: true },
+        { src: '~/plugins/vee-validate.js', ssr: false },
+        { src: '~/plugins/v-markdown-editor.js', mode: 'client', ssr: false }
     ],
 
     // Auto import components: https://go.nuxtjs.dev/config-components
@@ -64,21 +65,14 @@ export default {
         'nuxt-buefy',
         // https://go.nuxtjs.dev/axios
         '@nuxtjs/axios',
-        '@nuxtjs/auth'
+        '@nuxtjs/auth',
+        '@nuxtjs/strapi'
     ],
 
     // Axios module configuration: https://go.nuxtjs.dev/config-axios
     axios: {
         baseURL: 'http://localhost:1337'
     },
-
-    // Build Configuration: https://go.nuxtjs.dev/config-build
-    build: {},
-
-    publicRuntimeConfig: {
-        API_AUTH_URL: 'http://localhost:1337'
-    },
-    privateRuntimeConfig: {},
     /*
      ** Auth module configuration
      ** See https://auth.nuxtjs.org/schemes/local.html#options
@@ -101,5 +95,15 @@ export default {
                 }
             }
         }
-    }
+    },
+    strapi: {},
+    // Build Configuration: https://go.nuxtjs.dev/config-build
+    build: {
+        transpile: ['vee-validate/dist/rules']
+    },
+
+    publicRuntimeConfig: {
+        API_AUTH_URL: 'http://localhost:1337'
+    },
+    privateRuntimeConfig: {}
 }

@@ -1,5 +1,5 @@
-export default function ({ store, redirect }) {
-    if (store.state.auth.loggedIn) {
+export default function ({ redirect, $strapi }) {
+    if ($strapi.user) {
         return redirect('/')
     }
 }

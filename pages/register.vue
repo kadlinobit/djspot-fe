@@ -5,33 +5,61 @@
                 <div class="column is-4 is-offset-4">
                     <h2 class="title has-text-centered">{{ $t('user.register') }}</h2>
 
-                    <Notification v-if="success" type="success" :message="success" />
-                    <Notification v-if="error" type="danger" :message="$t(error)" />
+                    <b-notification v-if="success" type="is-success" :closable="false">
+                        {{ $t(success) }}
+                    </b-notification>
 
-                    <form v-if="!success" method="post" @submit.prevent>
-                        <b-field :label="$t('user.username')">
-                            <b-input v-model="username" type="text" required></b-input>
-                        </b-field>
+                    <b-notification v-if="error" type="is-danger" :closable="false">
+                        {{ $t(error) }}
+                    </b-notification>
 
-                        <b-field :label="$t('user.email')">
-                            <b-input v-model="email" type="email" required></b-input>
-                        </b-field>
-                        <b-field :label="$t('user.password')">
-                            <b-input v-model="password1" type="password" required />
-                        </b-field>
-                        <b-field :label="$t('user.password_again')">
-                            <b-input v-model="password2" type="password" required />
-                        </b-field>
-                        <div class="control">
-                            <b-button
-                                :loading="isLoading"
-                                type="is-dark is-fullwidth"
-                                @click="register"
-                            >
-                                {{ $t('user.do_register') }}
-                            </b-button>
-                        </div>
-                    </form>
+                    <ValidationObserver ref="observer" slim>
+                        <form v-if="!success" method="post" @submit.prevent>
+                            <b-validated-field
+                                v-model="username"
+                                name="username"
+                                type="text"
+                                :label="$t('user.username')"
+                                rules="required"
+                            />
+
+                            <b-validated-field
+                                v-model="email"
+                                name="email"
+                                type="email"
+                                :label="$t('user.email')"
+                                rules="required|email"
+                            />
+
+                            <b-validated-field
+                                v-model="password1"
+                                vid="password1"
+                                name="password1"
+                                type="password"
+                                :label="$t('user.password')"
+                                rules="required"
+                            />
+
+                            <b-validated-field
+                                v-model="password2"
+                                name="password2"
+                                type="password"
+                                :label="$t('user.password_again')"
+                                rules="required|confirmed:password1"
+                            />
+                            <div class="field">
+                                <div class="control">
+                                    <b-button
+                                        :loading="isLoading"
+                                        type="is-dark is-fullwidth"
+                                        @click="onSubmit"
+                                    >
+                                        {{ $t('user.do_register') }}
+                                    </b-button>
+                                </div>
+                            </div>
+                        </form>
+                    </ValidationObserver>
 
                     <div class="has-text-centered" style="margin-top: 20px">
                         {{ $t('user.already_got_an_account') }}
@@ -46,11 +74,18 @@
 </template>
 
 <script>
-import Notification from '~/components/Notification'
+import { extend, ValidationObserver } from 'vee-validate'
+import { required, email, confirmed } from 'vee-validate/dist/rules'
+import BValidatedField from '~/components/form/BValidatedField.vue'
+
+extend('email', email)
+extend('required', required)
+extend('confirmed', confirmed)
 
 export default {
     components: {
-        Notification
+        ValidationObserver,
+        BValidatedField
     },
     middleware: ['guest'],
     data() {
@@ -65,23 +100,43 @@ export default {
         }
     },
     methods: {
-        async register() {
+        onSubmit() {
             this.error = null
-            if (this.password1 !== this.password2) {
-                this.error = this.$t('user.passwords_do_not_match')
-                return
-            }
+            this.$refs.observer.validate().then((success) => {
+                if (!success) {
+                    this.$buefy.toast.open({
+                        message: this.$t('validation.form_validation_error'),
+                        type: 'is-danger'
+                    })
+                    return
+                }
+                this.register()
+            })
+        },
+        async register() {
             try {
                 this.isLoading = true
+                /*
                 this.$axios.setToken(false)
                 await this.$axios.post('auth/local/register', {
                     username: this.username,
                     email: this.email,
                     password: this.password1
+                }) */
+
+                await this.$strapi.register({
+                    email: this.email,
+                    username: this.username,
+                    password: this.password1
                 })
-                this.success = this.$t('user.register_success_message')
+
+                this.success = 'user.register_success_message'
             } catch (e) {
-                this.error = e.response.data.message[0].messages[0].message
+                if (e.response && e.response.data) {
+                    this.error = e.response.data.message[0].messages[0].message
+                } else {
+                    this.error = e
+                }
             } finally {
                 this.isLoading = false
             }
