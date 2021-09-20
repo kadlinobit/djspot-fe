@@ -20,13 +20,14 @@ export default {
     },
 
     // Global CSS: https://go.nuxtjs.dev/config-css
-    css: [],
+    css: ['@mdi/font/css/materialdesignicons.min.css'], // TBD - probably remove
 
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
         { src: '~plugins/axios', ssr: true },
         { src: '~/plugins/vee-validate.js', ssr: false },
-        { src: '~/plugins/v-markdown-editor.js', mode: 'client', ssr: false }
+        { src: '~/plugins/v-markdown-editor.js', mode: 'client', ssr: false }, // TBD - probably remove
+        { src: '~/plugins/audio.js' }
     ],
 
     // Auto import components: https://go.nuxtjs.dev/config-components
@@ -77,6 +78,7 @@ export default {
      ** Auth module configuration
      ** See https://auth.nuxtjs.org/schemes/local.html#options
      */
+    // TBD - probably remove
     auth: {
         strategies: {
             local: {
@@ -103,7 +105,8 @@ export default {
     },
 
     publicRuntimeConfig: {
-        API_AUTH_URL: 'http://localhost:1337'
+        API_AUTH_URL: 'http://localhost:1337', // TBD - probably remove
+        DOMAIN: 'http://localhost:1337'
     },
     privateRuntimeConfig: {}
 }

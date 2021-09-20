@@ -16,34 +16,34 @@
                             v-model="formData.name"
                             name="name"
                             type="text"
-                            :label="$t('dj.name')"
-                            :placeholder="$t('dj.dj_name_placeholder')"
-                            rules="required|no_dj_prefix|alpha_num_dash_space"
+                            :label="$t('mix.name')"
+                            :placeholder="$t('mix.name')"
+                            rules="required|alpha_num_dash_space"
                         />
                         <b-validated-field
-                            v-model="formData.slug"
-                            name="slug"
-                            :disabled="true"
-                            type="text"
-                            :label="$t('dj.slug')"
-                            rules="required"
+                            v-model="formData.url"
+                            name="url"
+                            type="url"
+                            :label="$t('mix.url')"
+                            :placeholder="$t('mix.url_placeholder')"
+                            rules="required|audio_load_state:@audioLoadState"
+                            :help="$t('mix.url_help')"
                         />
                         <b-validated-field
-                            v-model="formData.email"
-                            name="email"
-                            type="email"
-                            :label="$t('dj.email')"
-                            rules="email"
+                            v-model="audioLoadState"
+                            vid="audioLoadState"
+                            name="audioLoadState"
+                            :hidden="true"
                         />
-                        <b-validated-select
-                            v-model="formData.city"
-                            name="city"
-                            :label="$t('dj.city')"
-                            rules="required"
-                            :options="citiesOptions"
-                            :expanded="true"
-                            :placeholder="$t('dj.select_city')"
-                        />
+                        <div class="field">
+                            <Player
+                                v-if="audioUrl"
+                                :file="audioUrl"
+                                @audio-load-error="onAudioLoadError"
+                                @audio-load-success="onAudioLoadSuccess"
+                            />
+                        </div>
+
                         <b-validated-tag-input
                             v-model="formData.genres"
                             name="genres"
@@ -56,32 +56,24 @@
                         />
                     </div>
                     <div class="column">
-                        <b-validated-image-upload
-                            v-model="formData.photo"
-                            name="photo"
-                            :label="$t('dj.photo')"
-                            rules="image_type"
-                            :on-remove-image="onRemovePhoto"
-                            :on-keep-current-image="onKeepCurrentPhoto"
-                            :current-image="initialData ? initialData.photo : null"
+                        <b-validated-field
+                            v-model="formData.description"
+                            name="description"
+                            type="textarea"
+                            :label="$t('mix.description')"
+                            :placeholder="$t('mix.description_placeholder')"
                         />
                     </div>
                 </div>
-
-                <b-validated-field
-                    v-model="formData.bio"
-                    name="bio"
-                    type="textarea"
-                    :label="$t('dj.bio')"
-                />
-
                 <div class="field is-grouped is-grouped-right">
                     <div class="control">
                         <b-button type="is-light" @click="onCancel">
                             {{ $t('form.cancel') }}
                         </b-button>
+                    </div>
+                    <div class="control">
                         <b-button :loading="isLoading" type="is-dark" @click="onSubmit">
-                            {{ initialData ? $t('dj.save_profile') : $t('dj.do_create_profile') }}
+                            {{ initialData ? $t('mix.save_mix') : $t('mix.add_mix') }}
                         </b-button>
                     </div>
                 </div>
@@ -91,16 +83,14 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import { extend, ValidationObserver } from 'vee-validate'
-import { required, email } from 'vee-validate/dist/rules'
-import { mapGetters } from 'vuex'
+import { required } from 'vee-validate/dist/rules'
+import Player from '~/components/audio/Player.vue'
 import BValidatedField from '~/components/form/BValidatedField.vue'
-import BValidatedSelect from '~/components/form/BValidatedSelect.vue'
-import BValidatedImageUpload from '~/components/form/BValidatedImageUpload.vue'
 import BValidatedTagInput from '~/components/form/BValidatedTagInput.vue'
 import { getGenreTags } from '~/api/graphql/genre'
 
-extend('email', email)
 extend('required', required)
 
 extend('alpha_num_dash_space', (value) => {
@@ -110,31 +100,23 @@ extend('alpha_num_dash_space', (value) => {
     return 'validation.alpha_num_dash_space'
 })
 
-extend('no_dj_prefix', (value) => {
-    if (value.match(/^(?!(dj |dj_|dj-).*$).*/gi)) {
-        return true
-    }
-    return 'validation.no_dj_prefix'
-})
-
-extend('image_type', (file) => {
-    if (file === null || ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-        return true
-    }
-
-    return 'validation.image_type'
+extend('audio_load_state', {
+    params: ['audioLoadState'],
+    validate(value, { audioLoadState }) {
+        return audioLoadState !== 'error'
+    },
+    message: 'mix.audio_load_error'
 })
 
 export default {
     components: {
         ValidationObserver,
         BValidatedField,
-        BValidatedSelect,
-        BValidatedImageUpload,
-        BValidatedTagInput
+        BValidatedTagInput,
+        Player
     },
     middleware: ['authorized'],
-    plugins: ['vee-validate'],
+    plugins: ['vee-validate', 'audio'],
     props: {
         initialData: {
             type: Object,
@@ -151,42 +133,31 @@ export default {
         onFormSubmit: {
             type: Function,
             required: true
-        },
-        mode: {
-            type: String,
-            default: 'new'
         }
     },
     data() {
         return {
             formData: {
                 name: null,
-                slug: null,
-                email: null,
-                bio: null,
-                photo: null,
-                city: null,
-                genres: null
+                url: null,
+                description: null,
+                genres: null,
+                dj: this.$strapi.user.dj.id
             },
             availableGenres: null,
-            currentPhoto: null,
             success: null,
             error: null,
-            isLoading: false
+            isLoading: false,
+            audioUrl: null,
+            audioLoadState: null
         }
     },
     computed: {
-        ...mapGetters({
-            citiesOptions: 'form/getCitiesOptions'
-        }),
-        djName() {
-            return this.formData.name
+        formDataUrl() {
+            return this.formData.url
         }
     },
     watch: {
-        djName(value) {
-            this.formData.slug = this.createSlug(value)
-        },
         errorIn(value) {
             this.error = value
         },
@@ -195,6 +166,9 @@ export default {
         },
         isLoadingIn(value) {
             this.isLoading = value
+        },
+        formDataUrl() {
+            this.debouncedGetAudioUrl()
         }
     },
     async mounted() {
@@ -203,22 +177,13 @@ export default {
                 ...this.initialData
             }
         }
-        // Check if initial data contains photo - if so, set form to keep existing photo
-        if (
-            this.initialData &&
-            this.initialData.photo &&
-            this.initialData.photo.id &&
-            this.initialData.photo.url
-        ) {
-            this.formData.photo = 'keep-current'
-            this.currentPhoto = this.initialData.photo
-        }
-
         const genreTagsAll = await this.$strapi.graphql({
             query: getGenreTags()
         })
-
         this.availableGenres = genreTagsAll.genres
+    },
+    created() {
+        this.debouncedGetAudioUrl = _.debounce(this.getAudioUrl, 500)
     },
     methods: {
         onSubmit() {
@@ -238,19 +203,20 @@ export default {
         onCancel() {
             this.$router.back()
         },
-        onRemovePhoto() {
-            this.formData.photo = null
+        onAudioLoadError() {
+            this.audioLoadState = 'error'
         },
-        onKeepCurrentPhoto() {
-            this.formData.photo = 'keep-current'
+        onAudioLoadSuccess() {
+            this.audioLoadState = 'success'
         },
-        createSlug(value) {
-            return value
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036F]/g, '')
-                .replace(/ /g, '-')
-                .replace(/[^\w-]+/g, '')
+        async getAudioUrl() {
+            const audioUrls = await this.$audio.getAudioUrls(this.formDataUrl)
+
+            if (audioUrls && audioUrls.stream) {
+                this.audioUrl = audioUrls.stream
+            } else {
+                this.audioUrl = 'http://nonexistent/'
+            }
         }
     }
 }

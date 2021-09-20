@@ -13,7 +13,11 @@
                 :type="{ 'is-danger': errors[0], 'is-success': valid }"
                 :message="errors"
             >
+                <div v-if="currentImage && value === 'keep-current'">
+                    <b-image :src="`http://localhost:1337${currentImage.url}`" />
+                </div>
                 <b-upload
+                    v-else
                     expanded
                     drag-drop
                     :value="value"
@@ -34,9 +38,20 @@
                     </section>
                 </b-upload>
             </b-field>
-            <b-field v-if="value" grouped position="is-right">
-                <b-button type="is-danger" @click.prevent="onRemovePhoto"
-                    >{{ $t('dj.remove_photo') }}
+            <b-field v-if="value || currentImage" grouped position="is-right">
+                <b-button v-if="value" type="is-danger" @click.prevent="onRemoveImage">
+                    {{
+                        value === 'keep-current'
+                            ? $t('dj.remove_current_photo')
+                            : $t('dj.remove_photo')
+                    }}
+                </b-button>
+                <b-button
+                    v-if="currentImage && value !== 'keep-current'"
+                    type="is-info"
+                    @click.prevent="onKeepCurrentImage"
+                >
+                    {{ $t('dj.keep_current_photo') }}
                 </b-button>
             </b-field>
         </div>
@@ -50,8 +65,13 @@ export default {
     components: {
         ValidationProvider
     },
+    middleware: ['auth'],
     props: {
         value: {
+            default: null
+        },
+        currentImage: {
+            type: [Object],
             default: null
         },
         name: {
@@ -66,9 +86,14 @@ export default {
             type: [Object, String],
             default: ''
         },
-        onRemovePhoto: {
+        onRemoveImage: {
             type: Function,
             required: true
+        },
+        onKeepCurrentImage: {
+            type: Function,
+            required: false,
+            default: () => {}
         }
     },
     data() {
@@ -82,8 +107,11 @@ export default {
                 this.photoUrl = null
                 return
             }
-
-            this.photoUrl = URL.createObjectURL(photoFile)
+            try {
+                this.photoUrl = URL.createObjectURL(photoFile)
+            } catch (e) {
+                this.photoUrl = null
+            }
         }
     }
 }

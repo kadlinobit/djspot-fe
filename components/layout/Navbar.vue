@@ -36,7 +36,7 @@
                     </nuxt-link>
                 </div>
             </b-navbar-item>
-            <b-navbar-item v-else class="is-hidden-touch" @click="$nuxt.$emit('openSidebar')">
+            <b-navbar-item v-else class="is-hidden-touch" @click="() => setIsSidebarOpen(true)">
                 <b-icon icon="account" />
             </b-navbar-item>
         </template>
@@ -44,11 +44,15 @@
 </template>
 
 <script>
-import LanguageSelection from './LanguageSelection.vue'
+import { mapActions } from 'vuex'
+import LanguageSelection from '~/components/layout/LanguageSelection.vue'
 
 export default {
     components: {
         LanguageSelection
+    },
+    methods: {
+        ...mapActions(['setIsSidebarOpen'])
     }
 }
 </script>

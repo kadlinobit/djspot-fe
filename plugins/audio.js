@@ -1,0 +1,73 @@
+import Url from 'url-parse'
+
+export default (context, inject) => {
+    function isValidUrl(url) {
+        try {
+            // eslint-disable-next-line no-new
+            new URL(url)
+        } catch (e) {
+            return false
+        }
+        return true
+    }
+
+    function getDropboxUrls(parsedUrl) {
+        const audioUrls = {}
+
+        parsedUrl.set('query', { raw: 1 })
+        audioUrls.stream = parsedUrl.toString()
+
+        parsedUrl.set('query', { dl: 1 })
+        audioUrls.download = parsedUrl.toString()
+
+        return audioUrls
+    }
+
+    async function getHearThisUrls(parsedUrl) {
+        const audioUrls = {
+            stream: null,
+            download: null
+        }
+
+        try {
+            const response = await context.app.$axios.get(
+                `https://api-v2.hearthis.at${parsedUrl.pathname}`
+            )
+
+            if (response.data) {
+                audioUrls.stream = response.data.stream_url || null
+                audioUrls.download = response.data.download_url || null
+            }
+        } catch (e) {
+            // console.warn(e)
+        }
+        return audioUrls
+    }
+
+    async function getAudioUrls(url) {
+        if (!isValidUrl(url)) {
+            return null
+        }
+
+        const parsedUrl = new Url(url, true)
+        let audioUrls
+
+        if (parsedUrl.host.includes('dropbox.com')) {
+            audioUrls = getDropboxUrls(parsedUrl)
+        } else if (parsedUrl.host.includes('hearthis.at')) {
+            audioUrls = await getHearThisUrls(parsedUrl)
+        } else {
+            audioUrls = {
+                stream: url,
+                download: url
+            }
+        }
+        return audioUrls
+    }
+
+    const api = {
+        getAudioUrls
+    }
+
+    inject('audio', api)
+}

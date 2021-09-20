@@ -4,7 +4,14 @@
             :label="label"
             :type="{ 'is-danger': errors[0], 'is-success': valid }"
             :message="$t(errors[0])"
+            :style="visibilityStyle"
         >
+            <template v-if="help" #label>
+                {{ label }}
+                <b-tooltip type="is-dark" :label="help" multilined>
+                    <b-icon size="is-small" icon="help-circle-outline"></b-icon>
+                </b-tooltip>
+            </template>
             <b-input
                 :value="value"
                 :placeholder="placeholder"
@@ -43,7 +50,7 @@ export default {
         },
         label: {
             type: String,
-            required: true
+            default: 'label'
         },
         placeholder: {
             type: String,
@@ -56,6 +63,22 @@ export default {
         rules: {
             type: [Object, String],
             default: ''
+        },
+        hidden: {
+            type: Boolean,
+            default: false
+        },
+        help: {
+            type: String,
+            default: null
+        }
+    },
+    computed: {
+        visibilityStyle() {
+            if (this.hidden) {
+                return { display: 'none' }
+            }
+            return { display: 'default' }
         }
     }
 }

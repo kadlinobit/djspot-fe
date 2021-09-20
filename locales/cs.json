@@ -1,5 +1,9 @@
 {
+    "" : "THIS IS EMPTY STRING",
     "welcome_message": "Vítejte na DJSpot!",
+    "form" : {
+        "cancel": "Zrušit"
+    },
     "user" : {
         "register": "Nový účet",
         "do_register": "Vytvořit účet",
@@ -25,6 +29,7 @@
         "logout_success": "Byl jsi úspěšně odhlášen. Naviděnou příště!"
     },
     "dj" : {
+        "profile" : "Profil DJe",
         "create_profile": "Vytvořit DJ profil",
         "do_create_profile": "Vytvoř DJ profil",
         "email": "Booking email",
@@ -33,16 +38,33 @@
         "bio": "Bio",
         "photo": "Fotka",
         "remove_photo": "Odstranit fotku",
+        "remove_current_photo" : "Odstranit aktuální fotku",
+        "keep_current_photo" : "Ponechat aktuální fotku",
         "select_city": "Vyber město",
         "dj_name_placeholder": "Jméno DJe (bez titulu DJ)",
         "djs": "DJs",
         "genres": "Hudební styly",
         "select_3_genres" : "Vyber maximálně 3 styly",
         "slug": "URL adresa DJe",
-        "created_successfully" : "Tvůj DJ profil byl úspěšně vytvořen!"
+        "created_successfully" : "Tvůj DJ profil byl úspěšně vytvořen!",
+        "edit_profile" : "Upravit profil",
+        "save_profile" : "Uložit profil",
+        "updated_successfully" : "Tvůj profil byl úspěšně uložen!",
+        "delete_profile": "Smazat profil",
+        "delete_profile_confirm_message": "Opravdu chceš smazat svůj DJ profil? Tuhle akci nelze vzít zpět.",
+        "deleted_successfully" : "Tvůj DJský profil byl úspěšně smazán."
     },
     "mix" : {
-        "mixes": "Sety"
+        "mixes": "Sety",
+        "add_mix": "Přidat set",
+        "save_mix": "Uložit set",
+        "name": "Název setu",
+        "description": "Popis setu",
+        "description_placeholder": "Popis setu - ideálně tracklist, případně historky z natáčení...",
+        "url": "URL adresa",
+        "url_placeholder": "Adresa kde se nachází zvukový soubor",
+        "audio_load_error": "Nepodařilo se načíst zvuková data, URL není validní.",
+        "url_help" : "Je možné přidat set z vlastního hostingu a podporujeme také Dropbox nebo Hearthis.at."
     },
     "validation" : {
         "required": "Toto pole je povinné",

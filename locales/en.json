@@ -1,5 +1,8 @@
 {
     "welcome_message": "Welcome to DJSpot!",
+    "form" : {
+        "cancel": "Cancel"
+    },
     "user" : {
         "register": "Register",
         "do_register": "Register",
@@ -25,6 +28,7 @@
         
     },    
     "dj" : {
+        "profile" : "DJ Profile",
         "create_profile": "Create DJ profile",
         "do_create_profile": "Create DJ profile",
         "email": "Booking email",
@@ -33,16 +37,32 @@
         "bio": "Bio",
         "photo": "Photo",
         "remove_photo": "Remove photo",
+        "remove_current_photo" : "Remove current photo",
+        "keep_current_photo" : "Keep current photo",
         "select_city": "Select city",
         "dj_name_placeholder": "DJ name (without DJ in the front)",
         "djs": "DJs",
         "genres": "Genres",
         "select_3_genres" : "Choose max. 3 genres",
         "slug": "DJ's URL address",
-        "created_successfully" : "Your DJ profile has been created successfully!"
+        "created_successfully" : "Your DJ profile has been created successfully!",
+        "edit_profile" : "Edit profile",
+        "save_profile" : "Save profile",
+        "updated_successfully" : "Your profile has been updated successfully!",
+        "delete_profile": "Delete profile",
+        "delete_profile_confirm_message": "Are you sure you want to delete your DJ profile? This action cannot be undone.",
+        "deleted_successfully" : "Tvůj DJský profil byl úspěšně smazán."
     },
     "mix" : {
-        "mixes": "Mixes"
+        "mixes": "Mixes",
+        "add_mix": "Add mix",
+        "save_mix": "Uložit set",
+        "name": "Mix title",
+        "description": "Mix description",
+        "description_placeholder": "Description of the mix - ideally the tracklist, if possible...",
+        "url": "URL adress",
+        "url_placeholder": "URL address of the sound file",
+        "audio_load_error": "Failed loading the audio data, URL is invalid."
     },
     "validation" : {
         "required": "This field is required",

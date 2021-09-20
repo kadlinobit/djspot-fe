@@ -3,7 +3,7 @@
         <b-field
             :label="label"
             :type="{ 'is-danger': errors[0], 'is-success': valid }"
-            :message="$t(errors)"
+            :message="$t(errors[0])"
         >
             <b-select
                 :value="value"
