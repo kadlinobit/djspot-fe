@@ -1,5 +1,5 @@
 <template>
-    <b-navbar type="is-dark" spaced>
+    <b-navbar type="is-dark">
         <template #brand>
             <b-navbar-item tag="nuxt-link" :to="{ path: '/' }">
                 <img
@@ -10,7 +10,7 @@
             <b-navbar-item
                 v-if="$strapi.user"
                 class="is-hidden-desktop"
-                @click="$nuxt.$emit('openSidebar')"
+                @click="() => setIsSidebarOpen(true)"
             >
                 <b-icon icon="account" />
             </b-navbar-item>

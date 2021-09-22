@@ -50,8 +50,9 @@ export const getDjsWithMixes = function () {
                     id
                     name
                 }
-                mixes {
+                sounds {
                     id
+                    type
                     created_at
                     updated_at
                     name

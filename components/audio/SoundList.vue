@@ -1,18 +1,18 @@
 <template>
     <div>
-        <MixListItem v-for="mix in mixes" :key="mix.id" :mix="mix" />
+        <SoundListItem v-for="sound in sounds" :key="sound.id" :sound="sound" />
     </div>
 </template>
 
 <script>
-import MixListItem from '~/components/mix/MixListItem.vue'
+import SoundListItem from '~/components/audio/SoundListItem.vue'
 
 export default {
     components: {
-        MixListItem
+        SoundListItem
     },
     props: {
-        mixes: {
+        sounds: {
             type: Array,
             required: true
         }

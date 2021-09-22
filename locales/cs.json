@@ -55,16 +55,37 @@
         "deleted_successfully" : "Tvůj DJský profil byl úspěšně smazán."
     },
     "mix" : {
+        "mix": "DJ Set",
         "mixes": "Sety",
-        "add_mix": "Přidat set",
-        "save_mix": "Uložit set",
+        "add": "Přidat set",
+        "add_success": "Set '{0}' byl úspěšně přidán!",
+        "save": "Uložit set",
         "name": "Název setu",
         "description": "Popis setu",
-        "description_placeholder": "Popis setu - ideálně tracklist, případně historky z natáčení...",
+        "description_placeholder": "Popis setu - ideálně tracklist, případně historky z natáčení..."
+    },
+    "track" : {
+        "track": "Track",
+        "tracks": "Tracky",
+        "add": "Přidat track",
+        "add_success": "Track '{0}' byl úspěšně přidán!",
+        "save": "Uložit track",
+        "name": "Název tracku",
+        "description": "Popis tracku",
+        "description_placeholder": "Popis tracku - cokoliv, co chceš posluchačům sdělit..."
+    },
+    "sound" : {
+        "type": "Typ audia",
+        "add": "Přidat audio",
+        "url_help" : "Je možné přidat audio z vlastního hostingu, Dropboxu nebo Hearthis.at.",
+        "audio_load_error": "Nepodařilo se načíst zvuková data, URL není validní.",
         "url": "URL adresa",
         "url_placeholder": "Adresa kde se nachází zvukový soubor",
-        "audio_load_error": "Nepodařilo se načíst zvuková data, URL není validní.",
-        "url_help" : "Je možné přidat set z vlastního hostingu a podporujeme také Dropbox nebo Hearthis.at."
+        "select_sound_type": "Vyber typ audia"
+    },
+    "playlist" : {
+        "added_to_playlist" : "Audio '{0}' přidáno do playlistu.",
+        "removed_from_playlist" : "Audio '{0}' odebráno z playlistu."
     },
     "validation" : {
         "required": "Toto pole je povinné",

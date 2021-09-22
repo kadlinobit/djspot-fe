@@ -12,22 +12,31 @@
             <form v-if="!success" method="post" @submit.prevent>
                 <div class="columns is-desktop">
                     <div class="column">
+                        <b-validated-select
+                            v-model="formData.type"
+                            name="type"
+                            :label="$t('sound.type')"
+                            rules="required"
+                            :options="soundTypeOptions"
+                            :expanded="true"
+                            :placeholder="$t('sound.select_sound_type')"
+                        />
                         <b-validated-field
                             v-model="formData.name"
                             name="name"
                             type="text"
-                            :label="$t('mix.name')"
-                            :placeholder="$t('mix.name')"
+                            :label="$t(`${formData.type}.name`)"
+                            :placeholder="$t(`${formData.type}.name`)"
                             rules="required|alpha_num_dash_space"
                         />
                         <b-validated-field
                             v-model="formData.url"
                             name="url"
                             type="url"
-                            :label="$t('mix.url')"
-                            :placeholder="$t('mix.url_placeholder')"
+                            :label="$t('sound.url')"
+                            :placeholder="$t('sound.url_placeholder')"
                             rules="required|audio_load_state:@audioLoadState"
-                            :help="$t('mix.url_help')"
+                            :help="$t('sound.url_help')"
                         />
                         <b-validated-field
                             v-model="audioLoadState"
@@ -60,8 +69,8 @@
                             v-model="formData.description"
                             name="description"
                             type="textarea"
-                            :label="$t('mix.description')"
-                            :placeholder="$t('mix.description_placeholder')"
+                            :label="$t(`${formData.type}.description`)"
+                            :placeholder="$t(`${formData.type}.description_placeholder`)"
                         />
                     </div>
                 </div>
@@ -73,7 +82,11 @@
                     </div>
                     <div class="control">
                         <b-button :loading="isLoading" type="is-dark" @click="onSubmit">
-                            {{ initialData ? $t('mix.save_mix') : $t('mix.add_mix') }}
+                            {{
+                                initialData
+                                    ? $t(`${formData.type}.save`)
+                                    : $t(`${formData.type}.add`)
+                            }}
                         </b-button>
                     </div>
                 </div>
@@ -89,6 +102,7 @@ import { required } from 'vee-validate/dist/rules'
 import Player from '~/components/audio/Player.vue'
 import BValidatedField from '~/components/form/BValidatedField.vue'
 import BValidatedTagInput from '~/components/form/BValidatedTagInput.vue'
+import BValidatedSelect from '~/components/form/BValidatedSelect.vue'
 import { getGenreTags } from '~/api/graphql/genre'
 
 extend('required', required)
@@ -113,6 +127,7 @@ export default {
         ValidationObserver,
         BValidatedField,
         BValidatedTagInput,
+        BValidatedSelect,
         Player
     },
     middleware: ['authorized'],
@@ -142,7 +157,8 @@ export default {
                 url: null,
                 description: null,
                 genres: null,
-                dj: this.$strapi.user.dj.id
+                dj: this.$strapi.user.dj.id,
+                type: 'mix'
             },
             availableGenres: null,
             success: null,
@@ -155,6 +171,12 @@ export default {
     computed: {
         formDataUrl() {
             return this.formData.url
+        },
+        soundTypeOptions() {
+            return [
+                { value: 'mix', label: this.$t('mix.mix') },
+                { value: 'track', label: this.$t('track.track') }
+            ]
         }
     },
     watch: {

@@ -25,7 +25,7 @@
                             </div>
                             <div class="column is-narrow">
                                 <b-button
-                                    type="is-default"
+                                    type="is-text"
                                     icon-right="pencil"
                                     tag="nuxt-link"
                                     :to="{ path: `/djs/manage/edit/` }"
@@ -47,7 +47,7 @@
                 </div>
                 <section>
                     <b-tabs
-                        v-if="dj.bio || (dj.mixes && dj.mixes.length > 0)"
+                        v-if="dj.bio || (mixes && mixes.length > 0)"
                         v-model="activeTab"
                         class="block"
                         size="is-medium"
@@ -55,8 +55,11 @@
                         <b-tab-item v-if="dj.bio" label="Bio">
                             {{ dj.bio }}
                         </b-tab-item>
-                        <b-tab-item v-if="dj.mixes && dj.mixes.length > 0" label="Sety">
-                            <MixList :mixes="dj.mixes" />
+                        <b-tab-item v-if="mixes && mixes.length > 0" label="Sety">
+                            <SoundList :sounds="mixes" />
+                        </b-tab-item>
+                        <b-tab-item v-if="tracks && tracks.length > 0" label="Tracky">
+                            <SoundList :sounds="tracks" />
                         </b-tab-item>
                     </b-tabs>
                 </section>
@@ -66,12 +69,17 @@
 </template>
 
 <script>
-/* eslint-disable */
 import { getDjsWithMixes } from '~/api/graphql/dj'
-import MixList from '~/components/mix/MixList.vue'
+import SoundList from '~/components/audio/SoundList.vue'
 export default {
     components: {
-        MixList
+        SoundList
+    },
+    data() {
+        return {
+            dj: null,
+            activeTab: 0
+        }
     },
     async fetch() {
         try {
@@ -88,7 +96,8 @@ export default {
             if (data.djs && data.djs.length > 0) {
                 this.dj = data.djs[0]
             } else {
-                throw { statusCode: 404, message: 'DJ not found' }
+                this.$fetchState.error = 'DJ not found'
+                return this.$nuxt.error({ statusCode: 404, message: 'DJ not found' })
             }
         } catch (e) {
             this.$fetchState.error = e
@@ -97,10 +106,12 @@ export default {
             }
         }
     },
-    data() {
-        return {
-            dj: null,
-            activeTab: 0
+    computed: {
+        mixes() {
+            return this.dj.sounds.filter((sound) => sound.type === 'mix') || []
+        },
+        tracks() {
+            return this.dj.sounds.filter((sound) => sound.type === 'track') || []
         }
     }
 }

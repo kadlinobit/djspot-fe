@@ -1,9 +1,11 @@
 <template>
     <section class="section">
         <div class="container">
-            <h1 class="title">{{ $t('mix.add_mix') }}</h1>
-            <MixForm
-                :on-form-submit="createMix"
+            <h1 class="title">
+                {{ $t('sound.add') }}
+            </h1>
+            <sound-form
+                :on-form-submit="createSound"
                 :error-in="error"
                 :success-in="success"
                 :is-loading-in="isLoading"
@@ -14,11 +16,11 @@
 </template>
 
 <script>
-import MixForm from '~/components/form/MixForm.vue'
+import SoundForm from '~/components/form/SoundForm.vue'
 
 export default {
     components: {
-        MixForm
+        SoundForm
     },
     data() {
         return {
@@ -28,17 +30,17 @@ export default {
         }
     },
     methods: {
-        async createMix(formDataJSON) {
+        async createSound(formDataObj) {
             try {
                 this.isLoading = true
 
-                await this.$strapi.create('mixes', formDataJSON)
+                await this.$strapi.create('sounds', formDataObj)
                 await this.$strapi.fetchUser()
 
                 // this.$router.push(`/djs/${dj.slug}`)
 
                 this.$buefy.toast.open({
-                    message: this.$t('mix.added_successfully'),
+                    message: this.$t(`${formDataObj.type}.add_success`, [formDataObj.name]),
                     type: 'is-success',
                     duration: 7000
                 })

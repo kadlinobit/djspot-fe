@@ -28,8 +28,8 @@
                     ></b-menu-item>
                     <b-menu-item
                         icon="plus"
-                        :label="$t('mix.add_mix')"
-                        @click="navigate(`/mixes/manage/new`)"
+                        :label="$t('sound.add')"
+                        @click="navigate(`/sounds/manage/new`)"
                     ></b-menu-item>
                 </b-menu-item>
             </b-menu-list>
