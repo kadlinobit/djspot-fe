@@ -55,6 +55,7 @@
         "deleted_successfully" : "Tvůj DJský profil byl úspěšně smazán."
     },
     "mix" : {
+        "type": "Set",
         "mix": "DJ Set",
         "mixes": "Sety",
         "add": "Přidat set",
@@ -65,6 +66,7 @@
         "description_placeholder": "Popis setu - ideálně tracklist, případně historky z natáčení..."
     },
     "track" : {
+        "type": "Track",
         "track": "Track",
         "tracks": "Tracky",
         "add": "Přidat track",
@@ -84,8 +86,12 @@
         "select_sound_type": "Vyber typ audia"
     },
     "playlist" : {
-        "added_to_playlist" : "Audio '{0}' přidáno do playlistu.",
-        "removed_from_playlist" : "Audio '{0}' odebráno z playlistu."
+        "added_to_playlist" : "Audio '{0}' přidáno do playlistu",
+        "removed_from_playlist" : "Audio '{0}' odebráno z playlistu"
+    },
+    "player": {
+        "error_loading_file" : "Chyba při načítání souboru",
+        "cancel_loading": "Zrušit načítání"
     },
     "validation" : {
         "required": "Toto pole je povinné",

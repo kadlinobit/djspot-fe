@@ -4,7 +4,7 @@
             <div class="level-item playlist-item-handle mr-2">
                 <b-icon icon="swap-vertical" />
             </div>
-            <div v-if="!currentMix || currentMix.id !== playlistItem.id" class="level-item">
+            <div v-if="!currentSound || currentSound.id !== playlistItem.id" class="level-item">
                 <b-button
                     :disabled="isPlayerLoading"
                     type="is-text"
@@ -12,7 +12,7 @@
                     @click.prevent="() => loadNewAudio(playlistItem)"
                 />
             </div>
-            <div v-if="currentMix && currentMix.id === playlistItem.id" class="level-item">
+            <div v-if="currentSound && currentSound.id === playlistItem.id" class="level-item">
                 <b-button
                     :disabled="isPlayerLoading"
                     type="is-text"
@@ -25,13 +25,16 @@
             </div>
         </div>
         <div class="level-right">
+            <div class="level-item">
+                <b-tag :type="soundTagType">{{ $t(`${playlistItem.type}.type`) }}</b-tag>
+            </div>
             <b-button
-                v-if="!currentMix || currentMix.id !== playlistItem.id"
+                v-if="!currentSound || currentSound.id !== playlistItem.id"
                 type="is-text"
                 :disabled="isPlayerLoading"
                 custom-class="level-item"
                 icon-left="delete-sweep"
-                @click.prevent="() => deleteMix(playlistItem)"
+                @click.prevent="() => deleteSound(playlistItem)"
             />
             <b-icon
                 v-else
@@ -55,15 +58,27 @@ export default {
     },
     computed: {
         ...mapGetters('player', {
-            currentMix: 'currentMix',
+            currentSound: 'currentSound',
             isPlaying: 'isPlaying',
             isPlayerLoading: 'isLoading'
         }),
-        ...mapGetters('playlist', ['isMixInPlaylist'])
+        ...mapGetters('playlist', ['isSoundInPlaylist']),
+        soundTagType() {
+            let tagType
+            switch (this.playlistItem.type) {
+                case 'mix':
+                    tagType = 'is-primary'
+                    break
+                case 'track':
+                    tagType = 'is-success'
+                    break
+            }
+            return tagType
+        }
     },
     methods: {
         ...mapActions('player', ['loadNewAudio', 'setIsPlaying']),
-        ...mapActions('playlist', ['deleteMix'])
+        ...mapActions('playlist', ['deleteSound'])
     }
 }
 </script>

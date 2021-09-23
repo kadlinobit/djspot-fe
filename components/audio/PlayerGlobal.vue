@@ -1,6 +1,5 @@
 <template>
     <div class="buefy-player is-relative">
-        <b-loading v-model="isLoading" :is-full-page="false" :can-cancel="false"></b-loading>
         <b-slider
             :tooltip="false"
             :value="currentSeconds"
@@ -34,19 +33,24 @@
             </div>
             <div v-if="isError" class="column">
                 <b-notification type="is-danger pt-3 pb-3" :closable="false" role="alert">
-                    Error loading file
+                    {{ $t('player.error_loading_file') }}
                 </b-notification>
             </div>
             <div v-if="!isError" class="column">
-                <div class="columns is-vcentered is-mobile">
+                <div class="columns is-vcentered is-mobile is-relative">
+                    <b-loading
+                        v-model="isLoading"
+                        :is-full-page="false"
+                        :can-cancel="false"
+                    ></b-loading>
                     <div class="column is-narrow">
                         <div class="tag is-light">
                             {{ currentSeconds | convertTimeHHMMSS }}
                         </div>
                     </div>
                     <div class="column">
-                        <span v-if="currentMix">
-                            {{ `${currentMix.dj.name} - ${currentMix.name}` }}
+                        <span v-if="currentSound">
+                            {{ `${currentSound.dj.name} - ${currentSound.name}` }}
                         </span>
                     </div>
                     <div class="column is-narrow">
@@ -57,7 +61,12 @@
                 </div>
             </div>
             <div class="column is-one-quarter-mobile is-one-fifth-desktop">
-                <div class="columns is-vcentered is-mobile is-gapless">
+                <div v-if="showCancelLoadingButton" class="has-text-centered">
+                    <b-button type="is-danger" @click.prevent="resetAudio">
+                        {{ $t('player.cancel_loading') }}
+                    </b-button>
+                </div>
+                <div v-else class="columns is-vcentered is-mobile is-gapless">
                     <div class="column is-narrow mr-3">
                         <b-button
                             :disabled="!isLoaded || isError"
@@ -118,18 +127,6 @@ export default {
         }
     },
     props: {
-        // autoPlay: {
-        //     type: Boolean,
-        //     default: false
-        // },
-        // file: {
-        //     type: String,
-        //     default: null
-        // },
-        // loop: {
-        //     type: Boolean,
-        //     default: false
-        // },
         audioRefName: {
             type: String,
             default: 'global-player-audio'
@@ -139,7 +136,7 @@ export default {
     computed: {
         ...mapGetters(['isPlaylistOpen']),
         ...mapGetters('player', [
-            'currentMix',
+            'currentSound',
             'file',
             'currentSeconds',
             'durationSeconds',
@@ -147,12 +144,12 @@ export default {
             'looping',
             'isPlaying',
             'previousVolume',
-            'showVolume',
             'volume',
             'isLoading',
             'isError',
             'isMuted',
-            'percentComplete'
+            'percentComplete',
+            'showCancelLoadingButton'
         ]),
         volumeIcon() {
             let volumeIcon = 'volume-off'
@@ -188,7 +185,7 @@ export default {
     methods: {
         ...mapActions(['setIsPlaylistOpen']),
         ...mapActions('player', [
-            'setCurrentMix',
+            'setCurrentSound',
             'setFile',
             'setCurrentSeconds',
             'setDurationSeconds',

@@ -1,7 +1,7 @@
 <template>
     <div class="level is-mobile">
         <div class="level-left">
-            <div v-if="!currentMix || currentMix.id !== sound.id" class="level-item">
+            <div v-if="!currentSound || currentSound.id !== sound.id" class="level-item">
                 <b-button
                     :disabled="isPlayerLoading"
                     type="is-text"
@@ -10,7 +10,7 @@
                     @click.prevent="() => onPlayNewSound(sound)"
                 />
             </div>
-            <div v-if="currentMix && currentMix.id === sound.id" class="level-item">
+            <div v-if="currentSound && currentSound.id === sound.id" class="level-item">
                 <b-button
                     :disabled="isPlayerLoading"
                     type="is-text"
@@ -28,12 +28,12 @@
         <div class="level-right">
             <div class="level-item">
                 <b-button
-                    v-if="!currentMix || currentMix.id !== sound.id"
+                    v-if="!currentSound || currentSound.id !== sound.id"
                     :disabled="isPlayerLoading"
                     type="is-text"
                     size="is-medium"
-                    :icon-left="isMixInPlaylist(sound) ? 'delete-sweep' : 'playlist-plus'"
-                    @click.prevent="() => handleAddOrRemovePlaylistMix(sound)"
+                    :icon-left="isSoundInPlaylist(sound) ? 'delete-sweep' : 'playlist-plus'"
+                    @click.prevent="() => handleAddOrRemovePlaylistSound(sound)"
                 />
                 <b-icon
                     v-else
@@ -59,17 +59,17 @@ export default {
     },
     computed: {
         ...mapGetters('player', {
-            currentMix: 'currentMix',
+            currentSound: 'currentSound',
             isPlaying: 'isPlaying',
             isPlayerLoading: 'isLoading'
         }),
-        ...mapGetters('playlist', ['isMixInPlaylist'])
+        ...mapGetters('playlist', ['isSoundInPlaylist'])
     },
     methods: {
         ...mapActions('player', ['loadNewAudio', 'setIsPlaying']),
-        ...mapActions('playlist', ['handlePlayMix', 'handleAddOrRemovePlaylistMix']),
+        ...mapActions('playlist', ['handlePlaySound', 'handleAddOrRemovePlaylistSound']),
         onPlayNewSound(sound) {
-            this.handlePlayMix(sound)
+            this.handlePlaySound(sound)
             this.loadNewAudio(sound)
         }
     }

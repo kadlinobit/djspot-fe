@@ -1,5 +1,5 @@
 export const state = () => ({
-    currentMix: null,
+    currentSound: null,
     file: null,
     currentSeconds: 0,
     durationSeconds: 0,
@@ -7,15 +7,17 @@ export const state = () => ({
     looping: false,
     isPlaying: false,
     previousVolume: 80,
-    showVolume: false,
     volume: 80,
     isLoading: false,
-    isError: false
+    isError: false,
+    showCancelLoading: false,
+    cancelLoadingTimeout: null,
+    showCancelLoadingButton: false
 })
 
 export const mutations = {
-    mutateSetCurrentMix(state, mix) {
-        state.currentMix = mix
+    mutateSetCurrentSound(state, sound) {
+        state.currentSound = sound
     },
     mutateSetFile(state, file) {
         state.file = file
@@ -38,9 +40,6 @@ export const mutations = {
     mutateSetPreviousVolume(state, previousVolume) {
         state.previousVolume = previousVolume
     },
-    mutateSetShowVolume(state, showVolume) {
-        state.showVolume = showVolume
-    },
     mutateSetVolume(state, volume) {
         state.volume = volume
     },
@@ -50,8 +49,14 @@ export const mutations = {
     mutateSetIsError(state, isError) {
         state.isError = isError
     },
+    mutateSetShowCancelLoadingButton(state, showCancelLoadingButton) {
+        state.showCancelLoadingButton = showCancelLoadingButton
+    },
+    mutateSetCancelLoadingTimeout(state, cancelLoadingTimeout) {
+        state.cancelLoadingTimeout = cancelLoadingTimeout
+    },
     mutateResetAudio(state) {
-        state.currentMix = null
+        state.currentSound = null
         state.file = null
         state.currentSeconds = 0
         state.durationSeconds = 0
@@ -59,12 +64,14 @@ export const mutations = {
         state.isPlaying = false
         state.isLoading = false
         state.isError = false
+        state.showCancelLoadingButton = false
+        state.cancelLoadingTimeout = null
     }
 }
 
 export const actions = {
-    setCurrentMix({ commit }, mix) {
-        commit('mutateSetCurrentMix', mix)
+    setCurrentSound({ commit }, sound) {
+        commit('mutateSetCurrentSound', sound)
     },
     setFile({ commit }, file) {
         commit('mutateSetFile', file)
@@ -87,13 +94,27 @@ export const actions = {
     setPreviousVolume({ commit }, previousVolume) {
         commit('mutateSetPreviousVolume', previousVolume)
     },
-    setShowVolume({ commit }, showVolume) {
-        commit('mutateSetShowVolume', showVolume)
-    },
     setVolume({ commit }, volume) {
         commit('mutateSetVolume', volume)
     },
-    setIsLoading({ commit }, isLoading) {
+    setIsLoading({ commit, state }, isLoading) {
+        /*  When loading begins, set timeout that will display 
+            the "cancel loading" button after couple of seconds of loading */
+        if (isLoading) {
+            commit(
+                'mutateSetCancelLoadingTimeout',
+                setTimeout(() => {
+                    commit('mutateSetShowCancelLoadingButton', true)
+                }, 100)
+            )
+        }
+        /*  When loading is finished, clear timeout and hide the "Cancel loading" button */
+        if (!isLoading) {
+            clearTimeout(state.cancelLoadingTimeout)
+            commit('mutateSetShowCancelLoadingButton', false)
+            commit('mutateSetCancelLoadingTimeout', null)
+        }
+
         commit('mutateSetIsLoading', isLoading)
     },
     setIsError({ commit }, isError) {
@@ -105,14 +126,14 @@ export const actions = {
     /**
      * Sets new audio for the player, fetches audio stream url
      * @param {Object} context - vuex store context
-     * @param {Object} newMix - object containing new audio mix data
+     * @param {Object} newSound - object containing new sound data
      */
-    async loadNewAudio(context, newMix) {
+    async loadNewAudio(context, newSound) {
         context.dispatch('resetAudio')
-        if (newMix && newMix.url) {
-            const audioUrls = await this.$audio.getAudioUrls(newMix.url)
+        if (newSound && newSound.url) {
+            const audioUrls = await this.$audio.getAudioUrls(newSound.url)
             if (audioUrls && audioUrls.stream) {
-                context.dispatch('setCurrentMix', newMix)
+                context.dispatch('setCurrentSound', newSound)
                 context.dispatch('setFile', audioUrls.stream)
             } else {
                 context.dispatch('setIsError', true)
@@ -124,8 +145,8 @@ export const actions = {
 }
 
 export const getters = {
-    currentMix(state) {
-        return state.currentMix
+    currentSound(state) {
+        return state.currentSound
     },
     file(state) {
         return state.file
@@ -148,9 +169,6 @@ export const getters = {
     previousVolume(state) {
         return state.previousVolume
     },
-    showVolume(state) {
-        return state.showVolume
-    },
     volume(state) {
         return state.volume
     },
@@ -165,5 +183,8 @@ export const getters = {
     },
     percentComplete(state) {
         return parseInt((state.currentSeconds / state.durationSeconds) * 100)
+    },
+    showCancelLoadingButton(state) {
+        return state.showCancelLoadingButton
     }
 }

@@ -9,14 +9,14 @@ export const mutations = {
     mutateSetPlaylist(state, playlist) {
         state.playlist = playlist
     },
-    mutateAddMixToEnd(state, mix) {
-        state.playlist.push(_.clone(mix))
+    mutateAddSoundToEnd(state, sound) {
+        state.playlist.push(_.clone(sound))
     },
-    mutateAddMixToIndex(state, { mix, index }) {
-        state.playlist.splice(index, 0, _.clone(mix))
+    mutateAddSoundToIndex(state, { sound, index }) {
+        state.playlist.splice(index, 0, _.clone(sound))
     },
-    mutateDeleteMix(state, mix) {
-        state.playlist = state.playlist.filter((playlistMix) => playlistMix.id !== mix.id)
+    mutateDeleteSound(state, sound) {
+        state.playlist = state.playlist.filter((playlistSound) => playlistSound.id !== sound.id)
     }
 }
 
@@ -24,45 +24,45 @@ export const actions = {
     setPlaylist({ commit }, playlist) {
         commit('mutateSetPlaylist', playlist)
     },
-    deleteMix({ commit }, mix) {
-        commit('mutateDeleteMix', mix)
+    deleteSound({ commit }, sound) {
+        commit('mutateDeleteSound', sound)
         Toast.open({
             message: this.$i18n.t('playlist.removed_from_playlist', [
-                `${mix.dj.name} – ${mix.name}`
+                `${sound.dj.name} – ${sound.name}`
             ]),
             type: 'is-warning'
         })
     },
-    handlePlayMix({ commit, state, rootState }, mix) {
-        if (!state.playlist.some((playlistMix) => playlistMix.id === mix.id)) {
+    handlePlaySound({ commit, state, rootState }, sound) {
+        if (!state.playlist.some((playlistSound) => playlistSound.id === sound.id)) {
             let index
-            if (rootState.player.currentMix) {
+            if (rootState.player.currentSound) {
                 index = state.playlist.findIndex(
-                    (playlistMix) => playlistMix.id === rootState.player.currentMix.id
+                    (playlistSound) => playlistSound.id === rootState.player.currentSound.id
                 )
                 index = index !== -1 ? index + 1 : 0
             }
 
-            commit('mutateAddMixToIndex', { mix, index })
+            commit('mutateAddSoundToIndex', { sound, index })
             Toast.open({
                 message: this.$i18n.t('playlist.added_to_playlist', [
-                    `${mix.dj.name} – ${mix.name}`
+                    `${sound.dj.name} – ${sound.name}`
                 ]),
                 type: 'is-success'
             })
         }
     },
-    handleAddOrRemovePlaylistMix({ commit, state, dispatch }, mix) {
-        if (!state.playlist.some((playlistMix) => playlistMix.id === mix.id)) {
-            commit('mutateAddMixToEnd', mix)
+    handleAddOrRemovePlaylistSound({ commit, state, dispatch }, sound) {
+        if (!state.playlist.some((playlistSound) => playlistSound.id === sound.id)) {
+            commit('mutateAddSoundToEnd', sound)
             Toast.open({
                 message: this.$i18n.t('playlist.added_to_playlist', [
-                    `${mix.dj.name} – ${mix.name}`
+                    `${sound.dj.name} – ${sound.name}`
                 ]),
                 type: 'is-success'
             })
         } else {
-            dispatch('deleteMix', mix)
+            dispatch('deleteSound', sound)
         }
     }
 }
@@ -71,7 +71,7 @@ export const getters = {
     playlist(state) {
         return state.playlist
     },
-    isMixInPlaylist: (state) => (mix) => {
-        return state.playlist.some((playlistMix) => playlistMix.id === mix.id)
+    isSoundInPlaylist: (state) => (sound) => {
+        return state.playlist.some((playlistSound) => playlistSound.id === sound.id)
     }
 }
