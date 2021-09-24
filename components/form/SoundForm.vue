@@ -49,7 +49,7 @@
                                 v-if="audioUrl"
                                 :file="audioUrl"
                                 @audio-load-error="onAudioLoadError"
-                                @audio-load-success="onAudioLoadSuccess"
+                                @audio-load-success="(data) => onAudioLoadSuccess(data)"
                             />
                         </div>
 
@@ -158,7 +158,8 @@ export default {
                 description: null,
                 genres: null,
                 dj: this.$strapi.user.dj.id,
-                type: 'mix'
+                type: 'mix',
+                duration: null
             },
             availableGenres: null,
             success: null,
@@ -228,8 +229,9 @@ export default {
         onAudioLoadError() {
             this.audioLoadState = 'error'
         },
-        onAudioLoadSuccess() {
+        onAudioLoadSuccess(data) {
             this.audioLoadState = 'success'
+            if (data && data.duration) this.formData.duration = data.duration
         },
         async getAudioUrl() {
             const audioUrls = await this.$audio.getAudioUrls(this.formDataUrl)
