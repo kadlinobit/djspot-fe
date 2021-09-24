@@ -20,12 +20,17 @@
                 />
             </div>
             <div class="level-item">
-                <nuxt-link :to="{ path: `/djs/${sound.dj.slug}/mixes/${sound.id}` }">
+                <nuxt-link :to="{ path: `/djs/${sound.dj.slug}/sounds/${sound.id}` }">
                     {{ `${sound.dj.name} – ${sound.name}` }}
                 </nuxt-link>
             </div>
         </div>
         <div class="level-right">
+            <div v-if="sound.duration" class="level-item">
+                <b-tag>
+                    {{ $audio.convertTimeHHMMSS(sound.duration) }}
+                </b-tag>
+            </div>
             <div class="level-item">
                 <b-button
                     v-if="!currentSound || currentSound.id !== sound.id"
