@@ -66,6 +66,7 @@ export const getDjsWithMixes = function () {
                         id
                         name
                     }
+                    duration
                 }
             }
         }
