@@ -42,14 +42,14 @@
                     <div class="level-left">
                         <div class="level-item">
                             <div class="tag is-light">
-                                {{ currentSeconds | convertTimeHHMMSS }}
+                                {{ $audio.convertTimeHHMMSS(currentSeconds) }}
                             </div>
                         </div>
                     </div>
                     <div class="level-right">
                         <div class="level-item">
                             <div class="tag is-light">
-                                {{ durationSeconds | convertTimeHHMMSS }}
+                                {{ $audio.convertTimeHHMMSS(durationSeconds) }}
                             </div>
                         </div>
                     </div>
@@ -109,13 +109,6 @@
 
 <script>
 export default {
-    filters: {
-        convertTimeHHMMSS(val) {
-            const hhmmss = new Date(val * 1000).toISOString().substr(11, 8)
-
-            return hhmmss.indexOf('00:') === 0 ? hhmmss.substr(3) : hhmmss
-        }
-    },
     props: {
         autoPlay: {
             type: Boolean,
@@ -189,7 +182,7 @@ export default {
             if (this.$refs[this.audioRefName].readyState >= 2) {
                 this.loaded = true
                 this.durationSeconds = parseInt(this.$refs[this.audioRefName].duration)
-                this.$emit('audio-load-success')
+                this.$emit('audio-load-success', { duration: this.durationSeconds })
                 return (this.playing = this.autoPlay)
             }
 
@@ -206,12 +199,6 @@ export default {
         seek(value) {
             if (!this.loaded) return
             this.$refs[this.audioRefName].currentTime = parseInt(value)
-            /*
-            const bounds = e.target.getBoundingClientRect()
-            const seekPos = (e.clientX - bounds.left) / bounds.width
-
-            this.$refs.audio.currentTime = parseInt(this.$refs.audio.duration * seekPos)
-*/
         },
         stop() {
             this.playing = false

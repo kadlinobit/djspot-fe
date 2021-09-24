@@ -45,7 +45,7 @@
                     ></b-loading>
                     <div class="column is-narrow">
                         <div class="tag is-light">
-                            {{ currentSeconds | convertTimeHHMMSS }}
+                            {{ $audio.convertTimeHHMMSS(currentSeconds) }}
                         </div>
                     </div>
                     <div class="column">
@@ -55,7 +55,7 @@
                     </div>
                     <div class="column is-narrow">
                         <div class="tag is-light">
-                            {{ durationSeconds | convertTimeHHMMSS }}
+                            {{ $audio.convertTimeHHMMSS(durationSeconds) }}
                         </div>
                     </div>
                 </div>
@@ -119,13 +119,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 export default {
-    filters: {
-        convertTimeHHMMSS(val) {
-            const hhmmss = new Date(val * 1000).toISOString().substr(11, 8)
-
-            return hhmmss.indexOf('00:') === 0 ? hhmmss.substr(3) : hhmmss
-        }
-    },
     props: {
         audioRefName: {
             type: String,
