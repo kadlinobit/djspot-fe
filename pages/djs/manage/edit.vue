@@ -75,8 +75,19 @@ export default {
                 this.isLoading = true
                 const formData = new FormData()
 
+                // if (formDataJSON.photo && formDataJSON.photo !== 'keep-current') {
+                //     formData.append('files.photo', formDataJSON.photo, formDataJSON.photo.name)
+                // }
+
                 if (formDataJSON.photo && formDataJSON.photo !== 'keep-current') {
-                    formData.append('files.photo', formDataJSON.photo, formDataJSON.photo.name)
+                    const { canvas } = formDataJSON.photo
+                    if (canvas) {
+                        const avatarBlob = await new Promise((resolve) => canvas.toBlob(resolve))
+                        const fileName = `dj_${formDataJSON.slug}_photo.${
+                            avatarBlob.type.split('/')[1]
+                        }`
+                        formData.append('files.photo', avatarBlob, fileName)
+                    }
                 }
 
                 if (formDataJSON.photo === 'keep-current') {

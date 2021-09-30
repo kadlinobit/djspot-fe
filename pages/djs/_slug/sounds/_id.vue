@@ -8,11 +8,36 @@
             ></b-loading>
             <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
             <div v-else>
-                <div class="columns">
-                    <div class="column"></div>
+                <div class="columns is-mobile is-vcentered">
+                    <div class="column is-narrow">
+                        <b-button
+                            v-if="!currentSound || currentSound.id !== sound.id"
+                            :disabled="isPlayerLoading"
+                            type="is-text"
+                            size="is-large"
+                            icon-left="play"
+                            @click.prevent="() => onPlayNewSound(sound)"
+                        />
+                        <b-button
+                            v-if="currentSound && currentSound.id === sound.id"
+                            :disabled="isPlayerLoading"
+                            type="is-text"
+                            size="is-large"
+                            :icon-left="isPlaying ? 'pause' : 'play'"
+                            @click.prevent="() => setIsPlaying(!isPlaying)"
+                        />
+                    </div>
                     <div class="column">
                         <h1 class="title">{{ sound.name }}</h1>
                         <h2 class="subtitle">{{ sound.dj.name }}</h2>
+                    </div>
+                    <div class="column is-narrow">
+                        <b-button
+                            type="is-text"
+                            icon-right="pencil"
+                            tag="nuxt-link"
+                            :to="{ path: `/djs/manage/edit/` }"
+                        />
                     </div>
                 </div>
             </div>
@@ -21,6 +46,7 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 import { getSounds } from '~/api/graphql/sound'
 export default {
     data() {
@@ -53,6 +79,22 @@ export default {
             if (e.statusCode && e.statusCode === 404) {
                 return this.$nuxt.error({ statusCode: 404, message: e.message })
             }
+        }
+    },
+    computed: {
+        ...mapGetters('player', {
+            currentSound: 'currentSound',
+            isPlaying: 'isPlaying',
+            isPlayerLoading: 'isLoading'
+        }),
+        ...mapGetters('playlist', ['isSoundInPlaylist'])
+    },
+    methods: {
+        ...mapActions('player', ['loadNewAudio', 'setIsPlaying']),
+        ...mapActions('playlist', ['handlePlaySound', 'handleAddOrRemovePlaylistSound']),
+        onPlayNewSound(sound) {
+            this.handlePlaySound(sound)
+            this.loadNewAudio(sound)
         }
     }
 }

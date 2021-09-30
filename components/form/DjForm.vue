@@ -11,7 +11,7 @@
         <ValidationObserver ref="observer" slim>
             <form v-if="!success" method="post" @submit.prevent>
                 <div class="columns is-desktop">
-                    <div class="column">
+                    <div class="column is-half-desktop">
                         <b-validated-field
                             v-model="formData.name"
                             name="name"
@@ -55,15 +55,16 @@
                             :placeholder="$t('dj.select_3_genres')"
                         />
                     </div>
-                    <div class="column">
-                        <b-validated-image-upload
-                            v-model="formData.photo"
+                    <div class="column is-half-desktop">
+                        <b-validated-image-crop-upload
+                            v-model="rawPhoto"
                             name="photo"
                             :label="$t('dj.photo')"
                             rules="image_type"
                             :on-remove-image="onRemovePhoto"
                             :on-keep-current-image="onKeepCurrentPhoto"
                             :current-image="initialData ? initialData.photo : null"
+                            :on-cropped-image-change="onCroppedImageChange"
                         />
                     </div>
                 </div>
@@ -96,7 +97,7 @@ import { required, email } from 'vee-validate/dist/rules'
 import { mapGetters } from 'vuex'
 import BValidatedField from '~/components/form/BValidatedField.vue'
 import BValidatedSelect from '~/components/form/BValidatedSelect.vue'
-import BValidatedImageUpload from '~/components/form/BValidatedImageUpload.vue'
+import BValidatedImageCropUpload from '~/components/form/BValidatedImageCropUpload.vue'
 import BValidatedTagInput from '~/components/form/BValidatedTagInput.vue'
 import { getGenreTags } from '~/api/graphql/genre'
 
@@ -130,7 +131,7 @@ export default {
         ValidationObserver,
         BValidatedField,
         BValidatedSelect,
-        BValidatedImageUpload,
+        BValidatedImageCropUpload,
         BValidatedTagInput
     },
     middleware: ['authorized'],
@@ -166,8 +167,10 @@ export default {
                 bio: null,
                 photo: null,
                 city: null,
-                genres: null
+                genres: null,
+                avatar: null
             },
+            rawPhoto: null,
             availableGenres: null,
             currentPhoto: null,
             success: null,
@@ -211,6 +214,7 @@ export default {
             this.initialData.photo.url
         ) {
             this.formData.photo = 'keep-current'
+            this.rawPhoto = 'keep-current'
             this.currentPhoto = this.initialData.photo
         }
 
@@ -240,9 +244,14 @@ export default {
         },
         onRemovePhoto() {
             this.formData.photo = null
+            this.rawPhoto = null
         },
         onKeepCurrentPhoto() {
             this.formData.photo = 'keep-current'
+            this.rawPhoto = 'keep-current'
+        },
+        onCroppedImageChange(croppedImageData) {
+            this.formData.photo = croppedImageData
         },
         createSlug(value) {
             return value
