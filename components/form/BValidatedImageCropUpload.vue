@@ -17,11 +17,10 @@
                     <b-image :src="`http://localhost:1337${currentImage.url}`" />
                 </div>
                 <b-upload
-                    v-if="!value || (value && errors[0])"
+                    v-else-if="!file || (file && errors[0])"
+                    v-model="file"
                     expanded
                     drag-drop
-                    :value="value"
-                    @input="(imageValue) => $emit('input', imageValue)"
                 >
                     <section class="section">
                         <div class="content has-text-centered">
@@ -34,7 +33,7 @@
                         </div>
                     </section>
                 </b-upload>
-                <div v-if="value && value !== 'keep-current' && !errors[0]">
+                <div v-else-if="photoUrl && value !== 'keep-current' && !errors[0]">
                     <cropper
                         ref="cropper"
                         :src="photoUrl"
@@ -48,8 +47,8 @@
                             adjustStencil: false
                         }"
                         :canvas="{
-                            maxHeight: 2048,
-                            maxWidth: 2048
+                            width: 1024,
+                            height: 1024
                         }"
                         image-restriction="stencil"
                         @change="onCroppedImageChange"
@@ -89,7 +88,8 @@ export default {
     middleware: ['auth'],
     props: {
         value: {
-            default: null
+            default: null,
+            type: [Object, String, null]
         },
         currentImage: {
             type: [Object],
@@ -106,20 +106,6 @@ export default {
         rules: {
             type: [Object, String],
             default: ''
-        },
-        onRemoveImage: {
-            type: Function,
-            required: true
-        },
-        onKeepCurrentImage: {
-            type: Function,
-            required: false,
-            default: () => {}
-        },
-        onCroppedImageChange: {
-            type: Function,
-            required: false,
-            default: () => {}
         }
     },
     data() {
@@ -129,23 +115,30 @@ export default {
         }
     },
     watch: {
-        value(photoFile) {
-            if (!photoFile || photoFile === 'keep-current') {
+        file(file) {
+            if (!file || file === 'keep-current') {
                 this.photoUrl = null
                 return
             }
             try {
-                this.photoUrl = URL.createObjectURL(photoFile)
+                this.photoUrl = URL.createObjectURL(file)
             } catch (e) {
                 this.photoUrl = null
             }
         }
+    },
+    methods: {
+        onCroppedImageChange(croppedImage) {
+            this.$emit('input', { file: this.file, croppedImage })
+        },
+        onRemoveImage() {
+            this.file = null
+            this.$emit('input', null)
+        },
+        onKeepCurrentImage() {
+            this.file = null
+            this.$emit('input', 'keep-current')
+        }
     }
 }
 </script>
-
-<style lang="scss" scoped>
-.cropper {
-    max-width: 100%;
-}
-</style>
