@@ -17,11 +17,13 @@
 
 <script>
 import SoundForm from '~/components/form/SoundForm.vue'
+import { parseResponseErrorMessage } from '~/api/tools'
 
 export default {
     components: {
         SoundForm
     },
+    middleware: 'authenticated',
     data() {
         return {
             error: null,
@@ -34,26 +36,40 @@ export default {
             try {
                 this.isLoading = true
 
-                await this.$strapi.create('sounds', formDataObj)
-                await this.$strapi.fetchUser()
+                const formData = new FormData()
 
-                // this.$router.push(`/djs/${dj.slug}`)
-
-                this.$buefy.toast.open({
-                    message: this.$t(`${formDataObj.type}.add_success`, [formDataObj.name]),
-                    type: 'is-success',
-                    duration: 7000
-                })
-            } catch (e) {
-                if (e.response && e.response.data && e.response.data.message) {
-                    if (Array.isArray(e.response.data.message)) {
-                        this.error = e.response.data.message[0].messages[0].message
-                    } else {
-                        this.error = e.response.data.message
+                if (formDataObj.photo) {
+                    const { canvas } = formDataObj.photo.croppedImage
+                    if (canvas) {
+                        const blob = await new Promise((resolve) => canvas.toBlob(resolve))
+                        const fileName = `sound_${formDataObj.name}.${blob.type.split('/')[1]}`
+                        formData.append('files.photo', blob, fileName)
                     }
-                } else {
-                    this.error = e
                 }
+
+                formData.append(
+                    'data',
+                    JSON.stringify({
+                        ...formDataObj,
+                        genres: formDataObj.genres
+                            ? formDataObj.genres.map((genre) => parseInt(genre.id))
+                            : null
+                    })
+                )
+
+                const sound = await this.$strapi.create('sounds', formData)
+
+                if (sound) {
+                    this.$router.push(`/djs/${sound.dj.slug}/sounds/${sound.id}`)
+
+                    this.$buefy.toast.open({
+                        message: this.$t(`${formDataObj.type}.add_success`, [formDataObj.name]),
+                        type: 'is-success',
+                        duration: 7000
+                    })
+                }
+            } catch (e) {
+                this.error = parseResponseErrorMessage(e)
             } finally {
                 this.isLoading = false
             }
