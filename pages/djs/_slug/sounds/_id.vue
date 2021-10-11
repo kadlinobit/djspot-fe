@@ -8,36 +8,62 @@
             ></b-loading>
             <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
             <div v-else>
-                <div class="columns is-mobile is-vcentered">
-                    <div class="column is-narrow">
-                        <b-button
-                            v-if="!currentSound || currentSound.id !== sound.id"
-                            :disabled="isPlayerLoading"
-                            type="is-text"
-                            size="is-large"
-                            icon-left="play"
-                            @click.prevent="() => onPlayNewSound(sound)"
-                        />
-                        <b-button
-                            v-if="currentSound && currentSound.id === sound.id"
-                            :disabled="isPlayerLoading"
-                            type="is-text"
-                            size="is-large"
-                            :icon-left="isPlaying ? 'pause' : 'play'"
-                            @click.prevent="() => setIsPlaying(!isPlaying)"
-                        />
-                    </div>
+                <div class="columns">
                     <div class="column">
-                        <h1 class="title">{{ sound.name }}</h1>
-                        <h2 class="subtitle">{{ sound.dj.name }}</h2>
+                        <div class="columns is-mobile is-vcentered">
+                            <div class="column is-narrow">
+                                <b-button
+                                    v-if="!currentSound || currentSound.id !== sound.id"
+                                    :disabled="isPlayerLoading"
+                                    type="is-primary"
+                                    size="is-large"
+                                    icon-left="play"
+                                    @click.prevent="() => onPlayNewSound(sound)"
+                                />
+                                <b-button
+                                    v-if="currentSound && currentSound.id === sound.id"
+                                    :disabled="isPlayerLoading"
+                                    type="is-primary"
+                                    size="is-large"
+                                    :icon-left="isPlaying ? 'pause' : 'play'"
+                                    @click.prevent="() => setIsPlaying(!isPlaying)"
+                                />
+                            </div>
+                            <div class="column">
+                                <h1 class="title">{{ sound.name }}</h1>
+                                <h2 class="subtitle">
+                                    <nuxt-link :to="{ path: `/djs/${sound.dj.slug}` }">
+                                        {{ sound.dj.name }}
+                                    </nuxt-link>
+                                </h2>
+                            </div>
+                            <div class="column is-narrow">
+                                <b-button
+                                    type="is-text"
+                                    icon-right="pencil"
+                                    tag="nuxt-link"
+                                    :to="{ path: `/sounds/manage/edit/${sound.id}` }"
+                                />
+                            </div>
+                        </div>
+                        <b-taglist v-if="sound.genres">
+                            <b-tag
+                                v-for="genre in sound.genres"
+                                :key="`genre-${genre.id}`"
+                                type="is-primary is-light"
+                                size="is-large"
+                            >
+                                {{ genre.name }}
+                            </b-tag>
+                        </b-taglist>
                     </div>
-                    <div class="column is-narrow">
-                        <b-button
-                            type="is-text"
-                            icon-right="pencil"
-                            tag="nuxt-link"
-                            :to="{ path: `/djs/manage/edit/` }"
-                        />
+                    <div v-if="sound.photo" class="column is-narrow">
+                        <div
+                            class="sound-photo"
+                            :style="{
+                                backgroundImage: `url(http://localhost:1337${sound.photo.url})`
+                            }"
+                        ></div>
                     </div>
                 </div>
             </div>
@@ -49,6 +75,7 @@
 import { mapActions, mapGetters } from 'vuex'
 import { getSounds } from '~/api/graphql/sound'
 export default {
+    name: 'SoundDetailsPage',
     data() {
         return {
             sound: null
@@ -59,7 +86,7 @@ export default {
             const slug = this.$nuxt.context.params.slug
             const id = this.$nuxt.context.params.id
             const data = await this.$strapi.graphql({
-                query: getSounds(),
+                query: getSounds('detailed'),
                 variables: {
                     where: {
                         id,
@@ -87,7 +114,16 @@ export default {
             isPlaying: 'isPlaying',
             isPlayerLoading: 'isLoading'
         }),
-        ...mapGetters('playlist', ['isSoundInPlaylist'])
+        ...mapGetters('playlist', ['isSoundInPlaylist']),
+        likesCount() {
+            return this.sound ? this.sound.likes.length : 0
+        },
+        isLikedByMe() {
+            if (this.$strapi.user) {
+                return this.sound.likes.some((like) => like.user.id === this.$strapi.user.id)
+            }
+            return false
+        }
     },
     methods: {
         ...mapActions('player', ['loadNewAudio', 'setIsPlaying']),
@@ -99,3 +135,12 @@ export default {
     }
 }
 </script>
+
+<style lang="scss" scoped>
+.sound-photo {
+    height: 300px;
+    width: 300px;
+    background-size: cover;
+    background-position: center center;
+}
+</style>
