@@ -57,14 +57,11 @@
                     </div>
                     <div class="column is-half-desktop">
                         <b-validated-image-crop-upload
-                            v-model="rawPhoto"
+                            v-model="formData.photo"
                             name="photo"
                             :label="$t('dj.photo')"
                             rules="image_type"
-                            :on-remove-image="onRemovePhoto"
-                            :on-keep-current-image="onKeepCurrentPhoto"
                             :current-image="initialData ? initialData.photo : null"
-                            :on-cropped-image-change="onCroppedImageChange"
                         />
                     </div>
                 </div>
@@ -167,10 +164,8 @@ export default {
                 bio: null,
                 photo: null,
                 city: null,
-                genres: null,
-                avatar: null
+                genres: null
             },
-            rawPhoto: null,
             availableGenres: null,
             currentPhoto: null,
             success: null,
@@ -214,7 +209,6 @@ export default {
             this.initialData.photo.url
         ) {
             this.formData.photo = 'keep-current'
-            this.rawPhoto = 'keep-current'
             this.currentPhoto = this.initialData.photo
         }
 
@@ -241,17 +235,6 @@ export default {
         },
         onCancel() {
             this.$router.back()
-        },
-        onRemovePhoto() {
-            this.formData.photo = null
-            this.rawPhoto = null
-        },
-        onKeepCurrentPhoto() {
-            this.formData.photo = 'keep-current'
-            this.rawPhoto = 'keep-current'
-        },
-        onCroppedImageChange(croppedImageData) {
-            this.formData.photo = croppedImageData
         },
         createSlug(value) {
             return value
