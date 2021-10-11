@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { ToastProgrammatic as Toast } from 'buefy'
 
 export const state = () => ({
@@ -10,10 +9,10 @@ export const mutations = {
         state.playlist = playlist
     },
     mutateAddSoundToEnd(state, sound) {
-        state.playlist.push(_.clone(sound))
+        state.playlist.push(this.$audio.formatSoundForPlaylist(sound))
     },
     mutateAddSoundToIndex(state, { sound, index }) {
-        state.playlist.splice(index, 0, _.clone(sound))
+        state.playlist.splice(index, 0, this.$audio.formatSoundForPlaylist(sound))
     },
     mutateDeleteSound(state, sound) {
         state.playlist = state.playlist.filter((playlistSound) => playlistSound.id !== sound.id)

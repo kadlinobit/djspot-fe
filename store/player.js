@@ -17,7 +17,7 @@ export const state = () => ({
 
 export const mutations = {
     mutateSetCurrentSound(state, sound) {
-        state.currentSound = sound
+        state.currentSound = this.$audio.formatSoundForPlaylist(sound)
     },
     mutateSetFile(state, file) {
         state.file = file
