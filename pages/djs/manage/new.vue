@@ -8,7 +8,6 @@
                 :success-in="success"
                 :is-loading-in="isLoading"
                 :initial-data="null"
-                mode="new"
             />
         </div>
     </section>
@@ -16,11 +15,13 @@
 
 <script>
 import DjForm from '~/components/form/DjForm.vue'
+import { parseResponseErrorMessage } from '~/api/tools'
 
 export default {
     components: {
         DjForm
     },
+    middleware: 'authenticated',
     data() {
         return {
             error: null,
@@ -29,24 +30,26 @@ export default {
         }
     },
     methods: {
-        async createDj(formDataJSON) {
+        async createDj(formDataObj) {
             try {
                 this.isLoading = true
                 const formData = new FormData()
 
-                if (formDataJSON.photo) {
-                    formData.append('files.photo', formDataJSON.photo, formDataJSON.photo.name)
+                if (formDataObj.photo) {
+                    const { canvas } = formDataObj.photo.croppedImage
+                    if (canvas) {
+                        const blob = await new Promise((resolve) => canvas.toBlob(resolve))
+                        const fileName = `dj_${formDataObj.slug}_photo.${blob.type.split('/')[1]}`
+                        formData.append('files.photo', blob, fileName)
+                    }
                 }
+
                 formData.append(
                     'data',
                     JSON.stringify({
-                        name: formDataJSON.name,
-                        slug: formDataJSON.slug,
-                        email: formDataJSON.email,
-                        bio: formDataJSON.bio,
-                        city: formDataJSON.city,
-                        genres: formDataJSON.genres
-                            ? formDataJSON.genres.map((genre) => parseInt(genre.id))
+                        ...formDataObj,
+                        genres: formDataObj.genres
+                            ? formDataObj.genres.map((genre) => parseInt(genre.id))
                             : null
                     })
                 )
@@ -62,11 +65,7 @@ export default {
                     duration: 7000
                 })
             } catch (e) {
-                if (e.response && e.response.data) {
-                    this.error = e.response.data.message[0].messages[0].message
-                } else {
-                    this.error = e
-                }
+                this.error = parseResponseErrorMessage(e)
             } finally {
                 this.isLoading = false
             }
