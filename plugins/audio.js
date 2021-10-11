@@ -1,4 +1,5 @@
 import Url from 'url-parse'
+import _ from 'lodash'
 
 export default (context, inject) => {
     function isValidUrl(url) {
@@ -70,9 +71,14 @@ export default (context, inject) => {
         return hhmmss.indexOf('00:') === 0 ? hhmmss.substr(3) : hhmmss
     }
 
+    function formatSoundForPlaylist(sound) {
+        return _.pick(sound, ['duration', 'dj', 'id', 'name', 'type', 'url'])
+    }
+
     const api = {
         getAudioUrls,
-        convertTimeHHMMSS
+        convertTimeHHMMSS,
+        formatSoundForPlaylist
     }
 
     inject('audio', api)
