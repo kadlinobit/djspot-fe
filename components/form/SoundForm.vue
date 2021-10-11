@@ -1,5 +1,6 @@
 <template>
-    <div>
+    <section class="section">
+        <b-loading v-if="isLoading" />
         <b-notification v-if="success" type="is-success" :closable="false">
             {{ $t(success) }}
         </b-notification>
@@ -11,7 +12,7 @@
         <ValidationObserver ref="observer" slim>
             <form v-if="!success" method="post" @submit.prevent>
                 <div class="columns is-desktop">
-                    <div class="column">
+                    <div class="column is-half-desktop">
                         <b-validated-select
                             v-model="formData.type"
                             name="type"
@@ -64,16 +65,23 @@
                             :placeholder="$t('dj.select_3_genres')"
                         />
                     </div>
-                    <div class="column">
-                        <b-validated-field
-                            v-model="formData.description"
-                            name="description"
-                            type="textarea"
-                            :label="$t(`${formData.type}.description`)"
-                            :placeholder="$t(`${formData.type}.description_placeholder`)"
+                    <div class="column is-half-desktop">
+                        <b-validated-image-crop-upload
+                            v-model="formData.photo"
+                            name="photo"
+                            :label="$t('dj.photo')"
+                            rules="image_type"
+                            :current-image="initialData ? initialData.photo : null"
                         />
                     </div>
                 </div>
+                <b-validated-field
+                    v-model="formData.description"
+                    name="description"
+                    type="textarea"
+                    :label="$t(`${formData.type}.description`)"
+                    :placeholder="$t(`${formData.type}.description_placeholder`)"
+                />
                 <div class="field is-grouped is-grouped-right">
                     <div class="control">
                         <b-button type="is-light" @click="onCancel">
@@ -92,7 +100,7 @@
                 </div>
             </form>
         </ValidationObserver>
-    </div>
+    </section>
 </template>
 
 <script>
@@ -103,6 +111,7 @@ import Player from '~/components/audio/Player.vue'
 import BValidatedField from '~/components/form/BValidatedField.vue'
 import BValidatedTagInput from '~/components/form/BValidatedTagInput.vue'
 import BValidatedSelect from '~/components/form/BValidatedSelect.vue'
+import BValidatedImageCropUpload from '~/components/form/BValidatedImageCropUpload.vue'
 import { getGenreTags } from '~/api/graphql/genre'
 
 extend('required', required)
@@ -122,12 +131,21 @@ extend('audio_load_state', {
     message: 'mix.audio_load_error'
 })
 
+extend('image_type', (file) => {
+    if (file === null || ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+        return true
+    }
+
+    return 'validation.image_type'
+})
+
 export default {
     components: {
         ValidationObserver,
         BValidatedField,
         BValidatedTagInput,
         BValidatedSelect,
+        BValidatedImageCropUpload,
         Player
     },
     middleware: ['authorized'],
@@ -159,14 +177,16 @@ export default {
                 genres: null,
                 dj: this.$strapi.user.dj.id,
                 type: 'mix',
-                duration: null
+                duration: null,
+                photo: null
             },
             availableGenres: null,
             success: null,
             error: null,
             isLoading: false,
             audioUrl: null,
-            audioLoadState: null
+            audioLoadState: null,
+            currentPhoto: null
         }
     },
     computed: {
@@ -200,6 +220,18 @@ export default {
                 ...this.initialData
             }
         }
+
+        // Check if initial data contains photo - if so, set form to keep existing photo
+        if (
+            this.initialData &&
+            this.initialData.photo &&
+            this.initialData.photo.id &&
+            this.initialData.photo.url
+        ) {
+            this.formData.photo = 'keep-current'
+            this.currentPhoto = this.initialData.photo
+        }
+
         const genreTagsAll = await this.$strapi.graphql({
             query: getGenreTags()
         })
