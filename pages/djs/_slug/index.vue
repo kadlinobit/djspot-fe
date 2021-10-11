@@ -69,9 +69,10 @@
 </template>
 
 <script>
-import { getDjsWithMixes } from '~/api/graphql/dj'
+import { getDjs } from '~/api/graphql/dj'
 import SoundList from '~/components/audio/SoundList.vue'
 export default {
+    name: 'DjProfilePage',
     components: {
         SoundList
     },
@@ -85,7 +86,7 @@ export default {
         try {
             const slug = this.$nuxt.context.params.slug
             const data = await this.$strapi.graphql({
-                query: getDjsWithMixes(),
+                query: getDjs('withMixes'),
                 variables: {
                     where: {
                         slug
