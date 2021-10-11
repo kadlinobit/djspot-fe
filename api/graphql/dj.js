@@ -1,26 +1,90 @@
 import gql from 'graphql-tag'
 
-export const getDjs = function () {
+const fragments = {
+    default: `
+        id
+        name
+        email
+        bio
+        slug
+        user {
+            id
+        }
+        photo {
+            id
+            url
+            formats
+        }
+        city
+        genres {
+            id
+            name
+        }
+    `,
+    withMixes: `
+        id
+        name
+        email
+        bio
+        slug
+        user {
+            id
+        }
+        photo {
+            id
+            url
+            formats
+        }
+        city
+        genres {
+            id
+            name
+        }
+        sounds {
+            id
+            type
+            created_at
+            updated_at
+            name
+            description
+            url
+            dj {
+                name
+                slug
+            }
+            genres {
+                id
+                name
+            }
+            duration
+        }
+    `,
+    form: `
+        id
+        name
+        email
+        bio
+        slug
+        photo {
+            id
+            url
+        }
+        city
+        genres {
+            id
+            name
+        }
+    `
+}
+
+export const getDjs = function (fragmentName) {
     const query = gql`
         query getDjs($where: JSON) {
             djs(where: $where) {
-                id
-                name
-                email
-                bio
-                slug
-                user {
-                    id
-                }
-                photo {
-                    id
-                    url
-                    formats
-                }
-                city
-                genres {
-                    id
-                    name
+                ${
+                    fragmentName && fragments[fragmentName]
+                        ? fragments[fragmentName]
+                        : fragments.default
                 }
             }
         }
@@ -28,69 +92,14 @@ export const getDjs = function () {
     return query.loc.source.body
 }
 
-export const getDjsWithMixes = function () {
-    const query = gql`
-        query getDjs($where: JSON) {
-            djs(where: $where) {
-                id
-                name
-                email
-                bio
-                slug
-                user {
-                    id
-                }
-                photo {
-                    id
-                    url
-                    formats
-                }
-                city
-                genres {
-                    id
-                    name
-                }
-                sounds {
-                    id
-                    type
-                    created_at
-                    updated_at
-                    name
-                    description
-                    url
-                    dj {
-                        name
-                        slug
-                    }
-                    genres {
-                        id
-                        name
-                    }
-                    duration
-                }
-            }
-        }
-    `
-    return query.loc.source.body
-}
-
-export const getDjFormData = function () {
+export const getDj = function (fragmentName) {
     const query = gql`
         query ($id: ID!) {
             dj(id: $id) {
-                id
-                name
-                email
-                bio
-                slug
-                photo {
-                    id
-                    url
-                }
-                city
-                genres {
-                    id
-                    name
+                ${
+                    fragmentName && fragments[fragmentName]
+                        ? fragments[fragmentName]
+                        : fragments.default
                 }
             }
         }
@@ -98,13 +107,14 @@ export const getDjFormData = function () {
     return query.loc.source.body
 }
 
-export const createDj = function () {
+export const createDj = function (fragmentName) {
     const mutation = gql`
         mutation createDj($dj: createDjInput!) {
             createDj(input: $dj) {
-                dj {
-                    id
-                    name
+                ${
+                    fragmentName && fragments[fragmentName]
+                        ? fragments[fragmentName]
+                        : fragments.default
                 }
             }
         }
