@@ -17,7 +17,7 @@
 export default {
     methods: {
         setLanguage(languageCode) {
-            this.$i18n.locale = languageCode
+            this.$i18n.setLocale(languageCode)
         }
     }
 }
