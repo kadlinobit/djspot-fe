@@ -8,43 +8,45 @@
             ></b-loading>
             <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
             <div v-else>
-                <div class="columns">
-                    <div v-if="dj.photo" class="column is-narrow">
-                        <div
-                            class="dj-photo"
-                            :style="{
-                                backgroundImage: `url(http://localhost:1337${dj.photo.url})`
-                            }"
-                        ></div>
-                    </div>
+                <div class="columns is-mobile">
                     <div class="column">
-                        <div class="columns is-gapless is-vcentered">
+                        <div class="columns is-mobile is-vcentered">
                             <div class="column">
-                                <h1 class="title">{{ dj.name }}</h1>
+                                <h1 class="title is-size-3-mobile is-size-2-desktop">
+                                    {{ dj.name }}
+                                </h1>
                                 <h2 class="subtitle">{{ dj.city }}</h2>
                             </div>
-                            <div class="column is-narrow">
-                                <b-button
-                                    type="is-text"
-                                    icon-right="pencil"
-                                    tag="nuxt-link"
-                                    :to="{ path: `/djs/manage/edit/` }"
+                            <div class="column is-hidden-tablet is-narrow">
+                                <cover-image
+                                    quality="small"
+                                    cover-type="dj"
+                                    :pixel-size="100"
+                                    :cover-image="dj.photo || null"
                                 />
                             </div>
                         </div>
-
                         <b-taglist>
                             <b-tag
                                 v-for="genre in dj.genres"
                                 :key="`genre-${genre.id}`"
                                 type="is-primary"
-                                size="is-large"
+                                size="is-size-5-desktop is-size-6-mobile is-size-6-tablet"
                             >
                                 {{ genre.name }}
                             </b-tag>
                         </b-taglist>
                     </div>
+                    <div class="column is-hidden-mobile is-narrow">
+                        <cover-image
+                            quality="small"
+                            cover-type="dj"
+                            :pixel-size="300"
+                            :cover-image="dj.photo || null"
+                        />
+                    </div>
                 </div>
+                <dj-control-box :dj="dj" :on-toggle-follow="onToggleFollow" />
                 <section>
                     <b-tabs
                         v-if="dj.bio || (mixes && mixes.length > 0)"
@@ -69,12 +71,17 @@
 </template>
 
 <script>
-import { getDjs } from '~/api/graphql/dj'
+import { getDjs, toggleDjFollow } from '~/api/graphql/dj'
+import CoverImage from '~/components/media/CoverImage.vue'
 import SoundList from '~/components/audio/SoundList.vue'
+import DjControlBox from '~/components/dj/DjControlBox.vue'
+
 export default {
     name: 'DjProfilePage',
     components: {
-        SoundList
+        SoundList,
+        CoverImage,
+        DjControlBox
     },
     data() {
         return {
@@ -113,6 +120,29 @@ export default {
         },
         tracks() {
             return this.dj.sounds.filter((sound) => sound.type === 'track') || []
+        }
+    },
+    methods: {
+        onToggleFollow() {
+            this.dj.isFollowedByMe ? this.dj.followsCount-- : this.dj.followsCount++
+            this.dj.isFollowedByMe = !this.dj.isFollowedByMe
+            this.toggleFollow()
+        },
+        async toggleFollow() {
+            try {
+                const data = await this.$strapi.graphql({
+                    query: toggleDjFollow('withMixes'),
+                    variables: {
+                        id: this.dj.id
+                    }
+                })
+
+                if (data.toggleDjFollow) {
+                    this.dj = data.toggleDjFollow
+                }
+            } catch (e) {
+                throw new Error(e)
+            }
         }
     }
 }
