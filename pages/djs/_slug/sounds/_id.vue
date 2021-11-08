@@ -8,14 +8,14 @@
             ></b-loading>
             <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
             <div v-else>
-                <div class="columns">
+                <div class="columns sound-main-info">
                     <div class="column">
                         <div class="columns is-mobile is-vcentered">
                             <div class="column is-narrow">
                                 <b-button
                                     v-if="!currentSound || currentSound.id !== sound.id"
                                     :disabled="isPlayerLoading"
-                                    type="is-primary"
+                                    type="is-text"
                                     size="is-large"
                                     icon-left="play"
                                     @click.prevent="() => onPlayNewSound(sound)"
@@ -23,26 +23,40 @@
                                 <b-button
                                     v-if="currentSound && currentSound.id === sound.id"
                                     :disabled="isPlayerLoading"
-                                    type="is-primary"
+                                    type="is-text"
                                     size="is-large"
                                     :icon-left="isPlaying ? 'pause' : 'play'"
                                     @click.prevent="() => setIsPlaying(!isPlaying)"
                                 />
                             </div>
                             <div class="column">
-                                <h1 class="title">{{ sound.name }}</h1>
-                                <h2 class="subtitle">
-                                    <nuxt-link :to="{ path: `/djs/${sound.dj.slug}` }">
-                                        {{ sound.dj.name }}
-                                    </nuxt-link>
-                                </h2>
+                                <h1 class="title is-size-4-mobile is-size-3-desktop">
+                                    {{ sound.name }}
+                                </h1>
+                                <h4 class="subtitle is-6">
+                                    <b-tag type="is-light mr-2">
+                                        {{ $t(`${sound.type}.type`) }}
+                                    </b-tag>
+                                    <span class="icon-text mr-2">
+                                        <span class="icon">
+                                            <i class="mdi mdi-clock-outline"></i>
+                                        </span>
+                                        <span>{{ $audio.convertTimeHHMMSS(sound.duration) }}</span>
+                                    </span>
+                                    <span class="icon-text">
+                                        <span class="icon">
+                                            <i class="mdi mdi-calendar"></i>
+                                        </span>
+                                        <span>{{ $time.fromNow(sound.created_at) }}</span>
+                                    </span>
+                                </h4>
                             </div>
-                            <div class="column is-narrow">
-                                <b-button
-                                    type="is-text"
-                                    icon-right="pencil"
-                                    tag="nuxt-link"
-                                    :to="{ path: `/sounds/manage/edit/${sound.id}` }"
+                            <div class="column is-hidden-tablet is-narrow">
+                                <cover-image
+                                    quality="thumbnail"
+                                    cover-type="sound"
+                                    :pixel-size="100"
+                                    :cover-image="sound.photo || null"
                                 />
                             </div>
                         </div>
@@ -51,19 +65,54 @@
                                 v-for="genre in sound.genres"
                                 :key="`genre-${genre.id}`"
                                 type="is-primary is-light"
-                                size="is-large"
+                                size="is-size-5-desktop is-size-6-mobile is-size-6-tablet"
                             >
                                 {{ genre.name }}
                             </b-tag>
                         </b-taglist>
+                        <dj-info-box :dj="sound.dj" />
                     </div>
-                    <div v-if="sound.photo" class="column is-narrow">
-                        <div
-                            class="sound-photo"
-                            :style="{
-                                backgroundImage: `url(http://localhost:1337${sound.photo.url})`
-                            }"
-                        ></div>
+                    <div class="column is-narrow is-hidden-mobile">
+                        <cover-image
+                            quality="small"
+                            cover-type="sound"
+                            :pixel-size="300"
+                            :cover-image="sound.photo || null"
+                        />
+                    </div>
+                </div>
+                <div class="level is-mobile sound-controls">
+                    <div class="level-left">
+                        <div class="level-item">
+                            <b-responsive-button
+                                :type="sound.isLikedByMe ? 'is-dark' : 'is-light'"
+                                icon-left="heart"
+                                @click="onToggleLike"
+                            >
+                                {{ sound.likesCount || 'Like' }}
+                            </b-responsive-button>
+                        </div>
+                        <div class="level-item">
+                            <b-responsive-button
+                                :type="isSoundInPlaylist(sound) ? 'is-dark' : 'is-light'"
+                                icon-left="playlist-play"
+                                @click="handleAddOrRemovePlaylistSound(sound)"
+                            >
+                                Playlist
+                            </b-responsive-button>
+                        </div>
+                    </div>
+                    <div class="level-right">
+                        <div class="level-item">
+                            <b-responsive-button
+                                type="is-dark"
+                                tag="nuxt-link"
+                                icon-left="pencil"
+                                :to="{ path: `/sounds/manage/edit/${sound.id}` }"
+                            >
+                                {{ $t('form.edit') }}
+                            </b-responsive-button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -73,9 +122,18 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { getSounds } from '~/api/graphql/sound'
+import { getSounds, toggleSoundLike } from '~/api/graphql/sound'
+import DjInfoBox from '~/components/dj/DjInfoBox.vue'
+import CoverImage from '~/components/media/CoverImage.vue'
+import BResponsiveButton from '~/components/form/BResponsiveButton.vue'
+
 export default {
     name: 'SoundDetailsPage',
+    components: {
+        DjInfoBox,
+        CoverImage,
+        BResponsiveButton
+    },
     data() {
         return {
             sound: null
@@ -131,16 +189,34 @@ export default {
         onPlayNewSound(sound) {
             this.handlePlaySound(sound)
             this.loadNewAudio(sound)
+        },
+        onToggleLike() {
+            this.sound.isLikedByMe ? this.sound.likesCount-- : this.sound.likesCount++
+            this.sound.isLikedByMe = !this.sound.isLikedByMe
+            this.toggleLike()
+        },
+        async toggleLike() {
+            try {
+                const data = await this.$strapi.graphql({
+                    query: toggleSoundLike('detailed'),
+                    variables: {
+                        id: this.sound.id
+                    }
+                })
+
+                if (data.toggleSoundLike) {
+                    this.sound = data.toggleSoundLike
+                }
+            } catch (e) {
+                throw new Error(e)
+            }
         }
     }
 }
 </script>
 
 <style lang="scss" scoped>
-.sound-photo {
-    height: 300px;
-    width: 300px;
-    background-size: cover;
-    background-position: center center;
+.sound-controls {
+    // border: 1px solid #eee;
 }
 </style>
