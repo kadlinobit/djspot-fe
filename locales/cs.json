@@ -2,7 +2,8 @@
     "" : "THIS IS EMPTY STRING",
     "welcome_message": "Vítejte na DJSpot!",
     "form" : {
-        "cancel": "Zrušit"
+        "cancel": "Zrušit",
+        "edit": "Upravit"
     },
     "user" : {
         "register": "Nový účet",
@@ -52,7 +53,9 @@
         "updated_successfully" : "Tvůj profil byl úspěšně uložen!",
         "delete_profile": "Smazat profil",
         "delete_profile_confirm_message": "Opravdu chceš smazat svůj DJ profil? Tuhle akci nelze vzít zpět.",
-        "deleted_successfully" : "Tvůj DJský profil byl úspěšně smazán."
+        "deleted_successfully" : "Tvůj DJský profil byl úspěšně smazán.",
+        "follow": "Sledovat",
+        "followers": "Sledujících"
     },
     "mix" : {
         "type": "Set",
