@@ -40,7 +40,12 @@ const fragments = {
             id
             name
             slug
-            city  
+            city
+            photo {
+                url
+                previewUrl
+                formats
+            }
         }
         type
         duration
