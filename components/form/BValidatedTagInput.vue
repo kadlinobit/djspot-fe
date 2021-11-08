@@ -2,8 +2,13 @@
     <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
         <b-field
             :label="label"
-            :type="{ 'is-danger': errors[0], 'is-success': valid }"
+            :type="{
+                'is-danger': isValidationOn && errors[0],
+                'is-success': isValidationOn && valid,
+                '': !isValidationOn
+            }"
             :message="$t(errors[0])"
+            :expanded="expanded"
         >
             <b-taginput
                 :value="value"
@@ -15,6 +20,7 @@
                 :icon="icon"
                 :placeholder="placeholder"
                 :maxtags="maxtags"
+                :expanded="expanded"
                 @typing="getFilteredTags"
                 @input="(value) => emitInput(value)"
             >
@@ -49,7 +55,7 @@ export default {
         },
         label: {
             type: String,
-            required: true
+            default: ''
         },
         placeholder: {
             type: String,
@@ -82,6 +88,10 @@ export default {
         maxtags: {
             type: [String, Number],
             default: ''
+        },
+        isValidationOn: {
+            type: Boolean,
+            default: true
         },
         rules: {
             type: [Object, String],
