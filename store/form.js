@@ -1,3 +1,6 @@
+import _ from 'lodash'
+import { getGenreTags } from '~/api/graphql/genre'
+
 export const state = () => ({
     cities: [
         'Aš',
@@ -206,13 +209,55 @@ export const state = () => ({
         'Železný Brod',
         'Židlochovice',
         'Žďár nad Sázavou'
+    ],
+    genres: [],
+    djPageSortOptions: [
+        {
+            value: 'name:asc',
+            label: 'name:asc'
+        },
+        {
+            value: 'name:desc',
+            label: 'name:desc'
+        },
+        {
+            value: 'created_at:asc',
+            label: 'created_at:asc'
+        },
+        {
+            value: 'created_at:desc',
+            label: 'created_at:desc'
+        }
     ]
 })
+export const mutations = {
+    mutateSetGenres(state, genres) {
+        state.genres = genres
+    }
+}
+
+export const actions = {
+    async fetchGenres({ commit, state }) {
+        if (_.isEmpty(state.genres)) {
+            const genresData = await this.$strapi.graphql({
+                query: getGenreTags()
+            })
+
+            commit('mutateSetGenres', genresData.genres)
+        }
+    }
+}
 
 export const getters = {
     getCitiesOptions(state) {
         return state.cities.map((city) => {
             return { value: city, label: city }
         })
+    },
+    getDjPageSortOptions(state) {
+        return state.djPageSortOptions
+    },
+    getGenresOptions(state) {
+        return state.genres
     }
 }
