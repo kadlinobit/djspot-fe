@@ -1,7 +1,14 @@
 import Url from 'url-parse'
 import _ from 'lodash'
+import base64 from 'base-64'
+import utf8 from 'utf8'
 
 export default (context, inject) => {
+    /**
+     * Function that decides whether string is a valid URL
+     * @param {string} url - URL in string format
+     * @returns {boolean} - true if URL string is valid, false otherwise
+     */
     function isValidUrl(url) {
         try {
             // eslint-disable-next-line no-new
@@ -11,7 +18,11 @@ export default (context, inject) => {
         }
         return true
     }
-
+    /**
+     * Returns stream and download URLs of a Dropbox file
+     * @param {Object} parsedUrl - Url object (from url-parse library)
+     * @returns {Object} - {stream, download} object with URLs to stream and download audio
+     */
     function getDropboxUrls(parsedUrl) {
         const audioUrls = {}
 
@@ -23,7 +34,11 @@ export default (context, inject) => {
 
         return audioUrls
     }
-
+    /**
+     * Returns stream and download URLs of a Hearthis.at file
+     * @param {Object} parsedUrl - Url object (from url-parse library)
+     * @returns {Object} - {stream, download} object with URLs to stream and download audio
+     */
     async function getHearThisUrls(parsedUrl) {
         const audioUrls = {
             stream: null,
@@ -44,7 +59,31 @@ export default (context, inject) => {
         }
         return audioUrls
     }
+    /**
+     * Returns stream and download URLs of a MS OneDrive file
+     * @param {Object} parsedUrl - Url object (from url-parse library)
+     * @returns {Object} - {stream, download} object with URLs to stream and download audio
+     */
+    function getOneDriveUrls(parsedUrl) {
+        const audioUrls = {
+            stream: null,
+            download: null
+        }
 
+        const base64value = base64.encode(utf8.encode(parsedUrl.toString()))
+        const encodedUrl = base64value.replace(/=+$/, '').replace('/', '_').replace('+', '-')
+        const resultUrl = `https://api.onedrive.com/v1.0/shares/u!${encodedUrl}/root/content`
+
+        audioUrls.stream = resultUrl
+        audioUrls.download = resultUrl
+
+        return audioUrls
+    }
+    /**
+     * Returns stream and download URLs of a general URL (based on URL type decides which type of storage is used)
+     * @param {string} url - Sharing URL of the audio file
+     * @returns {Object} - {stream, download} object with URLs to stream and download audio
+     */
     async function getAudioUrls(url) {
         if (!isValidUrl(url)) {
             return null
@@ -53,11 +92,20 @@ export default (context, inject) => {
         const parsedUrl = new Url(url, true)
         let audioUrls
 
+        // Dropbox.com
         if (parsedUrl.host.includes('dropbox.com')) {
             audioUrls = getDropboxUrls(parsedUrl)
-        } else if (parsedUrl.host.includes('hearthis.at')) {
+        }
+        // Hearthis.at
+        else if (parsedUrl.host.includes('hearthis.at')) {
             audioUrls = await getHearThisUrls(parsedUrl)
-        } else {
+        }
+        // OneDrive
+        else if (parsedUrl.host.includes('1drv.ms')) {
+            audioUrls = getOneDriveUrls(parsedUrl)
+        }
+        // Own hosting
+        else {
             audioUrls = {
                 stream: url,
                 download: url
@@ -65,12 +113,21 @@ export default (context, inject) => {
         }
         return audioUrls
     }
-
+    /**
+     * Converts number of seconds into time in "hh:mm:ss" format
+     * @param {number} seconds - number of seconds
+     * @returns {string} - time in format "hh:mm:ss"
+     */
     function convertTimeHHMMSS(seconds) {
         const hhmmss = new Date(seconds * 1000).toISOString().substr(11, 8)
         return hhmmss.indexOf('00:') === 0 ? hhmmss.substr(3) : hhmmss
     }
 
+    /**
+     * Returns new Sound object with selected keys only {duration, dj, id, name, type, url}
+     * @param {Object} sound - Sound object {id, name, dj etc.}
+     * @returns {Object} - new Sound object with keys selected for playlist
+     */
     function formatSoundForPlaylist(sound) {
         return _.pick(sound, ['duration', 'dj', 'id', 'name', 'type', 'url'])
     }
