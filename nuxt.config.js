@@ -20,14 +20,19 @@ export default {
     },
 
     // Global CSS: https://go.nuxtjs.dev/config-css
-    css: ['@mdi/font/css/materialdesignicons.min.css'], // TBD - probably remove
+    css: [
+        '~/assets/scss/main.scss',
+        '@mdi/font/css/materialdesignicons.min.css' // TBD - probably remove
+    ],
 
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
         { src: '~plugins/axios', ssr: true },
         { src: '~/plugins/vee-validate.js', ssr: false },
         { src: '~/plugins/v-markdown-editor.js', mode: 'client', ssr: false }, // TBD - probably remove
-        { src: '~/plugins/audio.js' }
+        { src: '~/plugins/audio.js' },
+        { src: '~/plugins/media.js' },
+        { src: '~/plugins/time.js' }
     ],
 
     // Auto import components: https://go.nuxtjs.dev/config-components
@@ -36,40 +41,39 @@ export default {
     // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
     buildModules: [
         // https://go.nuxtjs.dev/eslint
-        '@nuxtjs/eslint-module',
-        [
-            'nuxt-i18n',
-            {
-                vueI18nLoader: true,
-                defaultLocale: 'cs',
-                seo: true,
-                locales: [
-                    {
-                        code: 'en',
-                        name: 'English',
-                        iso: 'en-US'
-                    },
-                    {
-                        code: 'cs',
-                        name: 'Čeština',
-                        iso: 'cs'
-                    }
-                ],
-                vueI18n: i18n
-            }
-        ]
+        '@nuxtjs/eslint-module'
     ],
 
     // Modules: https://go.nuxtjs.dev/config-modules
     modules: [
         // https://go.nuxtjs.dev/buefy
-        'nuxt-buefy',
+        ['nuxt-buefy', { css: false }],
         // https://go.nuxtjs.dev/axios
         '@nuxtjs/axios',
         '@nuxtjs/auth',
-        '@nuxtjs/strapi'
+        '@nuxtjs/strapi',
+        '@nuxtjs/i18n'
     ],
 
+    i18n: {
+        vueI18nLoader: true,
+        strategy: 'no_prefix',
+        defaultLocale: 'cs',
+        seo: true,
+        locales: [
+            {
+                code: 'en',
+                name: 'English',
+                iso: 'en-US'
+            },
+            {
+                code: 'cs',
+                name: 'Čeština',
+                iso: 'cs'
+            }
+        ],
+        vueI18n: i18n
+    },
     // Axios module configuration: https://go.nuxtjs.dev/config-axios
     axios: {
         baseURL: 'http://localhost:1337'
@@ -102,7 +106,7 @@ export default {
         key: 'strapi_jwt',
         expires: '31d',
         cookie: {
-            sameSite: true,
+            sameSite: 'lax',
             path: '/'
         }
     },
