@@ -1,11 +1,11 @@
 <template>
     <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
-        <b-field
+        <o-field
             :label="label"
-            :type="{ 'is-danger': errors[0], 'is-success': valid }"
+            :variant="{ danger: !!errors[0], success: valid }"
             :message="$t(errors[0])"
         >
-            <b-select
+            <o-select
                 :value="value"
                 :placeholder="placeholder"
                 :expanded="expanded"
@@ -14,8 +14,8 @@
                 <option v-for="option in options" :key="option.value" :value="option.value">
                     {{ option.label }}
                 </option>
-            </b-select>
-        </b-field>
+            </o-select>
+        </o-field>
     </ValidationProvider>
 </template>
 

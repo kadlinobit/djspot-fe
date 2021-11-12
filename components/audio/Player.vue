@@ -1,23 +1,23 @@
 <template>
     <div class="buefy-player" style="position: relative">
-        <b-loading v-model="isLoading" :is-full-page="false" :can-cancel="false"></b-loading>
+        <o-loading :full-page="false" :active.sync="isLoading" :can-cancel="false"></o-loading>
         <div class="columns is-vcentered is-mobile">
             <div class="column is-narrow">
                 <div class="level is-mobile">
                     <div class="level-item mr-1">
-                        <b-button
+                        <o-button
                             :disabled="!loaded || isError"
-                            type="is-text"
-                            size="is-medium"
+                            variant="text"
+                            size="medium"
                             icon-left="stop"
                             @click.prevent="stop"
                         />
                     </div>
                     <div class="level-item">
-                        <b-button
+                        <o-button
                             :disabled="!loaded || isError"
-                            type="is-text"
-                            size="is-medium"
+                            variant="text"
+                            size="medium"
                             :icon-left="playing ? 'pause' : 'play'"
                             @click.prevent="playing = !playing"
                         />
@@ -25,17 +25,17 @@
                 </div>
             </div>
             <div v-if="isError" class="column">
-                <b-notification type="is-danger pt-3 pb-3" :closable="false" role="alert">
+                <o-notification variant="danger pt-3 pb-3" :closable="false" role="alert">
                     Error loading file
-                </b-notification>
+                </o-notification>
             </div>
             <div v-if="!isError && !showVolume" class="column">
-                <b-slider
+                <o-slider
                     :tooltip="false"
                     :value="currentSeconds"
                     :max="durationSeconds"
                     :disabled="!loaded || isError"
-                    type="is-primary mb-2 mt-2"
+                    variant="primary mb-2 mt-2"
                     @change="(value) => seek(value)"
                 />
                 <div class="level is-mobile">
@@ -56,12 +56,12 @@
                 </div>
             </div>
             <div v-if="!isError && showVolume" class="column">
-                <b-slider
+                <o-slider
                     v-model="volume"
                     :tooltip="false"
                     :max="100"
                     :disabled="!loaded || isError"
-                    type="is-success mb-2 mt-2"
+                    variant="success mb-2 mt-2"
                 />
                 <div class="level is-mobile">
                     <div class="level-item">
@@ -72,19 +72,19 @@
             <div class="is-narrow">
                 <div class="level is-mobile">
                     <div class="level-item mr-2">
-                        <b-button
+                        <o-button
                             :disabled="!loaded || isError"
-                            :type="showVolume ? 'is-success' : 'is-text'"
-                            size="is-medium"
+                            :variant="showVolume ? 'success' : 'text'"
+                            size="medium"
                             icon-left="equalizer"
                             @click.prevent="showVolume = !showVolume"
                         />
                     </div>
                     <div class="level-item">
-                        <b-switch
+                        <o-switch
                             :disabled="!loaded || isError"
                             :value="!muted"
-                            type="is-success"
+                            variant="success"
                             @input="mute"
                         />
                     </div>

@@ -1,23 +1,35 @@
 <template>
-    <b-navbar-dropdown arrowless collapsible>
-        <template #label>
-            <b-icon icon="earth" />
-        </template>
-        <b-navbar-item
-            v-for="lang in $i18n.locales"
-            :key="lang.code"
-            @click="setLanguage(lang.code)"
-        >
-            {{ lang.name }}
-        </b-navbar-item>
-    </b-navbar-dropdown>
+    <div class="navbar-item has-dropdown is-right" :class="{ 'is-active': isDropdownExpanded }">
+        <div class="navbar-link" @click="toggleIsDropdownExpanded">
+            <o-icon icon="earth" />
+
+            <div class="navbar-dropdown">
+                <a
+                    v-for="lang in $i18n.locales"
+                    :key="lang.code"
+                    class="navbar-item"
+                    @click="setLanguage(lang.code)"
+                >
+                    {{ lang.name }}
+                </a>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
 export default {
+    data() {
+        return {
+            isDropdownExpanded: false
+        }
+    },
     methods: {
         setLanguage(languageCode) {
             this.$i18n.setLocale(languageCode)
+        },
+        toggleIsDropdownExpanded() {
+            this.isDropdownExpanded = !this.isDropdownExpanded
         }
     }
 }

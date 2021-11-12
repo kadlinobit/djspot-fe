@@ -5,15 +5,15 @@
                 <div class="column is-4 is-offset-4">
                     <h2 class="title has-text-centered">{{ $t('user.forgot_password') }}</h2>
 
-                    <b-notification v-if="success" type="is-success" :closable="false">
+                    <o-notification v-if="success" variant="success" :closable="false">
                         {{ $t('success') }}
-                    </b-notification>
-                    <b-notification v-if="error" type="is-danger" :closable="false">
+                    </o-notification>
+                    <o-notification v-if="error" variant="danger" :closable="false">
                         {{ $t('error') }}
-                    </b-notification>
+                    </o-notification>
                     <ValidationObserver ref="observer" slim>
                         <form v-if="!success" method="post" @submit.prevent>
-                            <b-validated-field
+                            <o-validated-field
                                 v-model="email"
                                 name="email"
                                 type="email"
@@ -22,13 +22,13 @@
                             />
                             <div class="field">
                                 <div class="control">
-                                    <b-button
-                                        type="button is-dark is-fullwidth"
-                                        :loading="isLoading"
+                                    <o-button
+                                        variant="dark is-fullwidth"
+                                        :disabled="isLoading"
                                         @click="onSubmit"
                                     >
                                         {{ $t('user.email_reset_link') }}
-                                    </b-button>
+                                    </o-button>
                                 </div>
                             </div>
                         </form>
@@ -42,7 +42,7 @@
 <script>
 import { extend, ValidationObserver } from 'vee-validate'
 import { required, email } from 'vee-validate/dist/rules'
-import BValidatedField from '~/components/form/BValidatedField.vue'
+import OValidatedField from '~/components/form/OValidatedField.vue'
 
 extend('email', email)
 extend('required', required)
@@ -50,7 +50,7 @@ extend('required', required)
 export default {
     components: {
         ValidationObserver,
-        BValidatedField
+        OValidatedField
     },
     plugins: ['vee-validate'],
     middleware: 'guest',

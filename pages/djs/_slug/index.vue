@@ -1,11 +1,12 @@
 <template>
     <section class="section">
         <div class="container is-max-desktop">
-            <b-loading
+            <o-loading
                 v-if="$fetchState.pending"
-                :is-full-page="true"
+                :full-page="false"
+                :active.sync="$fetchState.pending"
                 :can-cancel="true"
-            ></b-loading>
+            />
             <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
             <div v-else>
                 <div class="columns is-mobile">
@@ -26,16 +27,18 @@
                                 />
                             </div>
                         </div>
-                        <b-taglist>
-                            <b-tag
+                        <div class="tags">
+                            <span
                                 v-for="genre in dj.genres"
                                 :key="`genre-${genre.id}`"
-                                type="is-primary"
-                                size="is-size-5-desktop is-size-6-mobile is-size-6-tablet"
+                                class="
+                                    tag
+                                    is-primary is-size-5-desktop is-size-6-mobile is-size-6-tablet
+                                "
                             >
                                 {{ genre.name }}
-                            </b-tag>
-                        </b-taglist>
+                            </span>
+                        </div>
                     </div>
                     <div class="column is-hidden-mobile is-narrow">
                         <cover-image
@@ -48,22 +51,28 @@
                 </div>
                 <dj-control-box :dj="dj" :on-toggle-follow="onToggleFollow" />
                 <section>
-                    <b-tabs
-                        v-if="dj.bio || (mixes && mixes.length > 0)"
+                    <o-tabs
+                        v-if="
+                            dj.bio || (mixes && mixes.length > 0) || (tracks && tracks.length > 0)
+                        "
                         v-model="activeTab"
-                        class="block"
-                        size="is-medium"
+                        :expanded="true"
+                        :animated="false"
                     >
-                        <b-tab-item v-if="dj.bio" label="Bio">
-                            {{ dj.bio }}
-                        </b-tab-item>
-                        <b-tab-item v-if="mixes && mixes.length > 0" label="Sety">
+                        <o-tab-item v-if="!!dj.bio" label="Bio">
+                            <div>
+                                {{ dj.bio }}
+                            </div>
+                        </o-tab-item>
+
+                        <o-tab-item v-if="mixes && mixes.length > 0" label="Sety">
                             <SoundList :sounds="mixes" />
-                        </b-tab-item>
-                        <b-tab-item v-if="tracks && tracks.length > 0" label="Tracky">
+                        </o-tab-item>
+
+                        <o-tab-item v-if="tracks && tracks.length > 0" label="Tracky">
                             <SoundList :sounds="tracks" />
-                        </b-tab-item>
-                    </b-tabs>
+                        </o-tab-item>
+                    </o-tabs>
                 </section>
             </div>
         </div>
@@ -86,7 +95,7 @@ export default {
     data() {
         return {
             dj: null,
-            activeTab: 0
+            activeTab: 1
         }
     },
     async fetch() {

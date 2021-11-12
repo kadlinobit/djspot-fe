@@ -1,30 +1,30 @@
 <template>
     <div class="buefy-player is-relative">
-        <b-slider
+        <o-slider
             :tooltip="false"
             :value="currentSeconds"
             :max="durationSeconds"
             :disabled="!isLoaded || isError"
-            type="is-primary mb-0 mt-0"
+            variant="primary mb-0 mt-0"
             @change="(value) => seek(value)"
         />
         <div class="columns is-vcentered is-mobile mb-0 mt-1">
             <div class="column is-narrow ml-2">
                 <div class="columns is-vcentered is-mobile is-gapless">
                     <div class="column">
-                        <b-button
+                        <o-button
                             :disabled="!isLoaded || isError"
-                            type="is-text"
-                            size="is-size-6"
+                            variant="text"
+                            size="size-6"
                             icon-left="stop"
                             @click.prevent="stop"
                         />
                     </div>
                     <div class="column">
-                        <b-button
+                        <o-button
                             :disabled="!isLoaded || isError"
-                            type="is-text"
-                            size="is-size-6"
+                            variant="text"
+                            size="size-6"
                             :icon-left="isPlaying ? 'pause' : 'play'"
                             @click.prevent="setIsPlaying(!isPlaying)"
                         />
@@ -32,17 +32,17 @@
                 </div>
             </div>
             <div v-if="isError" class="column">
-                <b-notification type="is-danger pt-3 pb-3" :closable="false" role="alert">
+                <o-notification variant="danger pt-3 pb-3" role="alert">
                     {{ $t('player.error_loading_file') }}
-                </b-notification>
+                </o-notification>
             </div>
             <div v-if="!isError" class="column">
                 <div class="columns is-vcentered is-mobile is-relative">
-                    <b-loading
-                        v-model="isLoading"
-                        :is-full-page="false"
+                    <o-loading
+                        :full-page="false"
+                        :active.sync="isLoading"
                         :can-cancel="false"
-                    ></b-loading>
+                    ></o-loading>
                     <div class="column is-narrow">
                         <div class="tag is-light">
                             {{ $audio.convertTimeHHMMSS(currentSeconds) }}
@@ -62,36 +62,36 @@
             </div>
             <div class="column is-one-quarter-mobile is-one-fifth-desktop">
                 <div v-if="showCancelLoadingButton" class="has-text-centered">
-                    <b-button type="is-danger" @click.prevent="resetAudio">
+                    <o-button variant="danger" @click.prevent="resetAudio">
                         {{ $t('player.cancel_loading') }}
-                    </b-button>
+                    </o-button>
                 </div>
                 <div v-else class="columns is-vcentered is-mobile is-gapless">
                     <div class="column is-narrow mr-3">
-                        <b-button
+                        <o-button
                             :disabled="!isLoaded || isError"
-                            type="is-text"
-                            size="is-size-6"
+                            variant="text"
+                            size="size-6"
                             :icon-left="volumeIcon"
                             @click.prevent="() => onMute()"
                         />
                     </div>
                     <div class="column mr-4">
-                        <b-slider
+                        <o-slider
                             :value="volume"
                             :tooltip="false"
                             :max="100"
                             :disabled="!isLoaded || isError"
-                            type="is-success"
+                            variant="success"
                             @input="(newVolume) => setVolume(newVolume)"
                         />
                     </div>
                     <div class="column">
-                        <b-button
-                            type="is-text"
-                            size="is-size-6"
+                        <o-button
+                            variant="text"
+                            size="size-6"
                             icon-left="playlist-music"
-                            @click.prevent="() => setIsPlaylistOpen(true)"
+                            @click.stop="() => setIsPlaylistOpen(true)"
                         />
                     </div>
                 </div>

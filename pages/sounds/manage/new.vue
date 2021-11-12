@@ -62,9 +62,9 @@ export default {
                 if (sound) {
                     this.$router.push(`/djs/${sound.dj.slug}/sounds/${sound.id}`)
 
-                    this.$buefy.toast.open({
+                    this.$oruga.notification.open({
                         message: this.$t(`${formDataObj.type}.add_success`, [formDataObj.name]),
-                        type: 'is-success',
+                        variant: 'success',
                         duration: 7000
                     })
                 }

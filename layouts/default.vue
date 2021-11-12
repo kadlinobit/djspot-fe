@@ -1,18 +1,15 @@
 <template>
     <div class="app">
-        <b-modal
+        <o-modal
             trap-focus
             :destroy-on-hide="false"
+            content-class="modal-content"
             aria-role="dialog"
-            aria-label="Example Modal"
+            aria-label="Playlist modal"
             aria-modal
             :active="isPlaylistOpen"
             @close="() => setIsPlaylistOpen(false)"
         >
-            <!--<template #default="props">
-                <modal-form v-bind="formProps" @close="props.close"></modal-form>
-
-            </template>-->
             <template #default>
                 <div class="modal-card" style="width: auto">
                     <header class="modal-card-head">Playlist</header>
@@ -22,10 +19,10 @@
                     <footer class="modal-card-foot">Footer</footer>
                 </div>
             </template>
-        </b-modal>
-        <b-sidebar
+        </o-modal>
+        <o-sidebar
             v-if="$strapi.user"
-            type="is-light"
+            variant="light"
             :fullheight="true"
             :fullwidth="false"
             :overlay="true"
@@ -34,7 +31,7 @@
             @close="() => setIsSidebarOpen(false)"
         >
             <SidebarMenu />
-        </b-sidebar>
+        </o-sidebar>
         <Navbar />
         <nuxt style="margin-bottom: 100px" />
         <BottomBar />

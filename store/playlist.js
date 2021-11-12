@@ -1,5 +1,3 @@
-import { ToastProgrammatic as Toast } from 'buefy'
-
 export const state = () => ({
     playlist: []
 })
@@ -25,11 +23,11 @@ export const actions = {
     },
     deleteSound({ commit }, sound) {
         commit('mutateDeleteSound', sound)
-        Toast.open({
+        this._vm.$oruga.notification.open({
             message: this.$i18n.t('playlist.removed_from_playlist', [
                 `${sound.dj.name} – ${sound.name}`
             ]),
-            type: 'is-warning'
+            variant: 'warning'
         })
     },
     handlePlaySound({ commit, state, rootState }, sound) {
@@ -43,22 +41,23 @@ export const actions = {
             }
 
             commit('mutateAddSoundToIndex', { sound, index })
-            Toast.open({
+            this._vm.$oruga.notification.open({
                 message: this.$i18n.t('playlist.added_to_playlist', [
                     `${sound.dj.name} – ${sound.name}`
                 ]),
-                type: 'is-success'
+                variant: 'success'
             })
         }
     },
     handleAddOrRemovePlaylistSound({ commit, state, dispatch }, sound) {
         if (!state.playlist.some((playlistSound) => playlistSound.id === sound.id)) {
             commit('mutateAddSoundToEnd', sound)
-            Toast.open({
+
+            this._vm.$oruga.notification.open({
                 message: this.$i18n.t('playlist.added_to_playlist', [
                     `${sound.dj.name} – ${sound.name}`
                 ]),
-                type: 'is-success'
+                variant: 'success'
             })
         } else {
             dispatch('deleteSound', sound)

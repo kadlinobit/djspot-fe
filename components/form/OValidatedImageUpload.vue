@@ -7,16 +7,16 @@
         slim
     >
         <div>
-            <b-field
+            <o-field
                 :label="label"
                 :class="{ 'has-name': !!value }"
-                :type="{ 'is-danger': errors[0], 'is-success': valid }"
-                :message="errors"
+                :variant="{ danger: !!errors[0], success: valid }"
+                :message="errors[0]"
             >
                 <div v-if="currentImage && value === 'keep-current'">
-                    <b-image :src="`http://localhost:1337${currentImage.url}`" />
+                    <o-image :src="`http://localhost:1337${currentImage.url}`" />
                 </div>
-                <b-upload
+                <o-upload
                     v-else
                     expanded
                     drag-drop
@@ -27,33 +27,33 @@
                         <div class="content has-text-centered">
                             <div v-if="!value || (value && errors[0])">
                                 <p>
-                                    <b-icon icon="upload" size="is-large"> </b-icon>
+                                    <o-icon icon="upload" size="large"> </o-icon>
                                 </p>
                                 <p>Drop your files here or click to upload</p>
                             </div>
                             <div v-if="value && !errors[0]">
-                                <b-image :src="photoUrl" />
+                                <o-image :src="photoUrl" />
                             </div>
                         </div>
                     </section>
-                </b-upload>
-            </b-field>
-            <b-field v-if="value || currentImage" grouped position="is-right">
-                <b-button v-if="value" type="is-danger" @click.prevent="onRemoveImage">
+                </o-upload>
+            </o-field>
+            <o-field v-if="value || currentImage" grouped position="is-right">
+                <o-button v-if="value" variant="danger" @click.stop="onRemoveImage">
                     {{
                         value === 'keep-current'
                             ? $t('dj.remove_current_photo')
                             : $t('dj.remove_photo')
                     }}
-                </b-button>
-                <b-button
+                </o-button>
+                <o-button
                     v-if="currentImage && value !== 'keep-current'"
-                    type="is-info"
+                    variant="info"
                     @click.prevent="onKeepCurrentImage"
                 >
                     {{ $t('dj.keep_current_photo') }}
-                </b-button>
-            </b-field>
+                </o-button>
+            </o-field>
         </div>
     </ValidationProvider>
 </template>

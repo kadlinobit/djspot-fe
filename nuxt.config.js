@@ -32,7 +32,8 @@ export default {
         { src: '~/plugins/v-markdown-editor.js', mode: 'client', ssr: false }, // TBD - probably remove
         { src: '~/plugins/audio.js' },
         { src: '~/plugins/media.js' },
-        { src: '~/plugins/time.js' }
+        { src: '~/plugins/time.js' },
+        { src: '~/plugins/oruga.js' }
     ],
 
     // Auto import components: https://go.nuxtjs.dev/config-components
@@ -46,8 +47,6 @@ export default {
 
     // Modules: https://go.nuxtjs.dev/config-modules
     modules: [
-        // https://go.nuxtjs.dev/buefy
-        ['nuxt-buefy', { css: false }],
         // https://go.nuxtjs.dev/axios
         '@nuxtjs/axios',
         '@nuxtjs/auth',

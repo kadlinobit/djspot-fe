@@ -1,46 +1,45 @@
 <template>
-    <b-navbar type="is-dark">
-        <template #brand>
-            <b-navbar-item tag="nuxt-link" :to="{ path: '/' }">
-                <img
-                    src="https://i.pinimg.com/originals/4d/3c/85/4d3c854215785de0346ab378d497c2d9.png"
-                    alt="Lightweight UI components for Vue.js based on Bulma"
-                />
-            </b-navbar-item>
-            <b-navbar-item
-                v-if="$strapi.user"
-                class="is-hidden-desktop"
-                @click="() => setIsSidebarOpen(true)"
+    <nav class="navbar is-primary" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <nuxt-link class="navbar-item" to="/">
+                <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28" />
+            </nuxt-link>
+            <a v-if="$strapi.user" class="navbar-item" @click="() => setIsSidebarOpen(true)">
+                <o-icon icon="account" />
+            </a>
+
+            <a
+                role="button"
+                class="navbar-burger"
+                :class="{ 'is-active': isMenuExpanded }"
+                aria-label="menu"
+                aria-expanded="false"
+                data-target="navbar-main-menu"
+                @click.stop="toggleIsMenuExpanded"
             >
-                <b-icon icon="account" />
-            </b-navbar-item>
-        </template>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
 
-        <!-- MAIN MENU -->
-        <template #start>
-            <b-navbar-item tag="nuxt-link" :to="{ path: '/djs' }">
-                {{ $t('dj.djs') }}
-            </b-navbar-item>
-            <b-navbar-item tag="nuxt-link" :to="{ path: '/mixes' }">
-                {{ $t('mix.mixes') }}
-            </b-navbar-item>
-        </template>
-
-        <template #end>
-            <language-selection />
-
-            <b-navbar-item v-if="!$strapi.user" tag="div">
-                <div class="buttons">
-                    <nuxt-link class="button is-light" :to="{ path: '/login' }">
-                        {{ $t('user.login') }}
-                    </nuxt-link>
+        <div id="navbar-main-menu" class="navbar-menu" :class="{ 'is-active': isMenuExpanded }">
+            <div class="navbar-start">
+                <nuxt-link class="navbar-item" to="/djs">{{ $t('dj.djs') }}</nuxt-link>
+                <nuxt-link class="navbar-item" to="/mixes">{{ $t('mix.mixes') }}</nuxt-link>
+            </div>
+            <div class="navbar-end">
+                <language-selection />
+                <div v-if="!$strapi.user" class="navbar-item">
+                    <div class="buttons">
+                        <nuxt-link class="button is-light" :to="{ path: '/login' }">
+                            {{ $t('user.login') }}
+                        </nuxt-link>
+                    </div>
                 </div>
-            </b-navbar-item>
-            <b-navbar-item v-else class="is-hidden-touch" @click="() => setIsSidebarOpen(true)">
-                <b-icon icon="account" />
-            </b-navbar-item>
-        </template>
-    </b-navbar>
+            </div>
+        </div>
+    </nav>
 </template>
 
 <script>
@@ -51,8 +50,16 @@ export default {
     components: {
         LanguageSelection
     },
+    data() {
+        return {
+            isMenuExpanded: false
+        }
+    },
     methods: {
-        ...mapActions(['setIsSidebarOpen'])
+        ...mapActions(['setIsSidebarOpen']),
+        toggleIsMenuExpanded() {
+            this.isMenuExpanded = !this.isMenuExpanded
+        }
     }
 }
 </script>
