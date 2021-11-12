@@ -2,9 +2,9 @@
     <div class="dj-control-box level is-mobile">
         <div class="level-left">
             <div class="level-item">
-                <b-responsive-button
+                <o-responsive-button
                     icon-left="eye"
-                    :type="dj.isFollowedByMe ? 'is-dark' : 'is-light'"
+                    :variant="dj.isFollowedByMe ? 'dark' : 'light'"
                     @click="onToggleFollow"
                 >
                     {{
@@ -12,27 +12,27 @@
                             ? `${dj.followsCount} ${$t('dj.followers')}`
                             : $t('dj.follow')
                     }}
-                </b-responsive-button>
+                </o-responsive-button>
             </div>
         </div>
         <div class="level-right">
-            <b-responsive-button
-                type="is-dark"
+            <o-responsive-button
+                variant="dark"
                 icon-left="pencil"
                 tag="nuxt-link"
                 :to="{ path: `/djs/manage/edit/` }"
             >
                 {{ $t('form.edit') }}
-            </b-responsive-button>
+            </o-responsive-button>
         </div>
     </div>
 </template>
 
 <script>
-import BResponsiveButton from '~/components/form/BResponsiveButton.vue'
+import OResponsiveButton from '~/components/form/OResponsiveButton.vue'
 export default {
     components: {
-        BResponsiveButton
+        OResponsiveButton
     },
     props: {
         dj: {

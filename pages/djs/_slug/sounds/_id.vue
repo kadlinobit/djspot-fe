@@ -1,30 +1,31 @@
 <template>
     <section class="section">
         <div class="container is-max-desktop">
-            <b-loading
+            <o-loading
                 v-if="$fetchState.pending"
-                :is-full-page="true"
+                :full-page="false"
+                :active.sync="$fetchState.pending"
                 :can-cancel="true"
-            ></b-loading>
+            ></o-loading>
             <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
             <div v-else>
                 <div class="columns sound-main-info">
                     <div class="column">
                         <div class="columns is-mobile is-vcentered">
                             <div class="column is-narrow">
-                                <b-button
+                                <o-button
                                     v-if="!currentSound || currentSound.id !== sound.id"
                                     :disabled="isPlayerLoading"
-                                    type="is-text"
-                                    size="is-large"
+                                    variant="text"
+                                    size="large"
                                     icon-left="play"
                                     @click.prevent="() => onPlayNewSound(sound)"
                                 />
-                                <b-button
+                                <o-button
                                     v-if="currentSound && currentSound.id === sound.id"
                                     :disabled="isPlayerLoading"
-                                    type="is-text"
-                                    size="is-large"
+                                    variant="text"
+                                    size="large"
                                     :icon-left="isPlaying ? 'pause' : 'play'"
                                     @click.prevent="() => setIsPlaying(!isPlaying)"
                                 />
@@ -34,9 +35,9 @@
                                     {{ sound.name }}
                                 </h1>
                                 <h4 class="subtitle is-6">
-                                    <b-tag type="is-light mr-2">
+                                    <span class="light mr-2">
                                         {{ $t(`${sound.type}.type`) }}
-                                    </b-tag>
+                                    </span>
                                     <span class="icon-text mr-2">
                                         <span class="icon">
                                             <i class="mdi mdi-clock-outline"></i>
@@ -60,16 +61,22 @@
                                 />
                             </div>
                         </div>
-                        <b-taglist v-if="sound.genres">
-                            <b-tag
+                        <div v-if="sound.genres" class="tags">
+                            <span
                                 v-for="genre in sound.genres"
                                 :key="`genre-${genre.id}`"
-                                type="is-primary is-light"
-                                size="is-size-5-desktop is-size-6-mobile is-size-6-tablet"
+                                class="
+                                    tag
+                                    is-primary
+                                    is-light
+                                    is-size-5-desktop
+                                    is-size-6-mobile
+                                    is-size-6-tablet
+                                "
                             >
                                 {{ genre.name }}
-                            </b-tag>
-                        </b-taglist>
+                            </span>
+                        </div>
                         <dj-info-box :dj="sound.dj" />
                     </div>
                     <div class="column is-narrow is-hidden-mobile">
@@ -84,34 +91,34 @@
                 <div class="level is-mobile sound-controls">
                     <div class="level-left">
                         <div class="level-item">
-                            <b-responsive-button
-                                :type="sound.isLikedByMe ? 'is-dark' : 'is-light'"
+                            <o-responsive-button
+                                :variant="sound.isLikedByMe ? 'dark' : 'light'"
                                 icon-left="heart"
                                 @click="onToggleLike"
                             >
                                 {{ sound.likesCount || 'Like' }}
-                            </b-responsive-button>
+                            </o-responsive-button>
                         </div>
                         <div class="level-item">
-                            <b-responsive-button
-                                :type="isSoundInPlaylist(sound) ? 'is-dark' : 'is-light'"
+                            <o-responsive-button
+                                :variant="isSoundInPlaylist(sound) ? 'dark' : 'light'"
                                 icon-left="playlist-play"
                                 @click="handleAddOrRemovePlaylistSound(sound)"
                             >
                                 Playlist
-                            </b-responsive-button>
+                            </o-responsive-button>
                         </div>
                     </div>
                     <div class="level-right">
                         <div class="level-item">
-                            <b-responsive-button
-                                type="is-dark"
+                            <o-responsive-button
+                                variant="dark"
                                 tag="nuxt-link"
                                 icon-left="pencil"
                                 :to="{ path: `/sounds/manage/edit/${sound.id}` }"
                             >
                                 {{ $t('form.edit') }}
-                            </b-responsive-button>
+                            </o-responsive-button>
                         </div>
                     </div>
                 </div>
@@ -125,14 +132,14 @@ import { mapActions, mapGetters } from 'vuex'
 import { getSounds, toggleSoundLike } from '~/api/graphql/sound'
 import DjInfoBox from '~/components/dj/DjInfoBox.vue'
 import CoverImage from '~/components/media/CoverImage.vue'
-import BResponsiveButton from '~/components/form/BResponsiveButton.vue'
+import OResponsiveButton from '~/components/form/OResponsiveButton.vue'
 
 export default {
     name: 'SoundDetailsPage',
     components: {
         DjInfoBox,
         CoverImage,
-        BResponsiveButton
+        OResponsiveButton
     },
     data() {
         return {

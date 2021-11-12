@@ -1,16 +1,15 @@
 <template>
     <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
-        <b-field
+        <o-field
             :label="label"
-            :type="{
-                'is-danger': isValidationOn && errors[0],
-                'is-success': isValidationOn && valid,
-                '': !isValidationOn
+            :variant="{
+                danger: isValidationOn && !!errors[0],
+                success: isValidationOn && valid
             }"
             :message="$t(errors[0])"
             :expanded="expanded"
         >
-            <b-taginput
+            <o-inputitems
                 :value="value"
                 :data="filteredTags"
                 :autocomplete="autocomplete"
@@ -19,13 +18,13 @@
                 :field="field"
                 :icon="icon"
                 :placeholder="placeholder"
-                :maxtags="maxtags"
+                :maxitems="maxtags"
                 :expanded="expanded"
                 @typing="getFilteredTags"
                 @input="(value) => emitInput(value)"
             >
-            </b-taginput>
-        </b-field>
+            </o-inputitems>
+        </o-field>
     </ValidationProvider>
 </template>
 

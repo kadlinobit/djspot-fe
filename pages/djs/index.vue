@@ -2,20 +2,20 @@
     <section class="section">
         <div class="container">
             <h1 class="title">DJs {{ getDjsCount }}</h1>
-            <b-field>
-                <b-input
+            <o-field>
+                <o-input
                     v-model="searchNameLocal"
                     placeholder="Search in DJ name"
                     type="search"
                     expanded
-                ></b-input>
+                ></o-input>
                 <p class="control">
-                    <b-button type="is-primary" label="Search" @click="onSearch" />
+                    <o-button type="is-primary" label="Search" @click="onSearch" />
                 </p>
-            </b-field>
-            <b-field grouped>
-                <b-field>
-                    <b-select v-model="sortLocal" @input="onSearch">
+            </o-field>
+            <o-field grouped>
+                <o-field>
+                    <o-select v-model="sortLocal" @input="onSearch">
                         <option
                             v-for="option in getDjPageSortOptions"
                             :key="option.value"
@@ -23,10 +23,10 @@
                         >
                             {{ option.label }}
                         </option>
-                    </b-select>
-                </b-field>
-                <b-field>
-                    <b-select v-model="searchCityLocal" @input="onSearch">
+                    </o-select>
+                </o-field>
+                <o-field>
+                    <o-select v-model="searchCityLocal" @input="onSearch">
                         <option value="">
                             {{ `Celá ČR` }}
                         </option>
@@ -37,9 +37,9 @@
                         >
                             {{ option.label }}
                         </option>
-                    </b-select>
-                </b-field>
-                <b-validated-tag-input
+                    </o-select>
+                </o-field>
+                <o-validated-tag-input
                     v-model="searchGenresLocal"
                     name="genres"
                     :tags="getGenresOptions"
@@ -49,7 +49,7 @@
                     expanded
                     :placeholder="$t('dj.select_3_genres')"
                 />
-            </b-field>
+            </o-field>
 
             <p v-if="$fetchState.pending">Loading ...</p>
             <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
@@ -60,13 +60,13 @@
                     </li>
                 </ul>
 
-                <b-pagination
-                    v-model="currentPage"
+                <o-pagination
+                    :current="currentPage"
                     :total="getDjsCount"
                     :range-before="1"
                     :range-after="1"
-                    order="is-centered"
-                    size="is-small"
+                    order="centered"
+                    size="small"
                     :per-page="perPage"
                     aria-next-label="Next page"
                     aria-previous-label="Previous page"
@@ -74,7 +74,7 @@
                     aria-current-label="Current page"
                     @change="onPageChange"
                 >
-                </b-pagination>
+                </o-pagination>
             </div>
         </div>
     </section>
@@ -84,12 +84,12 @@
 import _ from 'lodash'
 import { mapGetters, mapActions } from 'vuex'
 import { getDjs, getDjsCount } from '~/api/graphql/dj'
-import BValidatedTagInput from '~/components/form/BValidatedTagInput.vue'
+import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 
 export default {
     name: 'DjsPage',
     components: {
-        BValidatedTagInput
+        OValidatedTagInput
     },
     data() {
         return {
@@ -186,15 +186,6 @@ export default {
             return djsCountData.djsCount || 0
         },
         async fetchDjs(start) {
-            const djsDataFull = await this.$strapi.graphql({
-                query: getDjs(),
-                variables: {
-                    sort: this.getSort,
-                    where: this.getWhere
-                }
-            })
-
-            console.log('DJS NUMBER', djsDataFull.djs.length)
             const djsData = await this.$strapi.graphql({
                 query: getDjs(),
                 variables: {
@@ -218,12 +209,12 @@ export default {
         },
         async onPageChange(pageNumber) {
             this.syncLocalSearchValues()
+            this.currentPage = pageNumber
 
             if (!_.isArray(this.getDjs[pageNumber]) || _.isEmpty(this.getDjs[pageNumber])) {
                 const djs = await this.fetchDjs(
                     this.currentPage * this.getPerPage - this.getPerPage
                 )
-
                 this.setPageDjs({ djs, pageNumber })
             }
         },

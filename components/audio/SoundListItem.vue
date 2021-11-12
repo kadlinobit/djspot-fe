@@ -2,18 +2,18 @@
     <div class="level is-mobile">
         <div class="level-left">
             <div v-if="!currentSound || currentSound.id !== sound.id" class="level-item">
-                <b-button
+                <o-button
                     :disabled="isPlayerLoading"
-                    type="is-text"
+                    variant="text"
                     size="is-medium"
                     icon-left="play"
                     @click.prevent="() => onPlayNewSound(sound)"
                 />
             </div>
             <div v-if="currentSound && currentSound.id === sound.id" class="level-item">
-                <b-button
+                <o-button
                     :disabled="isPlayerLoading"
-                    type="is-text"
+                    variant="text"
                     size="is-medium"
                     :icon-left="isPlaying ? 'pause' : 'play'"
                     @click.prevent="() => setIsPlaying(!isPlaying)"
@@ -27,25 +27,25 @@
         </div>
         <div class="level-right">
             <div v-if="sound.duration" class="level-item">
-                <b-tag>
+                <span class="tag">
                     {{ $audio.convertTimeHHMMSS(sound.duration) }}
-                </b-tag>
+                </span>
             </div>
             <div class="level-item">
-                <b-button
+                <o-button
                     v-if="!currentSound || currentSound.id !== sound.id"
                     :disabled="isPlayerLoading"
-                    type="is-text"
+                    variant="text"
                     size="is-medium"
                     :icon-left="isSoundInPlaylist(sound) ? 'delete-sweep' : 'playlist-plus'"
                     @click.prevent="() => handleAddOrRemovePlaylistSound(sound)"
                 />
-                <b-icon
+                <o-icon
                     v-else
                     custom-class="level-item"
                     icon="checkbox-blank-circle"
-                    type="is-success m-4"
-                    size="is-small"
+                    variant="success m-3"
+                    size="small"
                 />
             </div>
         </div>

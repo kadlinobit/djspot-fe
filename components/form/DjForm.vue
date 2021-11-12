@@ -1,18 +1,18 @@
 <template>
     <div>
-        <b-notification v-if="success" type="is-success" :closable="false">
+        <o-notification v-if="success" type="success" :closable="false">
             {{ $t(success) }}
-        </b-notification>
+        </o-notification>
 
-        <b-notification v-if="error" type="is-danger" :closable="false">
+        <o-notification v-if="error" type="danger" :closable="false">
             {{ $t(error) }}
-        </b-notification>
+        </o-notification>
 
         <ValidationObserver ref="observer" slim>
             <form v-if="!success" method="post" @submit.prevent>
                 <div class="columns is-desktop">
                     <div class="column is-half-desktop">
-                        <b-validated-field
+                        <o-validated-field
                             v-model="formData.name"
                             name="name"
                             type="text"
@@ -20,7 +20,7 @@
                             :placeholder="$t('dj.dj_name_placeholder')"
                             rules="required|no_dj_prefix|alpha_num_dash_space"
                         />
-                        <b-validated-field
+                        <o-validated-field
                             v-model="formData.slug"
                             name="slug"
                             :disabled="true"
@@ -28,14 +28,14 @@
                             :label="$t('dj.slug')"
                             rules="required"
                         />
-                        <b-validated-field
+                        <o-validated-field
                             v-model="formData.email"
                             name="email"
                             type="email"
                             :label="$t('dj.email')"
                             rules="email"
                         />
-                        <b-validated-select
+                        <o-validated-select
                             v-model="formData.city"
                             name="city"
                             :label="$t('dj.city')"
@@ -44,7 +44,7 @@
                             :expanded="true"
                             :placeholder="$t('dj.select_city')"
                         />
-                        <b-validated-tag-input
+                        <o-validated-tag-input
                             v-model="formData.genres"
                             name="genres"
                             :label="$t('dj.genres')"
@@ -56,7 +56,7 @@
                         />
                     </div>
                     <div class="column is-half-desktop">
-                        <b-validated-image-crop-upload
+                        <o-validated-image-crop-upload
                             v-model="formData.photo"
                             name="photo"
                             :label="$t('dj.photo')"
@@ -66,7 +66,7 @@
                     </div>
                 </div>
 
-                <b-validated-field
+                <o-validated-field
                     v-model="formData.bio"
                     name="bio"
                     type="textarea"
@@ -75,12 +75,12 @@
 
                 <div class="field is-grouped is-grouped-right">
                     <div class="control">
-                        <b-button type="is-light" @click="onCancel">
+                        <o-button variant="light" @click="onCancel">
                             {{ $t('form.cancel') }}
-                        </b-button>
-                        <b-button :loading="isLoading" type="is-dark" @click="onSubmit">
+                        </o-button>
+                        <o-button :disabled="isLoading" variant="dark" @click="onSubmit">
                             {{ initialData ? $t('dj.save_profile') : $t('dj.do_create_profile') }}
-                        </b-button>
+                        </o-button>
                     </div>
                 </div>
             </form>
@@ -92,10 +92,10 @@
 import { extend, ValidationObserver } from 'vee-validate'
 import { required, email } from 'vee-validate/dist/rules'
 import { mapGetters } from 'vuex'
-import BValidatedField from '~/components/form/BValidatedField.vue'
-import BValidatedSelect from '~/components/form/BValidatedSelect.vue'
-import BValidatedImageCropUpload from '~/components/form/BValidatedImageCropUpload.vue'
-import BValidatedTagInput from '~/components/form/BValidatedTagInput.vue'
+import OValidatedField from '~/components/form/OValidatedField.vue'
+import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
+import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUpload.vue'
+import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import { getGenreTags } from '~/api/graphql/genre'
 
 extend('email', email)
@@ -126,10 +126,10 @@ extend('image_type', (file) => {
 export default {
     components: {
         ValidationObserver,
-        BValidatedField,
-        BValidatedSelect,
-        BValidatedImageCropUpload,
-        BValidatedTagInput
+        OValidatedField,
+        OValidatedSelect,
+        OValidatedImageCropUpload,
+        OValidatedTagInput
     },
     middleware: ['authorized'],
     plugins: ['vee-validate'],
@@ -223,9 +223,9 @@ export default {
             this.error = null
             this.$refs.observer.validate().then((success) => {
                 if (!success) {
-                    this.$buefy.toast.open({
+                    this.$oruga.notification.open({
                         message: this.$t('validation.form_validation_error'),
-                        type: 'is-danger'
+                        variant: 'danger'
                     })
                     return
                 }

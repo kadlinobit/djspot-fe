@@ -59,9 +59,9 @@ export default {
 
                 this.$router.push(`/djs/${dj.slug}`)
 
-                this.$buefy.toast.open({
+                this.$oruga.notification.open({
                     message: this.$t('dj.created_successfully'),
-                    type: 'is-success',
+                    variant: 'success',
                     duration: 7000
                 })
             } catch (e) {

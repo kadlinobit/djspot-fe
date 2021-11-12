@@ -1,18 +1,18 @@
 <template>
     <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
-        <b-field
+        <o-field
             :label="label"
-            :type="{ 'is-danger': errors[0], 'is-success': valid }"
+            :variant="{ danger: !!errors[0], success: valid }"
             :message="$t(errors[0])"
             :style="visibilityStyle"
         >
             <template v-if="help" #label>
                 {{ label }}
-                <b-tooltip type="is-dark" :label="help" multilined>
-                    <b-icon size="is-small" icon="help-circle-outline"></b-icon>
-                </b-tooltip>
+                <o-tooltip variant="dark" :label="help" multilined>
+                    <o-icon size="small" icon="help-circle-outline"></o-icon>
+                </o-tooltip>
             </template>
-            <b-input
+            <o-input
                 :value="value"
                 :placeholder="placeholder"
                 :type="type"
@@ -20,7 +20,7 @@
                 :disabled="disabled"
                 @input="(value) => $emit('input', value)"
             />
-        </b-field>
+        </o-field>
     </ValidationProvider>
 </template>
 

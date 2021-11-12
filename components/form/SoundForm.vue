@@ -1,19 +1,19 @@
 <template>
     <section class="section">
-        <b-loading v-if="isLoading" />
-        <b-notification v-if="success" type="is-success" :closable="false">
+        <o-loading :active.sync="isLoading" />
+        <o-notification v-if="success" variant="success">
             {{ $t(success) }}
-        </b-notification>
+        </o-notification>
 
-        <b-notification v-if="error" type="is-danger" :closable="false">
+        <o-notification v-if="error" type="danger">
             {{ $t(error) }}
-        </b-notification>
+        </o-notification>
 
         <ValidationObserver ref="observer" slim>
             <form v-if="!success" method="post" @submit.prevent>
                 <div class="columns is-desktop">
                     <div class="column is-half-desktop">
-                        <b-validated-select
+                        <o-validated-select
                             v-model="formData.type"
                             name="type"
                             :label="$t('sound.type')"
@@ -22,7 +22,7 @@
                             :expanded="true"
                             :placeholder="$t('sound.select_sound_type')"
                         />
-                        <b-validated-field
+                        <o-validated-field
                             v-model="formData.name"
                             name="name"
                             type="text"
@@ -30,7 +30,7 @@
                             :placeholder="$t(`${formData.type}.name`)"
                             rules="required|alpha_num_dash_space"
                         />
-                        <b-validated-field
+                        <o-validated-field
                             v-model="formData.url"
                             name="url"
                             type="url"
@@ -39,7 +39,7 @@
                             rules="required|audio_load_state:@audioLoadState"
                             :help="$t('sound.url_help')"
                         />
-                        <b-validated-field
+                        <o-validated-field
                             v-model="audioLoadState"
                             vid="audioLoadState"
                             name="audioLoadState"
@@ -54,7 +54,7 @@
                             />
                         </div>
 
-                        <b-validated-tag-input
+                        <o-validated-tag-input
                             v-model="formData.genres"
                             name="genres"
                             :label="$t('dj.genres')"
@@ -66,7 +66,7 @@
                         />
                     </div>
                     <div class="column is-half-desktop">
-                        <b-validated-image-crop-upload
+                        <o-validated-image-crop-upload
                             v-model="formData.photo"
                             name="photo"
                             :label="$t('dj.photo')"
@@ -75,7 +75,7 @@
                         />
                     </div>
                 </div>
-                <b-validated-field
+                <o-validated-field
                     v-model="formData.description"
                     name="description"
                     type="textarea"
@@ -84,18 +84,18 @@
                 />
                 <div class="field is-grouped is-grouped-right">
                     <div class="control">
-                        <b-button type="is-light" @click="onCancel">
+                        <o-button variant="light" @click="onCancel">
                             {{ $t('form.cancel') }}
-                        </b-button>
+                        </o-button>
                     </div>
                     <div class="control">
-                        <b-button :loading="isLoading" type="is-dark" @click="onSubmit">
+                        <o-button :disabled="isLoading" variant="dark" @click="onSubmit">
                             {{
                                 initialData
                                     ? $t(`${formData.type}.save`)
                                     : $t(`${formData.type}.add`)
                             }}
-                        </b-button>
+                        </o-button>
                     </div>
                 </div>
             </form>
@@ -108,10 +108,10 @@ import _ from 'lodash'
 import { extend, ValidationObserver } from 'vee-validate'
 import { required } from 'vee-validate/dist/rules'
 import Player from '~/components/audio/Player.vue'
-import BValidatedField from '~/components/form/BValidatedField.vue'
-import BValidatedTagInput from '~/components/form/BValidatedTagInput.vue'
-import BValidatedSelect from '~/components/form/BValidatedSelect.vue'
-import BValidatedImageCropUpload from '~/components/form/BValidatedImageCropUpload.vue'
+import OValidatedField from '~/components/form/OValidatedField.vue'
+import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
+import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
+import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUpload.vue'
 import { getGenreTags } from '~/api/graphql/genre'
 
 extend('required', required)
@@ -142,10 +142,10 @@ extend('image_type', (file) => {
 export default {
     components: {
         ValidationObserver,
-        BValidatedField,
-        BValidatedTagInput,
-        BValidatedSelect,
-        BValidatedImageCropUpload,
+        OValidatedField,
+        OValidatedTagInput,
+        OValidatedSelect,
+        OValidatedImageCropUpload,
         Player
     },
     middleware: ['authorized'],
@@ -245,9 +245,11 @@ export default {
             this.error = null
             this.$refs.observer.validate().then((success) => {
                 if (!success) {
-                    this.$buefy.toast.open({
+                    this.$oruga.notification.open({
                         message: this.$t('validation.form_validation_error'),
-                        type: 'is-danger'
+                        rootClass: 'toast',
+                        variant: 'danger',
+                        duration: 500000
                     })
                     return
                 }

@@ -5,24 +5,24 @@
                 <div class="column is-4 is-offset-4">
                     <h2 class="title has-text-centered">{{ $t('user.login') }}</h2>
 
-                    <b-notification v-if="success" type="is-success" :closable="false">
+                    <o-notification v-if="success" variant="success" :closable="false">
                         {{ $t(success) }}
-                    </b-notification>
+                    </o-notification>
 
-                    <b-notification v-if="error" type="is-danger" :closable="false">
+                    <o-notification v-if="error" variant="danger" :closable="false">
                         {{ $t(error) }}
-                    </b-notification>
+                    </o-notification>
 
                     <ValidationObserver ref="observer" slim>
                         <form @submit.prevent>
-                            <b-validated-field
+                            <o-validated-field
                                 v-model="email"
                                 name="email"
                                 type="email"
                                 :label="$t('user.email')"
                                 rules="required|email"
                             />
-                            <b-validated-field
+                            <o-validated-field
                                 v-model="password"
                                 name="password"
                                 type="password"
@@ -31,13 +31,13 @@
                             />
                             <div class="field">
                                 <div class="control">
-                                    <b-button
-                                        :loading="isLoading"
-                                        type="is-dark is-fullwidth"
+                                    <o-button
+                                        :disabled="isLoading"
+                                        variant="dark is-fullwidth"
                                         @click="onSubmit"
                                     >
                                         {{ $t('user.do_login') }}
-                                    </b-button>
+                                    </o-button>
                                 </div>
                             </div>
                         </form>
@@ -56,14 +56,13 @@
                 </div>
             </div>
         </div>
-        <!-- <b-loading v-model="isLoading" :can-cancel="true" /> -->
     </section>
 </template>
 
 <script>
 import { extend, ValidationObserver } from 'vee-validate'
 import { required, email } from 'vee-validate/dist/rules'
-import BValidatedField from '~/components/form/BValidatedField.vue'
+import OValidatedField from '~/components/form/OValidatedField.vue'
 
 extend('email', email)
 extend('required', required)
@@ -71,7 +70,7 @@ extend('required', required)
 export default {
     components: {
         ValidationObserver,
-        BValidatedField
+        OValidatedField
     },
     plugins: ['vee-validate'],
     middleware: ['guest'],
@@ -99,9 +98,9 @@ export default {
             this.success = null
             this.$refs.observer.validate().then((success) => {
                 if (!success) {
-                    this.$buefy.toast.open({
+                    this.$oruga.notification.open({
                         message: this.$t('validation.form_validation_error'),
-                        type: 'is-danger'
+                        variant: 'danger'
                     })
                     return
                 }

@@ -1,39 +1,50 @@
 <template>
     <div class="p-5">
-        <b-menu :activable="false">
-            <b-menu-list label="Menu">
-                <b-menu-item icon="account" label="User" @click="navigate('/user')"></b-menu-item>
-                <b-menu-item icon="logout" label="Logout" @click="logout"></b-menu-item>
-            </b-menu-list>
-            <b-menu-list label="Deejay">
-                <b-menu-item
-                    v-if="!$strapi.user.dj"
-                    icon="plus"
-                    :label="$t('dj.create_profile')"
-                    @click="navigate('/djs/manage/new')"
-                />
-
-                <b-menu-item v-if="$strapi.user.dj" icon="album" :active="false" expanded>
-                    <template #label="props">
-                        {{ $strapi.user.dj.name }}
-                        <b-icon
-                            class="is-pulled-right"
-                            :icon="props.expanded ? 'menu-down' : 'menu-up'"
-                        ></b-icon>
-                    </template>
-                    <b-menu-item
-                        icon="account-box"
-                        :label="$t('dj.profile')"
-                        @click="navigate(`/djs/${$strapi.user.dj.slug}`)"
-                    ></b-menu-item>
-                    <b-menu-item
-                        icon="plus"
-                        :label="$t('sound.add')"
-                        @click="navigate(`/sounds/manage/new`)"
-                    ></b-menu-item>
-                </b-menu-item>
-            </b-menu-list>
-        </b-menu>
+        <aside class="menu">
+            <p class="menu-label">Menu</p>
+            <ul class="menu-list">
+                <li @click="closeSidebar">
+                    <nuxt-link to="/user">
+                        <o-icon icon="account" size="small" />
+                        <span>User</span>
+                    </nuxt-link>
+                </li>
+                <li @click="logout">
+                    <nuxt-link to="/">
+                        <span>Logout</span>
+                    </nuxt-link>
+                </li>
+            </ul>
+            <p class="menu-label">Deejay</p>
+            <ul class="menu-list">
+                <li v-if="!$strapi.user.dj" @click="closeSidebar">
+                    <nuxt-link to="/djs/manage/new">
+                        <o-icon icon="plus" size="small" />
+                        <span>{{ $t('dj.create_profile') }}</span>
+                    </nuxt-link>
+                </li>
+                <li v-else>
+                    <span>
+                        <o-icon icon="album" size="small" />
+                        <span>{{ $strapi.user.dj.name }}</span>
+                        <ul>
+                            <li @click="closeSidebar">
+                                <nuxt-link :to="`/djs/${$strapi.user.dj.slug}`">
+                                    <o-icon icon="account-box" size="small" />
+                                    <span>{{ $t('dj.profile') }}</span>
+                                </nuxt-link>
+                            </li>
+                            <li @click="closeSidebar">
+                                <nuxt-link to="/sounds/manage/new">
+                                    <o-icon icon="plus" size="small" />
+                                    <span>{{ $t('sound.add') }}</span>
+                                </nuxt-link>
+                            </li>
+                        </ul>
+                    </span>
+                </li>
+            </ul>
+        </aside>
     </div>
 </template>
 
@@ -47,16 +58,19 @@ export default {
     methods: {
         ...mapActions(['setIsSidebarOpen']),
         async logout() {
-            this.setIsSidebarOpen(false)
+            this.closeSidebar()
             await this.$strapi.logout()
             this.$router.push('/')
-            this.$buefy.toast.open({
+            this.$oruga.notification.open({
                 message: this.$t('user.logout_success'),
-                type: 'is-success'
+                variant: 'success'
             })
         },
         navigate(url) {
             this.$router.push(url)
+            this.setIsSidebarOpen(false)
+        },
+        closeSidebar() {
             this.setIsSidebarOpen(false)
         }
     }
