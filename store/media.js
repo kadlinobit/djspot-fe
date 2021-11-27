@@ -38,7 +38,6 @@ export const state = () => ({
 })
 export const getters = {
     getDefaultCoverImage: (state) => (type) => {
-        console.log('returning', state.defaultCoverImages[type])
         return state.defaultCoverImages[type]
     }
 }

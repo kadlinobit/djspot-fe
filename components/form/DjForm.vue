@@ -10,8 +10,8 @@
 
         <ValidationObserver ref="observer" slim>
             <form v-if="!success" method="post" @submit.prevent>
-                <div class="columns is-desktop">
-                    <div class="column is-half-desktop">
+                <div class="columns is-tablet">
+                    <div class="column is-half-tablet is-three-fifths-desktop">
                         <o-validated-field
                             v-model="formData.name"
                             name="name"
@@ -55,7 +55,7 @@
                             :placeholder="$t('dj.select_3_genres')"
                         />
                     </div>
-                    <div class="column is-half-desktop">
+                    <div class="column is-half-tablet is-two-fifths-desktop">
                         <o-validated-image-crop-upload
                             v-model="formData.photo"
                             name="photo"
@@ -66,10 +66,11 @@
                     </div>
                 </div>
 
-                <o-validated-field
+                <o-validated-bm-editor
                     v-model="formData.bio"
                     name="bio"
                     type="textarea"
+                    rules="required"
                     :label="$t('dj.bio')"
                 />
 
@@ -96,6 +97,7 @@ import OValidatedField from '~/components/form/OValidatedField.vue'
 import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUpload.vue'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
+import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
 import { getGenreTags } from '~/api/graphql/genre'
 
 extend('email', email)
@@ -129,7 +131,8 @@ export default {
         OValidatedField,
         OValidatedSelect,
         OValidatedImageCropUpload,
-        OValidatedTagInput
+        OValidatedTagInput,
+        OValidatedBmEditor
     },
     middleware: ['authorized'],
     plugins: ['vee-validate'],

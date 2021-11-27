@@ -10,9 +10,9 @@
                     </nuxt-link>
                 </li>
                 <li @click="logout">
-                    <nuxt-link to="/">
+                    <a>
                         <span>Logout</span>
-                    </nuxt-link>
+                    </a>
                 </li>
             </ul>
             <p class="menu-label">Deejay</p>
@@ -60,16 +60,16 @@ export default {
         async logout() {
             this.closeSidebar()
             await this.$strapi.logout()
-            this.$router.push('/')
             this.$oruga.notification.open({
                 message: this.$t('user.logout_success'),
                 variant: 'success'
             })
         },
-        navigate(url) {
-            this.$router.push(url)
-            this.setIsSidebarOpen(false)
-        },
+        // TBD - probably remove
+        // navigate(url) {
+        //     this.$router.push(url)
+        //     this.setIsSidebarOpen(false)
+        // },
         closeSidebar() {
             this.setIsSidebarOpen(false)
         }

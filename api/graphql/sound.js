@@ -151,3 +151,12 @@ export const toggleSoundLike = function (fragmentName) {
     `
     return query.loc.source.body
 }
+
+export const getSoundsCount = function () {
+    const query = gql`
+        query ($where: JSON) {
+            soundsCount(where: $where)
+        }
+    `
+    return query.loc.source.body
+}

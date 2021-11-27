@@ -7,7 +7,6 @@
             <a v-if="$strapi.user" class="navbar-item" @click="() => setIsSidebarOpen(true)">
                 <o-icon icon="account" />
             </a>
-
             <a
                 role="button"
                 class="navbar-burger"
@@ -26,15 +25,15 @@
         <div id="navbar-main-menu" class="navbar-menu" :class="{ 'is-active': isMenuExpanded }">
             <div class="navbar-start">
                 <nuxt-link class="navbar-item" to="/djs">{{ $t('dj.djs') }}</nuxt-link>
-                <nuxt-link class="navbar-item" to="/mixes">{{ $t('mix.mixes') }}</nuxt-link>
+                <nuxt-link class="navbar-item" to="/sounds">{{ $t('sound.sounds') }}</nuxt-link>
             </div>
             <div class="navbar-end">
                 <language-selection />
                 <div v-if="!$strapi.user" class="navbar-item">
                     <div class="buttons">
-                        <nuxt-link class="button is-light" :to="{ path: '/login' }">
+                        <a class="button is-light" @click="() => setIsLoginOpen(true)">
                             {{ $t('user.login') }}
-                        </nuxt-link>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -56,7 +55,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['setIsSidebarOpen']),
+        ...mapActions(['setIsSidebarOpen', 'setIsLoginOpen']),
         toggleIsMenuExpanded() {
             this.isMenuExpanded = !this.isMenuExpanded
         }

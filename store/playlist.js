@@ -69,7 +69,13 @@ export const getters = {
     playlist(state) {
         return state.playlist
     },
+    playlistSize(state) {
+        return state.playlist.length
+    },
     isSoundInPlaylist: (state) => (sound) => {
         return state.playlist.some((playlistSound) => playlistSound.id === sound.id)
+    },
+    soundIndexInPlaylist: (state) => (sound) => {
+        return state.playlist.findIndex((playlistSound) => playlistSound.id === sound.id)
     }
 }

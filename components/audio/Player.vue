@@ -1,5 +1,5 @@
 <template>
-    <div class="buefy-player" style="position: relative">
+    <div class="o-player-preview" style="position: relative">
         <o-loading :full-page="false" :active.sync="isLoading" :can-cancel="false"></o-loading>
         <div class="columns is-vcentered is-mobile">
             <div class="column is-narrow">
@@ -8,7 +8,7 @@
                         <o-button
                             :disabled="!loaded || isError"
                             variant="text"
-                            size="medium"
+                            size="size-6"
                             icon-left="stop"
                             @click.prevent="stop"
                         />
@@ -17,7 +17,7 @@
                         <o-button
                             :disabled="!loaded || isError"
                             variant="text"
-                            size="medium"
+                            size="size-6"
                             :icon-left="playing ? 'pause' : 'play'"
                             @click.prevent="playing = !playing"
                         />
@@ -26,7 +26,7 @@
             </div>
             <div v-if="isError" class="column">
                 <o-notification variant="danger pt-3 pb-3" :closable="false" role="alert">
-                    Error loading file
+                    {{ $t('player.error_loading_file') }}
                 </o-notification>
             </div>
             <div v-if="!isError && !showVolume" class="column">
@@ -69,33 +69,20 @@
                     </div>
                 </div>
             </div>
-            <div class="is-narrow">
-                <div class="level is-mobile">
-                    <div class="level-item mr-2">
-                        <o-button
-                            :disabled="!loaded || isError"
-                            :variant="showVolume ? 'success' : 'text'"
-                            size="medium"
-                            icon-left="equalizer"
-                            @click.prevent="showVolume = !showVolume"
-                        />
-                    </div>
-                    <div class="level-item">
-                        <o-switch
-                            :disabled="!loaded || isError"
-                            :value="!muted"
-                            variant="success"
-                            @input="mute"
-                        />
-                    </div>
-                </div>
+            <div class="column is-narrow">
+                <o-button
+                    :disabled="!loaded || isError"
+                    :variant="showVolume ? 'success' : 'text'"
+                    size="size-6"
+                    :icon-left="volumeIcon"
+                    @click.prevent="showVolume = !showVolume"
+                />
             </div>
         </div>
         <audio
             :ref="audioRefName"
             preload="auto"
             style="display: none"
-            :loop="looping"
             :src="file"
             @timeupdate="update"
             @loadstart="isLoading = true"
@@ -118,10 +105,6 @@ export default {
             type: String,
             default: null
         },
-        loop: {
-            type: Boolean,
-            default: false
-        },
         audioRefName: {
             type: String,
             default: 'audio'
@@ -131,7 +114,6 @@ export default {
         currentSeconds: 0,
         durationSeconds: 0,
         loaded: false,
-        looping: false,
         playing: false,
         previousVolume: 35,
         showVolume: false,
@@ -140,9 +122,6 @@ export default {
         isError: false
     }),
     computed: {
-        muted() {
-            return this.volume / 100 === 0
-        },
         percentComplete() {
             return parseInt((this.currentSeconds / this.durationSeconds) * 100)
         },
@@ -151,6 +130,19 @@ export default {
         },
         volumeTitle() {
             return `Volume (${this.volume}%)`
+        },
+        volumeIcon() {
+            let volumeIcon = 'volume-off'
+            if (this.volume > 0 && this.volume <= 30) {
+                volumeIcon = 'volume-low'
+            }
+            if (this.volume > 30 && this.volume <= 60) {
+                volumeIcon = 'volume-medium'
+            }
+            if (this.volume > 60) {
+                volumeIcon = 'volume-high'
+            }
+            return volumeIcon
         }
     },
     watch: {
@@ -167,14 +159,7 @@ export default {
             this.$refs[this.audioRefName].load()
         }
     },
-    created() {
-        this.looping = this.loop
-    },
     methods: {
-        download() {
-            this.stop()
-            window.open(this.file, 'download')
-        },
         load() {
             this.isLoading = false
             this.isError = false
@@ -187,14 +172,6 @@ export default {
             }
 
             throw new Error('Failed to load sound file.')
-        },
-        mute() {
-            if (this.muted) {
-                return (this.volume = this.previousVolume)
-            }
-
-            this.previousVolume = this.volume
-            this.volume = 0
         },
         seek(value) {
             if (!this.loaded) return

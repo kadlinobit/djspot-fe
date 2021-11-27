@@ -211,7 +211,7 @@ export const state = () => ({
         'Žďár nad Sázavou'
     ],
     genres: [],
-    djPageSortOptions: [
+    djsPageSortOptions: [
         {
             value: 'name:asc',
             label: 'name:asc'
@@ -228,7 +228,26 @@ export const state = () => ({
             value: 'created_at:desc',
             label: 'created_at:desc'
         }
-    ]
+    ],
+    soundsPageSortOptions: [
+        {
+            value: 'name:asc',
+            label: 'name:asc'
+        },
+        {
+            value: 'name:desc',
+            label: 'name:desc'
+        },
+        {
+            value: 'created_at:asc',
+            label: 'created_at:asc'
+        },
+        {
+            value: 'created_at:desc',
+            label: 'created_at:desc'
+        }
+    ],
+    soundTypeOptions: ['mix', 'track']
 })
 export const mutations = {
     mutateSetGenres(state, genres) {
@@ -254,10 +273,16 @@ export const getters = {
             return { value: city, label: city }
         })
     },
-    getDjPageSortOptions(state) {
-        return state.djPageSortOptions
+    getDjsPageSortOptions(state) {
+        return state.djsPageSortOptions
     },
     getGenresOptions(state) {
         return state.genres
+    },
+    getSoundTypeOptions(state) {
+        return state.soundTypeOptions
+    },
+    getSoundsPageSortOptions(state) {
+        return state.soundsPageSortOptions
     }
 }

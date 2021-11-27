@@ -33,7 +33,7 @@
                                 :key="`genre-${genre.id}`"
                                 class="
                                     tag
-                                    is-primary is-size-5-desktop is-size-6-mobile is-size-6-tablet
+                                    is-peach is-size-5-desktop is-size-6-mobile is-size-6-tablet
                                 "
                             >
                                 {{ genre.name }}
@@ -57,12 +57,13 @@
                         "
                         v-model="activeTab"
                         :expanded="true"
-                        :animated="false"
+                        :animated="true"
                     >
                         <o-tab-item v-if="!!dj.bio" label="Bio">
-                            <div>
-                                {{ dj.bio }}
-                            </div>
+                            <div
+                                v-dompurify-html="$marked.markdownToHtml(dj.bio)"
+                                class="content"
+                            />
                         </o-tab-item>
 
                         <o-tab-item v-if="mixes && mixes.length > 0" label="Sety">

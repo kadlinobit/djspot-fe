@@ -90,6 +90,8 @@
         "description_placeholder": "Popis tracku - cokoliv, co chceš posluchačům sdělit..."
     },
     "sound" : {
+        "sound": "Sound",
+        "sounds" : "Sounds",
         "type": "Typ audia",
         "add": "Přidat audio",
         "edit": "Upravit audio",
@@ -99,13 +101,15 @@
         "audio_load_error": "Nepodařilo se načíst zvuková data, URL není validní.",
         "url": "URL adresa",
         "url_placeholder": "Adresa kde se nachází zvukový soubor",
-        "select_sound_type": "Vyber typ audia"
+        "select_sound_type": "Vyber typ audia",
+        "info": "Info"
     },
     "playlist" : {
         "added_to_playlist" : "Audio '{0}' přidáno do playlistu",
         "removed_from_playlist" : "Audio '{0}' odebráno z playlistu"
     },
     "player": {
+        "error_loading_file_message": "Ze zadané URL adresy se nepodařilo načíst audio.",
         "error_loading_file" : "Chyba při načítání souboru",
         "cancel_loading": "Zrušit načítání"
     },

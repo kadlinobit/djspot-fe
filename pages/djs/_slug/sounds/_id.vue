@@ -67,11 +67,7 @@
                                 :key="`genre-${genre.id}`"
                                 class="
                                     tag
-                                    is-primary
-                                    is-light
-                                    is-size-5-desktop
-                                    is-size-6-mobile
-                                    is-size-6-tablet
+                                    is-peach is-size-5-desktop is-size-6-mobile is-size-6-tablet
                                 "
                             >
                                 {{ genre.name }}
@@ -122,6 +118,19 @@
                         </div>
                     </div>
                 </div>
+                <o-tabs
+                    v-if="!!sound.description"
+                    v-model="activeTab"
+                    :expanded="true"
+                    :animated="true"
+                >
+                    <o-tab-item v-if="!!sound.description" :label="$t(`${sound.type}.description`)">
+                        <div
+                            v-dompurify-html="$marked.markdownToHtml(sound.description)"
+                            class="content"
+                        />
+                    </o-tab-item>
+                </o-tabs>
             </div>
         </div>
     </section>
@@ -143,7 +152,8 @@ export default {
     },
     data() {
         return {
-            sound: null
+            sound: null,
+            activeTab: 1
         }
     },
     async fetch() {

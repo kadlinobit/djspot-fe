@@ -4,7 +4,7 @@
             <div class="level-item">
                 <o-responsive-button
                     icon-left="eye"
-                    :variant="dj.isFollowedByMe ? 'dark' : 'light'"
+                    :variant="dj.isFollowedByMe ? 'secondary' : 'text'"
                     @click="onToggleFollow"
                 >
                     {{

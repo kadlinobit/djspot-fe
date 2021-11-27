@@ -1,0 +1,106 @@
+@import '~bulma/sass/utilities/_all.sass';
+// // Set your colors
+$primary: #fedc3d;
+$primary-light: findLightColor($primary);
+$primary-dark: findDarkColor($primary);
+$primary-invert: findColorInvert($primary);
+
+$secondary: #01abaa;
+$secondary-light: findLightColor($secondary);
+$secondary-dark: #017878;
+$secondary-invert: findColorInvert($secondary);
+
+$light: #f8fedb;
+$light-invert: findColorInvert($light);
+
+$peach: #fea680;
+$peach-light: findLightColor($peach);
+$peach-dark: findDarkColor($peach);
+$peach-invert: findColorInvert($peach);
+
+$twitter: #4099ff;
+$twitter-invert: findColorInvert($twitter);
+
+// Lists and maps
+$custom-colors: null !default;
+$custom-shades: null !default;
+
+// Setup $colors to use as bulma classes (e.g. 'is-twitter')
+$colors: mergeColorMaps(
+    (
+        'white': (
+            $white,
+            $black
+        ),
+        'black': (
+            $black,
+            $white
+        ),
+        'light': (
+            $light,
+            $light-invert
+        ),
+        'dark': (
+            $dark,
+            $dark-invert
+        ),
+        'primary': (
+            $primary,
+            $primary-invert,
+            $primary-light,
+            $primary-dark
+        ),
+        'secondary': (
+            $secondary,
+            $secondary-invert,
+            $secondary-light,
+            $secondary-dark
+        ),
+        'peach': (
+            $peach,
+            $peach-invert,
+            $peach-light,
+            $peach-dark
+        ),
+        'link': (
+            $link,
+            $link-invert,
+            $link-light,
+            $link-dark
+        ),
+        'info': (
+            $info,
+            $info-invert,
+            $info-light,
+            $info-dark
+        ),
+        'success': (
+            $success,
+            $success-invert,
+            $success-light,
+            $success-dark
+        ),
+        'warning': (
+            $warning,
+            $warning-invert,
+            $warning-light,
+            $warning-dark
+        ),
+        'danger': (
+            $danger,
+            $danger-invert,
+            $danger-light,
+            $danger-dark
+        )
+    ),
+    $custom-colors
+);
+
+// Links
+$link: $secondary-dark;
+$link-invert: $secondary-invert;
+$link-focus-border: $secondary;
+
+// Box
+$box-background-color: $secondary;
+$box-color: $white;

@@ -29,11 +29,12 @@ export default {
     plugins: [
         { src: '~plugins/axios', ssr: true },
         { src: '~/plugins/vee-validate.js', ssr: false },
-        { src: '~/plugins/v-markdown-editor.js', mode: 'client', ssr: false }, // TBD - probably remove
         { src: '~/plugins/audio.js' },
         { src: '~/plugins/media.js' },
         { src: '~/plugins/time.js' },
-        { src: '~/plugins/oruga.js' }
+        { src: '~/plugins/oruga.js' },
+        { src: '~/plugins/marked.js' },
+        { src: '~/plugins/vue-dompurify-html.js' }
     ],
 
     // Auto import components: https://go.nuxtjs.dev/config-components

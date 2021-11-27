@@ -1,5 +1,6 @@
 <template>
     <div class="app">
+        <login-modal />
         <o-modal
             trap-focus
             :destroy-on-hide="false"
@@ -44,12 +45,15 @@ import Navbar from '~/components/layout/Navbar.vue'
 import SidebarMenu from '~/components/layout/SidebarMenu.vue'
 import BottomBar from '~/components/layout/BottomBar.vue'
 import Playlist from '~/components/audio/Playlist.vue'
+import LoginModal from '~/components/login/LoginModal.vue'
+
 export default {
     components: {
         Navbar,
         SidebarMenu,
         BottomBar,
-        Playlist
+        Playlist,
+        LoginModal
     },
     computed: {
         ...mapGetters(['isSidebarOpen', 'isPlaylistOpen'])
@@ -59,3 +63,10 @@ export default {
     }
 }
 </script>
+
+<style lang="scss">
+@import '~/assets/scss/_variables';
+html {
+    background-color: $light;
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
     <section class="section">
         <div class="container">
-            <h1 class="title">DJs {{ getDjsCount }}</h1>
+            <h1 class="title">Sounds {{ getSoundsCount }}</h1>
             <o-field>
                 <o-input
                     v-model="searchNameLocal"
@@ -17,7 +17,7 @@
                 <o-field>
                     <o-select v-model="sortLocal" @input="onSearch">
                         <option
-                            v-for="option in getDjsPageSortOptions"
+                            v-for="option in getSoundsPageSortOptions"
                             :key="option.value"
                             :value="option.value"
                         >
@@ -26,12 +26,12 @@
                     </o-select>
                 </o-field>
                 <o-field>
-                    <o-select v-model="searchCityLocal" @input="onSearch">
+                    <o-select v-model="searchTypeLocal" @input="onSearch">
                         <option value="">
                             {{ `Celá ČR` }}
                         </option>
                         <option
-                            v-for="option in getCitiesOptions"
+                            v-for="option in getSoundTypeOptions"
                             :key="option.value"
                             :value="option.value"
                         >
@@ -54,11 +54,11 @@
             <p v-if="$fetchState.pending">Loading ...</p>
             <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
             <div v-else>
-                <dj-list :djs="getDjs[currentPage]" />
+                <sounds-page-list :sounds="getSounds[currentPage]" />
 
                 <o-pagination
                     :current="currentPage"
-                    :total="getDjsCount"
+                    :total="getSoundsCount"
                     :range-before="1"
                     :range-after="1"
                     order="centered"
@@ -79,20 +79,20 @@
 <script>
 import _ from 'lodash'
 import { mapGetters, mapActions } from 'vuex'
-import { getDjs, getDjsCount } from '~/api/graphql/dj'
+import { getSounds, getSoundsCount } from '~/api/graphql/sound'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
-import DjList from '~/components/dj/DjList.vue'
+import SoundsPageList from '~/components/sound/SoundsPageList.vue'
 
 export default {
-    name: 'DjsPage',
+    name: 'SoundsPage',
     components: {
         OValidatedTagInput,
-        DjList
+        SoundsPageList
     },
     data() {
         return {
             searchNameLocal: '',
-            searchCityLocal: '',
+            searchTypeLocal: '',
             searchGenresLocal: [],
             sortLocal: ''
         }
@@ -101,18 +101,21 @@ export default {
         this.fetchGenres()
         this.syncLocalSearchValues()
 
-        if (_.isArray(this.getDjs[this.currentPage]) && !_.isEmpty(this.getDjs[this.currentPage]))
+        if (
+            _.isArray(this.getSounds[this.currentPage]) &&
+            !_.isEmpty(this.getSounds[this.currentPage])
+        )
             return
 
         try {
-            this.setDjsCount(await this.fetchDjsCount())
-            const djs = await this.fetchDjs(0)
+            this.setSoundsCount(await this.fetchSoundsCount())
+            const sounds = await this.fetchSounds(0)
 
-            if (Array.isArray(djs)) {
-                this.setNewDjs(djs)
+            if (Array.isArray(sounds)) {
+                this.setNewSounds(sounds)
             } else {
-                this.$fetchState.error = 'DJs not fetched'
-                return this.$nuxt.error({ statusCode: 404, message: 'DJs not fetched' })
+                this.$fetchState.error = 'Sounds not fetched'
+                return this.$nuxt.error({ statusCode: 404, message: 'Sounds not fetched' })
             }
         } catch (e) {
             this.$fetchState.error = e
@@ -122,18 +125,22 @@ export default {
         }
     },
     computed: {
-        ...mapGetters('djsPage', [
+        ...mapGetters('soundsPage', [
             'getCurrentPage',
             'getPerPage',
             'getSort',
-            'getDjsCount',
-            'getDjs',
+            'getSoundsCount',
+            'getSounds',
             'getWhere',
             'getSearchName',
-            'getSearchCity',
+            'getSearchType',
             'getSearchGenres'
         ]),
-        ...mapGetters('form', ['getDjsPageSortOptions', 'getCitiesOptions', 'getGenresOptions']),
+        ...mapGetters('form', [
+            'getSoundsPageSortOptions',
+            'getSoundTypeOptions',
+            'getGenresOptions'
+        ]),
         currentPage: {
             get() {
                 return this.getCurrentPage
@@ -160,32 +167,32 @@ export default {
         }
     },
     methods: {
-        ...mapActions('djsPage', [
+        ...mapActions('soundsPage', [
             'setCurrentPage',
             'setPerPage',
             'setSort',
-            'setDjsCount',
-            'setNewDjs',
-            'setPageDjs',
+            'setSoundsCount',
+            'setNewSounds',
+            'setPageSounds',
             'setSearchName',
-            'setSearchCity',
+            'setSearchType',
             'setSearchGenres',
             'initNewSearch'
         ]),
         ...mapActions('form', ['fetchGenres']),
-        async fetchDjsCount() {
-            const djsCountData = await this.$strapi.graphql({
-                query: getDjsCount(),
+        async fetchSoundsCount() {
+            const soundsCountData = await this.$strapi.graphql({
+                query: getSoundsCount(),
                 variables: {
                     where: this.getWhere
                 }
             })
 
-            return djsCountData.djsCount || 0
+            return soundsCountData.soundsCount || 0
         },
-        async fetchDjs(start) {
-            const djsData = await this.$strapi.graphql({
-                query: getDjs(),
+        async fetchSounds(start) {
+            const soundsData = await this.$strapi.graphql({
+                query: getSounds(),
                 variables: {
                     sort: this.getSort,
                     where: this.getWhere,
@@ -194,12 +201,12 @@ export default {
                 }
             })
 
-            return djsData.djs
+            return soundsData.sounds
         },
         async onSearch() {
             this.initNewSearch({
                 searchName: this.searchNameLocal,
-                searchCity: this.searchCityLocal,
+                searchType: this.searchTypeLocal,
                 searchGenres: this.searchGenresLocal,
                 sort: this.sortLocal
             })
@@ -209,16 +216,16 @@ export default {
             this.syncLocalSearchValues()
             this.currentPage = pageNumber
 
-            if (!_.isArray(this.getDjs[pageNumber]) || _.isEmpty(this.getDjs[pageNumber])) {
-                const djs = await this.fetchDjs(
+            if (!_.isArray(this.getSounds[pageNumber]) || _.isEmpty(this.getSounds[pageNumber])) {
+                const sounds = await this.fetchSounds(
                     this.currentPage * this.getPerPage - this.getPerPage
                 )
-                this.setPageDjs({ djs, pageNumber })
+                this.setPageSounds({ sounds, pageNumber })
             }
         },
         syncLocalSearchValues() {
             this.searchNameLocal = this.getSearchName
-            this.searchCityLocal = this.getSearchCity
+            this.searchTypeLocal = this.getSearchType
             this.searchGenresLocal = this.getSearchGenres
             this.sortLocal = this.getSort
         }

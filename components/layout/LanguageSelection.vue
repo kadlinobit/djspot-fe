@@ -1,35 +1,19 @@
 <template>
-    <div class="navbar-item has-dropdown is-right" :class="{ 'is-active': isDropdownExpanded }">
-        <div class="navbar-link" @click="toggleIsDropdownExpanded">
-            <o-icon icon="earth" />
-
-            <div class="navbar-dropdown">
-                <a
-                    v-for="lang in $i18n.locales"
-                    :key="lang.code"
-                    class="navbar-item"
-                    @click="setLanguage(lang.code)"
-                >
-                    {{ lang.name }}
-                </a>
-            </div>
-        </div>
-    </div>
+    <a class="navbar-item is-right" @click="toggleLocale">
+        <o-icon icon="earth" />
+        <span class="ml-1">{{ $i18n.locale }}</span>
+    </a>
 </template>
 
 <script>
 export default {
     data() {
-        return {
-            isDropdownExpanded: false
-        }
+        return {}
     },
     methods: {
-        setLanguage(languageCode) {
-            this.$i18n.setLocale(languageCode)
-        },
-        toggleIsDropdownExpanded() {
-            this.isDropdownExpanded = !this.isDropdownExpanded
+        toggleLocale() {
+            if (this.$i18n.locale === 'cs') this.$i18n.setLocale('en')
+            else this.$i18n.setLocale('cs')
         }
     }
 }

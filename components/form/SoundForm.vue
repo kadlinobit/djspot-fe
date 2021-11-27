@@ -11,8 +11,8 @@
 
         <ValidationObserver ref="observer" slim>
             <form v-if="!success" method="post" @submit.prevent>
-                <div class="columns is-desktop">
-                    <div class="column is-half-desktop">
+                <div class="columns is-tablet">
+                    <div class="column is-half-tablet is-three-fifths-desktop">
                         <o-validated-select
                             v-model="formData.type"
                             name="type"
@@ -65,7 +65,7 @@
                             :placeholder="$t('dj.select_3_genres')"
                         />
                     </div>
-                    <div class="column is-half-desktop">
+                    <div class="column is-half-tablet is-two-fifths-desktop">
                         <o-validated-image-crop-upload
                             v-model="formData.photo"
                             name="photo"
@@ -75,13 +75,14 @@
                         />
                     </div>
                 </div>
-                <o-validated-field
+
+                <o-validated-bm-editor
                     v-model="formData.description"
                     name="description"
-                    type="textarea"
                     :label="$t(`${formData.type}.description`)"
                     :placeholder="$t(`${formData.type}.description_placeholder`)"
                 />
+
                 <div class="field is-grouped is-grouped-right">
                     <div class="control">
                         <o-button variant="light" @click="onCancel">
@@ -112,6 +113,7 @@ import OValidatedField from '~/components/form/OValidatedField.vue'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUpload.vue'
+import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
 import { getGenreTags } from '~/api/graphql/genre'
 
 extend('required', required)
@@ -128,7 +130,7 @@ extend('audio_load_state', {
     validate(value, { audioLoadState }) {
         return audioLoadState !== 'error'
     },
-    message: 'mix.audio_load_error'
+    message: 'player.error_loading_file_message'
 })
 
 extend('image_type', (file) => {
@@ -146,6 +148,7 @@ export default {
         OValidatedTagInput,
         OValidatedSelect,
         OValidatedImageCropUpload,
+        OValidatedBmEditor,
         Player
     },
     middleware: ['authorized'],

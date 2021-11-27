@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import GlobalPlayer from '~/components/audio/PlayerGlobal.vue'
+import GlobalPlayer from '~/components/audio/PlayerGlobal/PlayerGlobal.vue'
 export default {
     components: {
         GlobalPlayer
@@ -14,11 +14,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '~/assets/scss/_variables';
+
 .bottom-bar {
     position: fixed;
     left: 0;
     bottom: 0;
     width: 100%;
-    background-color: #fefefe;
+    background-color: $primary;
 }
 </style>
