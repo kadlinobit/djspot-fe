@@ -1,25 +1,22 @@
 @import '~bulma/sass/utilities/_all.sass';
 // // Set your colors
-$primary: #fedc3d;
+$primary: #ffc000;
 $primary-light: findLightColor($primary);
 $primary-dark: findDarkColor($primary);
 $primary-invert: findColorInvert($primary);
 
-$secondary: #01abaa;
+$secondary: #2b3648;
 $secondary-light: findLightColor($secondary);
-$secondary-dark: #017878;
+$secondary-dark: findDarkColor($secondary);
 $secondary-invert: findColorInvert($secondary);
 
-$light: #f8fedb;
+$light: #fcfaf2;
 $light-invert: findColorInvert($light);
 
-$peach: #fea680;
+$peach: #e7696b;
 $peach-light: findLightColor($peach);
 $peach-dark: findDarkColor($peach);
 $peach-invert: findColorInvert($peach);
-
-$twitter: #4099ff;
-$twitter-invert: findColorInvert($twitter);
 
 // Lists and maps
 $custom-colors: null !default;
