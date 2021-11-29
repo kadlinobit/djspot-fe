@@ -24,12 +24,20 @@
                 @input="(newVolume) => setVolume(newVolume)"
             />
         </div>
-        <div class="column is-narrow mr-2">
+        <div class="column is-narrow">
             <o-button
                 variant="primary"
                 size="size-6"
                 icon-left="playlist-music"
                 @click.stop="() => setIsPlaylistOpen(true)"
+            />
+        </div>
+        <div class="column is-narrow mr-2">
+            <o-button
+                variant="primary"
+                size="size-6"
+                icon-left="chevron-down"
+                @click.stop="() => setIsBottomBarOpen(false)"
             />
         </div>
     </div>
@@ -63,7 +71,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['setIsPlaylistOpen']),
+        ...mapActions(['setIsPlaylistOpen', 'setIsBottomBarOpen']),
         ...mapActions('player', ['setPreviousVolume', 'setVolume', 'setIsMuted']),
         onMute() {
             if (this.isMuted) {

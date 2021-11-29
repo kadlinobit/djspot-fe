@@ -2,6 +2,7 @@ export const state = () => ({
     isSidebarOpen: false,
     isPlaylistOpen: false,
     isLoginOpen: false,
+    isBottomBarOpen: true,
     loginActiveComponent: 'login'
 })
 
@@ -15,6 +16,9 @@ export const mutations = {
     mutateSetIsLoginOpen(state, isLoginOpen) {
         state.isLoginOpen = isLoginOpen
     },
+    mutateSetIsBottomBarOpen(state, isBottomBarOpen) {
+        state.isBottomBarOpen = isBottomBarOpen
+    },
     mutateSetLoginActiveComponent(state, loginActiveComponent) {
         state.loginActiveComponent = loginActiveComponent
     }
@@ -26,6 +30,9 @@ export const actions = {
     },
     setIsPlaylistOpen({ commit }, isPlaylistOpen) {
         commit('mutateSetIsPlaylistOpen', isPlaylistOpen)
+    },
+    setIsBottomBarOpen({ commit }, isBottomBarOpen) {
+        commit('mutateSetIsBottomBarOpen', isBottomBarOpen)
     },
     setIsLoginOpen({ commit }, isLoginOpen) {
         commit('mutateSetIsLoginOpen', isLoginOpen)
@@ -42,6 +49,9 @@ export const getters = {
     },
     isPlaylistOpen(state) {
         return state.isPlaylistOpen
+    },
+    isBottomBarOpen(state) {
+        return state.isBottomBarOpen
     },
     isLoginOpen(state) {
         return state.isLoginOpen

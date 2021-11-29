@@ -35,7 +35,9 @@
         </o-sidebar>
         <Navbar />
         <nuxt style="margin-bottom: 100px" />
-        <BottomBar />
+        <client-only>
+            <BottomBar />
+        </client-only>
     </div>
 </template>
 
