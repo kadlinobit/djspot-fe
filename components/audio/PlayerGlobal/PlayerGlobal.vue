@@ -15,7 +15,7 @@
             <div class="column is-narrow-tablet is-6-mobile ml-2">
                 <play-controls :audio-ref-name="audioRefName" />
             </div>
-            <div class="column is-hidden-mobile">
+            <div class="column is-hidden-mobile is-text-ellipsis">
                 <sound-info />
             </div>
             <div class="column is-6-mobile is-4-tablet is-3-desktop is-2-widescreen">
@@ -62,7 +62,6 @@ export default {
     },
     data: () => ({}),
     computed: {
-        ...mapGetters(['isPlaylistOpen']),
         ...mapGetters('playlist', [
             'playlist',
             'playlistSize',
@@ -78,7 +77,8 @@ export default {
             'isPlaying',
             'volume',
             'isLoading',
-            'isError'
+            'isError',
+            'isAutoplay'
         ]),
         canPlayNext() {
             if (
@@ -105,7 +105,6 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['setIsPlaylistOpen']),
         ...mapActions('player', [
             'setCurrentSeconds',
             'setDurationSeconds',
@@ -113,6 +112,7 @@ export default {
             'setIsPlaying',
             'setIsLoading',
             'setIsError',
+            'setIsAutoplay',
             'loadNewAudio'
         ]),
         onLoadedData() {
@@ -122,8 +122,12 @@ export default {
             if (this.$refs[this.audioRefName].readyState >= 2) {
                 this.setIsLoaded(true)
                 this.setDurationSeconds(parseInt(this.$refs[this.audioRefName].duration))
-                this.setIsPlaying(true)
+                if (this.isAutoplay) {
+                    this.setIsPlaying(true)
+                }
+                this.setIsAutoplay(false)
             } else {
+                this.setIsAutoplay(false)
                 throw new Error('Failed to load sound file.')
             }
         },

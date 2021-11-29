@@ -10,6 +10,7 @@ export const state = () => ({
     volume: 80,
     isLoading: false,
     isError: false,
+    isAutoplay: false,
     showCancelLoading: false,
     cancelLoadingTimeout: null,
     showCancelLoadingButton: false
@@ -48,6 +49,9 @@ export const mutations = {
     },
     mutateSetIsError(state, isError) {
         state.isError = isError
+    },
+    mutateSetIsAutoplay(state, isAutoplay) {
+        state.isAutoplay = isAutoplay
     },
     mutateSetShowCancelLoadingButton(state, showCancelLoadingButton) {
         state.showCancelLoadingButton = showCancelLoadingButton
@@ -89,6 +93,9 @@ export const actions = {
         commit('mutateSetLooping', looping)
     },
     setIsPlaying({ commit }, isPlaying) {
+        if (isPlaying) {
+            commit('mutateSetIsBottomBarOpen', true, { root: true })
+        }
         commit('mutateSetIsPlaying', isPlaying)
     },
     setPreviousVolume({ commit }, previousVolume) {
@@ -120,6 +127,9 @@ export const actions = {
     setIsError({ commit }, isError) {
         commit('mutateSetIsError', isError)
     },
+    setIsAutoplay({ commit }, isAutoplay) {
+        commit('mutateSetIsAutoplay', isAutoplay)
+    },
     resetAudio({ commit }) {
         commit('mutateResetAudio')
     },
@@ -128,19 +138,22 @@ export const actions = {
      * @param {Object} context - vuex store context
      * @param {Object} newSound - object containing new sound data
      */
-    async loadNewAudio(context, newSound) {
-        context.dispatch('resetAudio')
+    async loadNewAudio({ dispatch }, newSound) {
+        dispatch('resetAudio')
+        // Set autoplay true as this is user called action for loading new audio
+        dispatch('setIsAutoplay', true)
+
         if (newSound && newSound.url) {
             const audioUrls = await this.$audio.getAudioUrls(newSound.url)
             if (audioUrls && audioUrls.stream) {
-                context.dispatch('setCurrentSound', newSound)
-                context.dispatch('setFile', audioUrls.stream)
+                dispatch('setCurrentSound', newSound)
+                dispatch('setFile', audioUrls.stream)
             } else {
-                context.dispatch('setIsError', true)
+                dispatch('setIsError', true)
             }
             return
         }
-        context.dispatch('setIsError', true)
+        dispatch('setIsError', true)
     }
 }
 
@@ -177,6 +190,9 @@ export const getters = {
     },
     isError(state) {
         return state.isError
+    },
+    isAutoplay(state) {
+        return state.isAutoplay
     },
     isMuted(state) {
         return state.volume / 100 === 0
