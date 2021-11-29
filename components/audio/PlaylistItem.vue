@@ -1,49 +1,52 @@
 <template>
-    <li class="level is-mobile playlist-item">
-        <div class="level-left">
-            <div class="level-item playlist-item-handle mr-2">
-                <o-icon icon="swap-vertical" />
-            </div>
-            <div v-if="!currentSound || currentSound.id !== playlistItem.id" class="level-item">
-                <o-button
-                    :disabled="isPlayerLoading"
-                    variant="text"
-                    icon-left="play"
-                    @click.prevent="() => loadNewAudio(playlistItem)"
-                />
-            </div>
-            <div v-if="currentSound && currentSound.id === playlistItem.id" class="level-item">
-                <o-button
-                    :disabled="isPlayerLoading"
-                    variant="text"
-                    :icon-left="isPlaying ? 'pause' : 'play'"
-                    @click.prevent="() => setIsPlaying(!isPlaying)"
-                />
-            </div>
-            <div class="level-item">
-                {{ `${playlistItem.dj.name} – ${playlistItem.name}` }}
-            </div>
+    <li class="columns is-mobile is-vcentered is-gapless playlist-item">
+        <div class="column is-narrow playlist-item-handle mr-1">
+            <o-icon icon="swap-vertical" />
         </div>
-        <div class="level-right">
-            <div class="level-item">
-                <span :class="['tag', soundTagType]">{{ $t(`${playlistItem.type}.type`) }}</span>
-            </div>
+        <div
+            v-if="!currentSound || currentSound.id !== playlistItem.id"
+            class="column is-narrow mr-1"
+        >
             <o-button
-                v-if="!currentSound || currentSound.id !== playlistItem.id"
-                variant="text"
                 :disabled="isPlayerLoading"
-                custom-class="level-item"
-                icon-left="delete-sweep"
-                @click.prevent="() => deleteSound(playlistItem)"
-            />
-            <o-icon
-                v-else
-                custom-class="level-item"
-                icon="checkbox-blank-circle"
-                variant="success m-3"
-                size="small"
+                variant="text"
+                icon-left="play"
+                @click.prevent="() => loadNewAudio(playlistItem)"
             />
         </div>
+        <div
+            v-if="currentSound && currentSound.id === playlistItem.id"
+            class="column is-narrow mr-1"
+        >
+            <o-button
+                :disabled="isPlayerLoading"
+                variant="text"
+                :icon-left="isPlaying ? 'pause' : 'play'"
+                @click.prevent="() => setIsPlaying(!isPlaying)"
+            />
+        </div>
+        <div class="column is-text-ellipsis">
+            {{ `${playlistItem.dj.name} – ${playlistItem.name}` }}
+        </div>
+
+        <div class="column is-narrow">
+            <span :class="['tag', soundTagType]">{{ $t(`${playlistItem.type}.type`) }}</span>
+        </div>
+        <o-button
+            v-if="!currentSound || currentSound.id !== playlistItem.id"
+            variant="text"
+            :disabled="isPlayerLoading"
+            custom-class="column is-narrow"
+            icon-left="delete-sweep"
+            @click.prevent="() => deleteSound(playlistItem)"
+        />
+        <o-icon
+            v-else
+            custom-class="column is-narrow"
+            icon="checkbox-blank-circle"
+            variant="success m-3"
+            size="small"
+        />
     </li>
 </template>
 

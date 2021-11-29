@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <ul>
         <SoundListItem v-for="sound in sounds" :key="sound.id" :sound="sound" />
-    </div>
+    </ul>
 </template>
 
 <script>
