@@ -34,7 +34,8 @@ export default {
         { src: '~/plugins/time.js' },
         { src: '~/plugins/oruga.js' },
         { src: '~/plugins/marked.js' },
-        { src: '~/plugins/vue-dompurify-html.js' }
+        { src: '~/plugins/vue-dompurify-html.js' },
+        { src: '~/plugins/persisted-state.client.js' }
     ],
 
     // Auto import components: https://go.nuxtjs.dev/config-components
