@@ -31,7 +31,8 @@
     "vee-validate": "^3.4.14",
     "vue-advanced-cropper": "^1.8.2",
     "vue-dompurify-html": "^2.3.0",
-    "vuedraggable": "^2.24.3"
+    "vuedraggable": "^2.24.3",
+    "vuex-persistedstate": "^4.1.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.14.7",
