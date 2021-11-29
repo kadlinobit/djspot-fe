@@ -9,7 +9,7 @@
                 {{ $audio.convertTimeHHMMSS(currentSeconds) }}
             </div>
         </div>
-        <div class="column has-text-centered has-text-weight-semibold">
+        <div class="column has-text-centered has-text-weight-semibold is-text-ellipsis">
             <span v-if="currentSound">
                 {{ `${currentSound.dj.name} - ${currentSound.name}` }}
             </span>
