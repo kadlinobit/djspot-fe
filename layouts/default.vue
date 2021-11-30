@@ -57,8 +57,18 @@ export default {
         Playlist,
         LoginModal
     },
+    head() {
+        return {
+            htmlAttrs: {
+                class:
+                    this.isPlaylistOpen || this.isLoginOpen || this.isSidebarOpen
+                        ? 'is-clipped'
+                        : ''
+            }
+        }
+    },
     computed: {
-        ...mapGetters(['isSidebarOpen', 'isPlaylistOpen'])
+        ...mapGetters(['isSidebarOpen', 'isPlaylistOpen', 'isLoginOpen'])
     },
     methods: {
         ...mapActions(['setIsSidebarOpen', 'setIsPlaylistOpen'])
