@@ -1,7 +1,9 @@
+import { defineNuxtConfig } from '@nuxt/bridge'
 import i18n from './config/i18n'
 
-export default {
+export default defineNuxtConfig({
     // Global page headers: https://go.nuxtjs.dev/config-head
+    // bridge: false,
     head: {
         title: 'djspot-fe',
         htmlAttrs: {
@@ -121,4 +123,4 @@ export default {
         DOMAIN: 'http://localhost:1337'
     },
     privateRuntimeConfig: {}
-}
+})
