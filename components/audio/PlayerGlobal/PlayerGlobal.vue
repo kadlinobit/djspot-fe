@@ -7,6 +7,8 @@
             :disabled="!isLoaded || isError"
             variant="secondary mb-0 mt-0"
             @change="(value) => seek(value)"
+            @dragstart="isSeeking = true"
+            @dragend="isSeeking = false"
         />
         <div v-if="currentSound" class="p-2 is-hidden-tablet">
             <sound-info />
@@ -28,7 +30,7 @@
             style="display: none"
             :loop="false"
             :src="file"
-            @timeupdate="update"
+            @timeupdate="updateCurrentSeconds"
             @loadstart="
                 setIsLoading(true)
                 setIsPlaying(false)
@@ -60,7 +62,9 @@ export default {
             default: 'global-player-audio'
         }
     },
-    data: () => ({}),
+    data: () => ({
+        isSeeking: false
+    }),
     computed: {
         ...mapGetters('playlist', [
             'playlist',
@@ -135,8 +139,9 @@ export default {
             if (!this.isLoaded) return
             this.$refs[this.audioRefName].currentTime = parseInt(value)
         },
-        update(e) {
-            this.setCurrentSeconds(parseInt(this.$refs[this.audioRefName].currentTime))
+        updateCurrentSeconds() {
+            if (!this.isSeeking)
+                this.setCurrentSeconds(parseInt(this.$refs[this.audioRefName].currentTime))
         },
         onError() {
             this.setIsLoading(false)
