@@ -3,13 +3,22 @@
         {{ $t('player.error_loading_file') }}
     </o-notification>
     <div v-else class="columns is-vcentered is-mobile is-relative">
-        <o-loading :full-page="false" :active.sync="isLoading" :can-cancel="false"></o-loading>
+        <!--  -->
         <div class="column is-narrow">
             <div class="tag is-secondary">
                 {{ $audio.convertTimeHHMMSS(currentSeconds) }}
             </div>
         </div>
-        <div class="column has-text-centered has-text-weight-semibold is-text-ellipsis">
+        <div v-if="isLoading" class="column">
+            <o-loading
+                :full-page="false"
+                :active.sync="isLoading"
+                :overlay="false"
+                :can-cancel="false"
+                icon-size="small"
+            ></o-loading>
+        </div>
+        <div v-else class="column has-text-centered has-text-weight-semibold is-text-ellipsis">
             <span v-if="currentSound">
                 {{ `${currentSound.dj.name} - ${currentSound.name}` }}
             </span>
