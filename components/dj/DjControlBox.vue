@@ -4,7 +4,7 @@
             <div class="level-item">
                 <o-responsive-button
                     icon-left="eye"
-                    :variant="dj.isFollowedByMe ? 'secondary' : 'text'"
+                    :variant="dj.isFollowedByMe ? 'primary' : 'light'"
                     @click="onToggleFollow"
                 >
                     {{
@@ -17,7 +17,7 @@
         </div>
         <div class="level-right">
             <o-responsive-button
-                variant="dark"
+                variant="light"
                 icon-left="pencil"
                 tag="nuxt-link"
                 :to="{ path: `/djs/manage/edit/` }"
