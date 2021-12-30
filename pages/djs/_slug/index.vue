@@ -32,10 +32,7 @@
                                 <span
                                     v-for="genre in dj.genres"
                                     :key="`genre-${genre.id}`"
-                                    class="
-                                        tag
-                                        is-peach is-size-5-desktop is-size-6-mobile is-size-6-tablet
-                                    "
+                                    class="tag is-peach is-size-5-desktop is-size-6-mobile is-size-6-tablet"
                                 >
                                     {{ genre.name }}
                                 </span>
@@ -65,7 +62,7 @@
                     :animated="true"
                 >
                     <o-tab-item v-if="!!dj.bio" label="Bio">
-                        <div v-dompurify-html="$marked.markdownToHtml(dj.bio)" class="content" />
+                        <div class="content" v-html="$marked.markdownToHtml(dj.bio)" />
                     </o-tab-item>
 
                     <o-tab-item v-if="mixes && mixes.length > 0" label="Sety">

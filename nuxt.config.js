@@ -3,6 +3,9 @@ import i18n from './config/i18n'
 
 export default defineNuxtConfig({
     // Global page headers: https://go.nuxtjs.dev/config-head
+    alias: {
+        tslib: 'tslib/tslib.es6.js'
+    },
     // bridge: false,
     head: {
         title: 'djspot-fe',
@@ -36,7 +39,7 @@ export default defineNuxtConfig({
         { src: '~/plugins/time.js' },
         { src: '~/plugins/oruga.js' },
         { src: '~/plugins/marked.js' },
-        { src: '~/plugins/vue-dompurify-html.js' },
+        { src: '~/plugins/vue-dompurify-html.js', ssr: false }, // TODO - REMOVE
         { src: '~/plugins/persisted-state.client.js' }
     ],
 
