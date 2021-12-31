@@ -49,7 +49,8 @@ export default defineNuxtConfig({
     // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
     buildModules: [
         // https://go.nuxtjs.dev/eslint
-        '@nuxtjs/eslint-module'
+        '@nuxtjs/eslint-module',
+        '@nuxtjs/strapi'
     ],
 
     // Modules: https://go.nuxtjs.dev/config-modules
@@ -57,7 +58,6 @@ export default defineNuxtConfig({
         // https://go.nuxtjs.dev/axios
         '@nuxtjs/axios',
         '@nuxtjs/auth',
-        '@nuxtjs/strapi',
         '@nuxtjs/i18n'
     ],
 
@@ -109,6 +109,8 @@ export default defineNuxtConfig({
         }
     },
     strapi: {
+        url: process.env.STRAPI_URL || 'http://localhost:1337',
+        version: 'v3',
         key: 'strapi_jwt',
         expires: '31d',
         cookie: {
