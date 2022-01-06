@@ -12,11 +12,7 @@
                 />
             </div>
             <div class="column preview-content-wrapper" @mouseover="handleMouseOver('preview')">
-                <div
-                    ref="previewContent"
-                    v-dompurify-html="markedHtml"
-                    class="preview-content content"
-                />
+                <div ref="previewContent" class="preview-content content" v-html="markedHtml" />
             </div>
         </div>
     </div>

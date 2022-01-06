@@ -1,7 +1,12 @@
+import { defineNuxtConfig } from '@nuxt/bridge'
 import i18n from './config/i18n'
 
-export default {
+export default defineNuxtConfig({
     // Global page headers: https://go.nuxtjs.dev/config-head
+    alias: {
+        tslib: 'tslib/tslib.es6.js'
+    },
+    // bridge: false,
     head: {
         title: 'djspot-fe',
         htmlAttrs: {
@@ -34,7 +39,7 @@ export default {
         { src: '~/plugins/time.js' },
         { src: '~/plugins/oruga.js' },
         { src: '~/plugins/marked.js' },
-        { src: '~/plugins/vue-dompurify-html.js' },
+        { src: '~/plugins/vue-dompurify-html.js', ssr: false }, // TODO - REMOVE
         { src: '~/plugins/persisted-state.client.js' }
     ],
 
@@ -52,8 +57,8 @@ export default {
         // https://go.nuxtjs.dev/axios
         '@nuxtjs/axios',
         '@nuxtjs/auth',
-        '@nuxtjs/strapi',
-        '@nuxtjs/i18n'
+        '@nuxtjs/i18n',
+        '@nuxtjs/strapi'
     ],
 
     i18n: {
@@ -104,6 +109,7 @@ export default {
         }
     },
     strapi: {
+        url: process.env.STRAPI_URL || 'http://localhost:1337',
         key: 'strapi_jwt',
         expires: '31d',
         cookie: {
@@ -121,4 +127,4 @@ export default {
         DOMAIN: 'http://localhost:1337'
     },
     privateRuntimeConfig: {}
-}
+})

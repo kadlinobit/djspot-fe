@@ -65,10 +65,7 @@
                             <span
                                 v-for="genre in sound.genres"
                                 :key="`genre-${genre.id}`"
-                                class="
-                                    tag
-                                    is-peach is-size-5-desktop is-size-6-mobile is-size-6-tablet
-                                "
+                                class="tag is-peach is-size-5-desktop is-size-6-mobile is-size-6-tablet"
                             >
                                 {{ genre.name }}
                             </span>
@@ -125,10 +122,7 @@
                     :animated="true"
                 >
                     <o-tab-item v-if="!!sound.description" :label="$t(`${sound.type}.description`)">
-                        <div
-                            v-dompurify-html="$marked.markdownToHtml(sound.description)"
-                            class="content"
-                        />
+                        <div class="content" v-html="$marked.markdownToHtml(sound.description)" />
                     </o-tab-item>
                 </o-tabs>
             </div>

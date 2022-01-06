@@ -1,4 +1,5 @@
 import { marked } from 'marked'
+import DOMPurify from 'isomorphic-dompurify'
 
 marked.setOptions({
     renderer: new marked.Renderer(),
@@ -28,7 +29,7 @@ marked.use({ renderer })
 
 export default (context, inject) => {
     function markdownToHtml(input) {
-        return marked(escapeHtml(input))
+        return DOMPurify.sanitize(marked(escapeHtml(input)))
     }
 
     function escapeHtml(input) {
