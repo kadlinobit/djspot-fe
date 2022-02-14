@@ -1,10 +1,6 @@
 <template>
     <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
-        <o-field
-            :label="label"
-            :variant="{ danger: !!errors[0], success: valid }"
-            :message="$t(errors[0])"
-        >
+        <o-field :label="label" :variant="getFieldVariant(errors, valid)" :message="$t(errors[0])">
             <o-select
                 :value="value"
                 :placeholder="placeholder"
@@ -58,6 +54,17 @@ export default {
         rules: {
             type: [Object, String],
             default: ''
+        },
+        isValidationOn: {
+            type: Boolean,
+            default: true
+        }
+    },
+    methods: {
+        getFieldVariant(errors, valid) {
+            if (this.isValidationOn && !!errors[0]) return 'danger'
+            if (this.isValidationOn && valid) return 'success'
+            return null
         }
     }
 }

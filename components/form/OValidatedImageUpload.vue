@@ -10,7 +10,7 @@
             <o-field
                 :label="label"
                 :class="{ 'has-name': !!value }"
-                :variant="{ danger: !!errors[0], success: valid }"
+                :variant="getFieldVariant(errors, valid)"
                 :message="errors[0]"
             >
                 <div v-if="currentImage && value === 'keep-current'">
@@ -86,6 +86,10 @@ export default {
             type: [Object, String],
             default: ''
         },
+        isValidationOn: {
+            type: Boolean,
+            default: true
+        },
         onRemoveImage: {
             type: Function,
             required: true
@@ -112,6 +116,13 @@ export default {
             } catch (e) {
                 this.photoUrl = null
             }
+        }
+    },
+    methods: {
+        getFieldVariant(errors, valid) {
+            if (this.isValidationOn && !!errors[0]) return 'danger'
+            if (this.isValidationOn && valid) return 'success'
+            return null
         }
     }
 }

@@ -2,7 +2,7 @@
     <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
         <o-field
             :label="label"
-            :variant="{ danger: !!errors[0], success: valid }"
+            :variant="getFieldVariant(errors, valid)"
             :message="$t(errors[0])"
             :style="visibilityStyle"
         >
@@ -73,6 +73,10 @@ export default {
         help: {
             type: String,
             default: null
+        },
+        isValidationOn: {
+            type: Boolean,
+            default: true
         }
     },
     computed: {
@@ -81,6 +85,13 @@ export default {
                 return { display: 'none' }
             }
             return { display: 'default' }
+        }
+    },
+    methods: {
+        getFieldVariant(errors, valid) {
+            if (this.isValidationOn && !!errors[0]) return 'danger'
+            if (this.isValidationOn && valid) return 'success'
+            return null
         }
     }
 }

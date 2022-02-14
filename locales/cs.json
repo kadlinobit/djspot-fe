@@ -3,20 +3,46 @@
     "welcome_message": "Vítejte na DJSpot!",
     "form" : {
         "cancel": "Zrušit",
-        "edit": "Upravit"
+        "edit": "Upravit",
+        "sort" : {
+            "a_z": "A > Z",
+            "z_a": "Z > A",
+            "newest": "Nejnovější",
+            "oldest": "Nejstarší",
+            "most_followed": "Nejsledovanější",
+            "most_liked": "Nejoblíbenější"
+        }
     },
     "user" : {
+        "user_profile": "Uživatelský profil",
+        "profile": "Profil",
+        "save_profile": "Uložit profil",
+        "create_profile": "Vytvořit profil",
+        "user_account": "Uživatelský účet",
+        "my_account" : "Můj účet",
+        "account": "Účet",
         "register": "Nový účet",
         "do_register": "Vytvořit účet",
         "username": "Uživatelské jméno",
+        "first_name": "Jméno",
+        "last_name": "Příjmení",
+        "location": "Město",
+        "language": "Jazyk",
+        "preffered_language": "Preferovaný jazyk",
         "email": "Email",
+        "password_check": "Heslo (pro kontrolu)",
+        "current_password_check": "Aktuální heslo (pro kontrolu)",
         "password": "Heslo",
         "password_again": "Heslo znovu",
         "passwords_do_not_match" : "Hesla se neshodují",
         "forgot_password" : "Zapomenuté heslo",
         "email_reset_link" : "Resetovat heslo",
         "password_reset_link_sent" : "Odkaz k nastavení nového hesla byl odeslán na tvůj email. Klikni na něj k dokončení resetu hesla.",
+        "do_change_password": "Změnit heslo",
+        "change_password": "Změna hesla",
+        "password_change_success": "Tvoje heslo bylo úspěšně změněno.",
         "new_password" : "Nové heslo",
+        "new_password_again" : "Nové heslo (znovu)",
         "reset_password" : "Reset hesla",
         "do_reset_password" : "Resetovat heslo",
         "password_reset_success" : "Heslo bylo úspěšně změněno. Teď se můžeš přihlásit.",
@@ -24,10 +50,12 @@
         "dont_have_an_account" : "Ještě nemáš účet?",
         "do_login" : "Přihlásit",
         "login": "Přihlášení",
+        "login_success": "Byl jsi úspěšně přihlášen. Vítej!",
         "go_to_login_page" : "Jít na přihlašovací stránku",
         "register_success_message": "Odkaz k potvrzení nového účtu byl právě odeslán na tvůj email - klikni na něj k dokončení registrace.",
         "email_confirmed": "Tvůj účet byl potvrzen! Teď se můžeš přihlásit.",
-        "logout_success": "Byl jsi úspěšně odhlášen. Naviděnou příště!"
+        "logout_success": "Byl jsi úspěšně odhlášen. Naviděnou příště!",
+        "profile_update_success": "Tvůj uživatelský profil byl úspěšně uložen!"
     },
     "dj" : {
         "profile" : "Profil DJe",
@@ -55,7 +83,10 @@
         "delete_profile_confirm_message": "Opravdu chceš smazat svůj DJ profil? Tuhle akci nelze vzít zpět.",
         "deleted_successfully" : "Tvůj DJský profil byl úspěšně smazán.",
         "follow": "Sledovat",
-        "followers": "Sledujících"
+        "followers": "Sledujících",
+        "no_djs_found": "Bohužel, nenašli jsme žádné DJs.",
+        "reset_search": "Resetovat vyhledávání",
+        "search_dj": "Hledat DJe..."
     },
     "mix" : {
         "type": "Set",
@@ -102,7 +133,8 @@
         "url": "URL adresa",
         "url_placeholder": "Adresa kde se nachází zvukový soubor",
         "select_sound_type": "Vyber typ audia",
-        "info": "Info"
+        "info": "Info",
+        "all_types": "Všechny typy"
     },
     "playlist" : {
         "added_to_playlist" : "Audio '{0}' přidáno do playlistu",

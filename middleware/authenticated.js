@@ -1,5 +1,5 @@
-export default function ({ redirect, $strapi }) {
-    if (!$strapi.user) {
+export default function ({ redirect, $auth }) {
+    if (!$auth.loggedIn) {
         return redirect('/login')
     }
 }

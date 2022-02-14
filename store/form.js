@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { getGenreTags } from '~/api/graphql/genre'
 
 export const state = () => ({
     cities: [
@@ -213,41 +212,58 @@ export const state = () => ({
     genres: [],
     djsPageSortOptions: [
         {
-            value: 'name:asc',
-            label: 'name:asc'
+            value: 'name',
+            label: 'form.sort.a_z'
         },
         {
-            value: 'name:desc',
-            label: 'name:desc'
+            value: '-name',
+            label: 'form.sort.z_a'
         },
         {
-            value: 'created_at:asc',
-            label: 'created_at:asc'
+            value: 'date_created',
+            label: 'form.sort.oldest'
         },
         {
-            value: 'created_at:desc',
-            label: 'created_at:desc'
+            value: '-date_created',
+            label: 'form.sort.newest'
+        },
+        {
+            value: '-follow_count',
+            label: 'form.sort.most_followed'
         }
     ],
     soundsPageSortOptions: [
         {
-            value: 'name:asc',
-            label: 'name:asc'
+            value: 'name',
+            label: 'form.sort.a_z'
         },
         {
-            value: 'name:desc',
-            label: 'name:desc'
+            value: '-name',
+            label: 'form.sort.z_a'
         },
         {
-            value: 'created_at:asc',
-            label: 'created_at:asc'
+            value: 'date_created',
+            label: 'form.sort.oldest'
         },
         {
-            value: 'created_at:desc',
-            label: 'created_at:desc'
+            value: '-date_created',
+            label: 'form.sort.newest'
+        },
+        {
+            value: '-like_count',
+            label: 'form.sort.most_liked'
         }
     ],
-    soundTypeOptions: ['mix', 'track']
+    soundTypeOptions: [
+        {
+            value: 'mix',
+            label: 'mix.type'
+        },
+        {
+            value: 'track',
+            label: 'track.type'
+        }
+    ]
 })
 export const mutations = {
     mutateSetGenres(state, genres) {
@@ -258,31 +274,29 @@ export const mutations = {
 export const actions = {
     async fetchGenres({ commit, state }) {
         if (_.isEmpty(state.genres)) {
-            const genresData = await this.$strapi.graphql({
-                query: getGenreTags()
-            })
+            const genres = await this.$axios.$get('items/genre')
 
-            commit('mutateSetGenres', genresData.genres)
+            commit('mutateSetGenres', genres.data)
         }
     }
 }
 
 export const getters = {
-    getCitiesOptions(state) {
+    citiesOptions(state) {
         return state.cities.map((city) => {
             return { value: city, label: city }
         })
     },
-    getDjsPageSortOptions(state) {
+    djsPageSortOptions(state) {
         return state.djsPageSortOptions
     },
-    getGenresOptions(state) {
+    genresOptions(state) {
         return state.genres
     },
-    getSoundTypeOptions(state) {
+    soundTypeOptions(state) {
         return state.soundTypeOptions
     },
-    getSoundsPageSortOptions(state) {
+    soundsPageSortOptions(state) {
         return state.soundsPageSortOptions
     }
 }

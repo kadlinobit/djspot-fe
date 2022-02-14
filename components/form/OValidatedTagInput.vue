@@ -2,10 +2,7 @@
     <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
         <o-field
             :label="label"
-            :variant="{
-                danger: isValidationOn && !!errors[0],
-                success: isValidationOn && valid
-            }"
+            :variant="getFieldVariant(errors, valid)"
             :message="$t(errors[0])"
             :expanded="expanded"
         >
@@ -118,7 +115,18 @@ export default {
         emitInput(value) {
             this.$emit('input', value)
             this.getFilteredTags('')
+        },
+        getFieldVariant(errors, valid) {
+            if (this.isValidationOn && !!errors[0]) return 'danger'
+            if (this.isValidationOn && valid) return 'success'
+            return null
         }
     }
 }
 </script>
+
+<style lang="scss" scoped>
+.autocomplete .dropdown-content {
+    flex-basis: 100% !important;
+}
+</style>

@@ -63,6 +63,7 @@ export default {
         }
     },
     mounted() {
+        this.innerValue = this.value
         this.editContent = this.$refs.editContent
         this.previewContent = this.$refs.previewContent
         this.editContent.addEventListener('scroll', this.handleScroll, true)

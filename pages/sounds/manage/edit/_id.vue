@@ -38,7 +38,6 @@ TODO:
 <script>
 import SoundForm from '~/components/form/SoundForm.vue'
 import ConfirmModal from '~/components/form/ConfirmModal.vue'
-import { getSound } from '~/api/graphql/sound'
 import { parseResponseErrorMessage } from '~/api/tools'
 
 export default {
@@ -58,18 +57,19 @@ export default {
     async fetch() {
         try {
             const id = this.$nuxt.context.params.id
-            const data = await this.$strapi.graphql({
-                query: getSound('form'),
-                variables: {
-                    id
+            const data = await this.$axios.$get(`items/sound/${id}`, {
+                params: {
+                    fields: this.$api.collection.getCollectionFields('sound', 'form').join(',')
                 }
             })
 
-            if (data.sound) {
-                this.initialData = { ...data.sound }
+            if (data.data) {
+                this.initialData = {
+                    ...data.data,
+                    genres: data.data.genres.map((genre) => genre.genre_id)
+                }
             } else {
-                this.$fetchState.error = 'Sound not found'
-                return this.$nuxt.error({ statusCode: 404, message: 'Sound not found' })
+                throw new Error('Sound not found')
             }
         } catch (e) {
             this.$fetchState.error = e
@@ -83,47 +83,54 @@ export default {
             try {
                 this.isLoading = true
 
-                const formData = new FormData()
+                const id = formDataObj.id
 
-                if (formDataObj.photo && formDataObj.photo !== 'keep-current') {
-                    const { canvas } = formDataObj.photo.croppedImage
-                    if (canvas) {
-                        const blob = await new Promise((resolve) => canvas.toBlob(resolve))
-                        const fileName = `sound_${formDataObj.name}.${blob.type.split('/')[1]}`
-                        formData.append('files.photo', blob, fileName)
-                    }
+                // #1 Handle photo update || delete
+                const photo = await this.editPhoto(formDataObj, this.initialData.photo)
+                delete formDataObj.photo
+                delete formDataObj.id
+
+                const soundData = {
+                    ...formDataObj,
+                    genres: formDataObj.genres
+                        ? formDataObj.genres.map((genre) => ({ genre_id: parseInt(genre.id) }))
+                        : null
                 }
 
-                if (formDataObj.photo === 'keep-current') {
-                    delete formDataObj.photo
+                if (photo !== 'keep-current') {
+                    soundData.photo = photo
                 }
 
-                formData.append(
-                    'data',
-                    JSON.stringify({
-                        ...formDataObj,
-                        genres: formDataObj.genres
-                            ? formDataObj.genres.map((genre) => parseInt(genre.id))
-                            : null
-                    })
+                const updatedSound = await this.$axios.patch(`items/sound/${id}`, soundData)
+
+                this.$router.push(
+                    `/djs/${this.$auth.user.djs[0].slug}/sounds/${updatedSound.data.data.id}`
                 )
 
-                const sound = await this.$strapi.update('sounds', formDataObj.id, formData)
-
-                if (sound) {
-                    this.$router.push(`/djs/${sound.dj.slug}/sounds/${sound.id}`)
-
-                    this.$oruga.notification.open({
-                        message: this.$t(`${formDataObj.type}.edit_success`, [sound.name]),
-                        variant: 'success',
-                        duration: 7000
-                    })
-                }
+                this.$oruga.notification.open({
+                    message: this.$t(`${formDataObj.type}.updated_successfully`),
+                    variant: 'success',
+                    duration: 7000
+                })
             } catch (e) {
-                this.error = parseResponseErrorMessage(e)
+                this.error = e
             } finally {
                 this.isLoading = false
             }
+        },
+        async editPhoto(formDataObj, prevPhoto) {
+            const newPhoto = formDataObj.photo
+            const newPhotoMeta = {
+                title: `sound_${formDataObj.name}`,
+                filename_download: `sound_${formDataObj.name}`
+                // folder: 'TBD - ADD FOLDER LATER'
+            }
+            const photoResult = await this.$api.file.handleCoverPhotoUpdate(
+                newPhoto,
+                prevPhoto,
+                newPhotoMeta
+            )
+            return photoResult
         },
         onDeleteSound() {
             const { type, name } = this.initialData
@@ -144,9 +151,9 @@ export default {
             try {
                 this.isLoading = true
                 const { id, type, name } = this.initialData
-                await this.$strapi.delete('sounds', id)
+                await this.$axios.delete(`items/sound/${id}`)
 
-                this.$router.push(`/`)
+                this.$router.push(`/djs/${this.$auth.user.djs[0].slug}`)
 
                 this.$oruga.notification.open({
                     message: this.$t(`${type}.delete_success`, [name]),

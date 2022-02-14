@@ -1,12 +1,5 @@
 <template>
-    <div
-        class="cover-image"
-        :style="{
-            backgroundImage: `url(${coverImageUrl})`,
-            width: `${pixelSize}px`,
-            height: `${pixelSize}px`
-        }"
-    ></div>
+    <div class="cover-image" :style="coverImageStyle"></div>
 </template>
 
 <script>
@@ -15,7 +8,7 @@ import { mapGetters } from 'vuex'
 export default {
     props: {
         coverImage: {
-            type: Object,
+            type: String,
             default: null
         },
         coverType: {
@@ -28,7 +21,7 @@ export default {
         },
         pixelSize: {
             type: Number,
-            default: 300
+            default: null
         }
     },
     computed: {
@@ -37,12 +30,20 @@ export default {
             if (this.coverImage) {
                 return this.$media.getImageUrl(this.coverImage, this.quality)
             } else {
-                return this.$media.getImageUrl(
-                    this.getDefaultCoverImage(this.coverType),
-                    this.quality,
-                    ''
-                )
+                return 'http://localhost:3000' + this.getDefaultCoverImage(this.coverType)
             }
+        },
+        coverImageStyle() {
+            const style = {}
+            style.backgroundImage = `url(${this.coverImageUrl})`
+            if (this.pixelSize) {
+                style.width = `${this.pixelSize}px`
+                style.height = `${this.pixelSize}px`
+            } else {
+                style.width = `100%`
+                style.paddingTop = `100%`
+            }
+            return style
         }
     }
 }

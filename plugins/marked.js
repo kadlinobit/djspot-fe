@@ -29,6 +29,7 @@ marked.use({ renderer })
 
 export default (context, inject) => {
     function markdownToHtml(input) {
+        if (typeof input !== 'string') return input
         return DOMPurify.sanitize(marked(escapeHtml(input)))
     }
 

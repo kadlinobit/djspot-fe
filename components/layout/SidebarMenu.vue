@@ -17,31 +17,29 @@
             </ul>
             <p class="menu-label">Deejay</p>
             <ul class="menu-list">
-                <li v-if="!$strapi.user.dj" @click="closeSidebar">
+                <li v-if="!djProfile" @click="closeSidebar">
                     <nuxt-link to="/djs/manage/new">
                         <o-icon icon="plus" size="small" />
                         <span>{{ $t('dj.create_profile') }}</span>
                     </nuxt-link>
                 </li>
                 <li v-else>
-                    <span>
-                        <o-icon icon="album" size="small" />
-                        <span>{{ $strapi.user.dj.name }}</span>
-                        <ul>
-                            <li @click="closeSidebar">
-                                <nuxt-link :to="`/djs/${$strapi.user.dj.slug}`">
-                                    <o-icon icon="account-box" size="small" />
-                                    <span>{{ $t('dj.profile') }}</span>
-                                </nuxt-link>
-                            </li>
-                            <li @click="closeSidebar">
-                                <nuxt-link to="/sounds/manage/new">
-                                    <o-icon icon="plus" size="small" />
-                                    <span>{{ $t('sound.add') }}</span>
-                                </nuxt-link>
-                            </li>
-                        </ul>
-                    </span>
+                    <o-icon icon="album" size="small" />
+                    <span>{{ djProfile.name }}</span>
+                    <ul>
+                        <li @click="closeSidebar">
+                            <nuxt-link :to="`/djs/${djProfile.slug}`">
+                                <o-icon icon="account-box" size="small" />
+                                <span>{{ $t('dj.profile') }}</span>
+                            </nuxt-link>
+                        </li>
+                        <li @click="closeSidebar">
+                            <nuxt-link to="/sounds/manage/new">
+                                <o-icon icon="plus" size="small" />
+                                <span>{{ $t('sound.add') }}</span>
+                            </nuxt-link>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </aside>
@@ -49,17 +47,30 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import { mapActions } from 'vuex'
 
 export default {
     props: {
         open: Boolean
     },
+    computed: {
+        djProfile() {
+            if (!_.isEmpty(this.$auth.user.djs)) {
+                return this.$auth.user.djs[0]
+            }
+            return null
+        }
+    },
     methods: {
         ...mapActions(['setIsSidebarOpen']),
         async logout() {
             this.closeSidebar()
-            await this.$strapi.logout()
+            await this.$auth.logout({
+                data: {
+                    refresh_token: this.$auth.strategy.refreshToken.get()
+                }
+            })
             this.$oruga.notification.open({
                 message: this.$t('user.logout_success'),
                 variant: 'success'

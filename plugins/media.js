@@ -1,4 +1,4 @@
-import _ from 'lodash'
+// import _ from 'lodash'
 
 export default (context, inject) => {
     /**
@@ -9,29 +9,29 @@ export default (context, inject) => {
      * @param {string} quality - desired photo quality - 'large', 'medium', 'small', 'thumbnail' or empty
      * @param {string} baseUrl - baseUrl for absolute path - default 'http://localhost:1337'
      */
-    function getImageUrl(image, quality, baseUrl = 'http://localhost:1337') {
-        const qualities = ['large', 'medium', 'small', 'thumbnail']
+    function getImageUrl(imageId, quality, baseUrl = 'http://localhost:8055/assets') {
+        // const qualities = ['large', 'medium', 'small', 'thumbnail']
 
-        if (!image) return null
+        if (!imageId) return null
 
-        if (!quality || !qualities.includes(quality)) return baseUrl + image.url
+        return `${baseUrl}/${imageId}`
+    }
 
-        let imageUrl
+    async function getCroppedImageBlob(imageObj) {
+        if (!imageObj.croppedImage)
+            throw new Error('Cropped image not present in provided image object.')
 
-        for (let i = qualities.indexOf(quality); i < qualities.length; i++) {
-            if (!_.isEmpty(image.formats[qualities[i]])) {
-                imageUrl = image.formats[qualities[i]].url
-                break
-            }
-        }
+        const { canvas } = imageObj.croppedImage
+        if (!canvas) throw new Error('Canvas object not present in provided image object.')
 
-        if (!imageUrl) imageUrl = image.url
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve))
 
-        return baseUrl + imageUrl
+        return blob
     }
 
     const api = {
-        getImageUrl
+        getImageUrl,
+        getCroppedImageBlob
     }
 
     inject('media', api)

@@ -39,24 +39,26 @@ export default (context, inject) => {
      * @param {Object} parsedUrl - Url object (from url-parse library)
      * @returns {Object} - {stream, download} object with URLs to stream and download audio
      */
-    async function getHearThisUrls(parsedUrl) {
+    function getHearThisUrls(parsedUrl) {
         const audioUrls = {
             stream: null,
             download: null
         }
 
-        try {
-            const response = await context.app.$axios.get(
-                `https://api-v2.hearthis.at${parsedUrl.pathname}`
-            )
+        audioUrls.stream = `https://hearthis.app${parsedUrl.pathname}listen`
 
-            if (response.data) {
-                audioUrls.stream = response.data.stream_url || null
-                audioUrls.download = response.data.download_url || null
-            }
-        } catch (e) {
-            // console.warn(e)
-        }
+        // try {
+        //     const response = await context.app.$axios.get(
+        //         `https://api-v2.hearthis.at${parsedUrl.pathname}`
+        //     )
+
+        //     if (response.data) {
+        //         audioUrls.stream = response.data.stream_url || null
+        //         audioUrls.download = response.data.download_url || null
+        //     }
+        // } catch (e) {
+        //     // console.warn(e)
+        // }
         return audioUrls
     }
     /**

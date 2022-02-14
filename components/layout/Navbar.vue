@@ -4,7 +4,7 @@
             <nuxt-link class="navbar-item" to="/">
                 <img src="https://bulma.io/images/bulma-logo.png" width="112" height="28" />
             </nuxt-link>
-            <a v-if="$strapi.user" class="navbar-item" @click="() => setIsSidebarOpen(true)">
+            <a v-if="$auth.loggedIn" class="navbar-item" @click="() => setIsSidebarOpen(true)">
                 <o-icon icon="account" />
             </a>
             <a
@@ -29,7 +29,7 @@
             </div>
             <div class="navbar-end">
                 <language-selection />
-                <div v-if="!$strapi.user" class="navbar-item">
+                <div v-if="!$auth.loggedIn" class="navbar-item">
                     <div class="buttons">
                         <a class="button is-light" @click="() => setIsLoginOpen(true)">
                             {{ $t('user.login') }}

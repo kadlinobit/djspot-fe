@@ -4,12 +4,13 @@
             <div class="level-item">
                 <o-responsive-button
                     icon-left="eye"
-                    :variant="dj.isFollowedByMe ? 'primary' : 'light'"
+                    :variant="followButtonVariant"
+                    :disabled="isToggleFollowLoading"
                     @click="onToggleFollow"
                 >
                     {{
-                        dj.followsCount > 0
-                            ? `${dj.followsCount} ${$t('dj.followers')}`
+                        dj.follow_count > 0
+                            ? `${dj.follow_count} ${$t('dj.followers')}`
                             : $t('dj.follow')
                     }}
                 </o-responsive-button>
@@ -42,6 +43,16 @@ export default {
         onToggleFollow: {
             type: Function,
             required: true
+        },
+        isToggleFollowLoading: {
+            type: Boolean,
+            default: false
+        }
+    },
+    computed: {
+        followButtonVariant() {
+            if (!this.$auth.loggedIn) return 'light'
+            return this.dj.follows.length > 0 ? 'dark' : 'light'
         }
     }
 }

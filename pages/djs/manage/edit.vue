@@ -20,26 +20,28 @@
                     </o-button>
                 </div>
             </div>
-            <client-only>
-                <dj-form
-                    :initial-data="initialData"
-                    :on-form-submit="editDj"
-                    :error-in="error"
-                    :success-in="success"
-                    :is-loading-in="isLoading"
-                />
-            </client-only>
+            <dj-form
+                :initial-data="initialData"
+                :on-form-submit="editDj"
+                :error-in="error"
+                :success-in="success"
+                :is-loading-in="isLoading"
+            />
         </div>
     </section>
 </template>
 
 <script>
+/**
+ * TBD
+ * - try to handle genres so there is no new dj_genre creation for each DJ update
+ */
+// import _ from 'lodash'
 import DjForm from '~/components/form/DjForm.vue'
 import ConfirmModal from '~/components/form/ConfirmModal.vue'
-import { getDj } from '~/api/graphql/dj'
-import { parseResponseErrorMessage } from '~/api/tools'
 
 export default {
+    name: 'DjEditPage',
     components: {
         DjForm
     },
@@ -54,14 +56,17 @@ export default {
     },
     async fetch() {
         try {
-            const data = await this.$strapi.graphql({
-                query: getDj('form'),
-                variables: {
-                    id: this.$strapi.user.dj.id
+            const data = await this.$axios.$get(`items/dj/${this.$auth.user.djs[0].id}`, {
+                params: {
+                    fields: this.$api.collection.getCollectionFields('dj', 'form').join(',')
                 }
             })
-            if (data.dj) {
-                this.initialData = { ...data.dj }
+
+            if (data.data) {
+                this.initialData = {
+                    ...data.data,
+                    genres: data.data.genres.map((genre) => genre.genre_id)
+                }
             } else {
                 throw new Error('DJ not found')
             }
@@ -76,35 +81,30 @@ export default {
         async editDj(formDataObj) {
             try {
                 this.isLoading = true
-                const formData = new FormData()
 
-                if (formDataObj.photo && formDataObj.photo !== 'keep-current') {
-                    const { canvas } = formDataObj.photo.croppedImage
-                    if (canvas) {
-                        const blob = await new Promise((resolve) => canvas.toBlob(resolve))
-                        const fileName = `dj_${formDataObj.slug}_photo.${blob.type.split('/')[1]}`
-                        formData.append('files.photo', blob, fileName)
-                    }
+                // #1 Handle photo update || delete
+                const photo = await this.editPhoto(formDataObj, this.initialData.photo)
+                delete formDataObj.photo
+                delete formDataObj.id
+
+                const djData = {
+                    ...formDataObj,
+                    genres: formDataObj.genres
+                        ? formDataObj.genres.map((genre) => ({ genre_id: parseInt(genre.id) }))
+                        : null
                 }
 
-                if (formDataObj.photo === 'keep-current') {
-                    delete formDataObj.photo
+                if (photo !== 'keep-current') {
+                    djData.photo = photo
                 }
 
-                formData.append(
-                    'data',
-                    JSON.stringify({
-                        ...formDataObj,
-                        genres: formDataObj.genres
-                            ? formDataObj.genres.map((genre) => parseInt(genre.id))
-                            : null
-                    })
+                const updatedDj = await this.$axios.patch(
+                    `items/dj/${this.$auth.user.djs[0].id}`,
+                    djData
                 )
+                await this.$auth.fetchUser()
 
-                const dj = await this.$strapi.update('djs', this.$strapi.user.dj.id, formData)
-                await this.$strapi.fetchUser()
-
-                this.$router.push(`/djs/${dj.slug}`)
+                this.$router.push(`/djs/${updatedDj.data.data.slug}`)
 
                 this.$oruga.notification.open({
                     message: this.$t('dj.updated_successfully'),
@@ -112,10 +112,24 @@ export default {
                     duration: 7000
                 })
             } catch (e) {
-                this.error = parseResponseErrorMessage(e)
+                this.error = e
             } finally {
                 this.isLoading = false
             }
+        },
+        async editPhoto(formDataObj, prevPhoto) {
+            const newPhoto = formDataObj.photo
+            const newPhotoMeta = {
+                title: `dj_${formDataObj.slug}_photo`,
+                filename_download: `dj_${formDataObj.slug}_photo`
+                // folder: 'TBD - ADD FOLDER LATER'
+            }
+            const photoResult = await this.$api.file.handleCoverPhotoUpdate(
+                newPhoto,
+                prevPhoto,
+                newPhotoMeta
+            )
+            return photoResult
         },
         onDeleteDj() {
             this.$oruga.modal.open({
@@ -133,8 +147,8 @@ export default {
         async deleteDj() {
             try {
                 this.isLoading = true
-                await this.$strapi.delete('djs', this.$strapi.user.dj.id)
-                await this.$strapi.fetchUser()
+                await this.$axios.delete(`items/dj/${this.$auth.user.djs[0].id}`)
+                await this.$auth.fetchUser()
 
                 this.$router.push(`/`)
 
@@ -144,7 +158,7 @@ export default {
                     duration: 7000
                 })
             } catch (e) {
-                this.error = parseResponseErrorMessage(e)
+                this.error = e
             } finally {
                 this.isLoading = false
             }

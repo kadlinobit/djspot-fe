@@ -13,22 +13,24 @@
                     <div class="column">
                         <div class="columns is-mobile is-vcentered">
                             <div class="column is-narrow">
-                                <o-button
-                                    v-if="!currentSound || currentSound.id !== sound.id"
-                                    :disabled="isPlayerLoading"
-                                    variant="text"
-                                    size="large"
-                                    icon-left="play"
-                                    @click.prevent="() => onPlayNewSound(sound)"
-                                />
-                                <o-button
-                                    v-if="currentSound && currentSound.id === sound.id"
-                                    :disabled="isPlayerLoading"
-                                    variant="text"
-                                    size="large"
-                                    :icon-left="isPlaying ? 'pause' : 'play'"
-                                    @click.prevent="() => setIsPlaying(!isPlaying)"
-                                />
+                                <client-only>
+                                    <o-button
+                                        v-if="!currentSound || currentSound.id !== sound.id"
+                                        :disabled="isPlayerLoading"
+                                        variant="text"
+                                        size="large"
+                                        icon-left="play"
+                                        @click.prevent="() => onPlayNewSound(sound)"
+                                    />
+                                    <o-button
+                                        v-if="currentSound && currentSound.id === sound.id"
+                                        :disabled="isPlayerLoading"
+                                        variant="text"
+                                        size="large"
+                                        :icon-left="isPlaying ? 'pause' : 'play'"
+                                        @click.prevent="() => setIsPlaying(!isPlaying)"
+                                    />
+                                </client-only>
                             </div>
                             <div class="column">
                                 <h1 class="title is-size-4-mobile is-size-3-desktop">
@@ -64,10 +66,10 @@
                         <div v-if="sound.genres" class="tags">
                             <span
                                 v-for="genre in sound.genres"
-                                :key="`genre-${genre.id}`"
+                                :key="`genre-${genre.genre_id.id}`"
                                 class="tag is-peach is-size-5-desktop is-size-6-mobile is-size-6-tablet"
                             >
-                                {{ genre.name }}
+                                {{ genre.genre_id.name }}
                             </span>
                         </div>
                         <dj-info-box :dj="sound.dj" />
@@ -85,11 +87,12 @@
                     <div class="level-left">
                         <div class="level-item">
                             <o-responsive-button
-                                :variant="sound.isLikedByMe ? 'dark' : 'light'"
+                                :variant="likeButtonVariant"
                                 icon-left="heart"
+                                :disabled="isToggleLikeLoading"
                                 @click="onToggleLike"
                             >
-                                {{ sound.likesCount || 'Like' }}
+                                {{ sound.like_count || 'Like' }}
                             </o-responsive-button>
                         </div>
                         <div class="level-item">
@@ -131,8 +134,8 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import { mapActions, mapGetters } from 'vuex'
-import { getSounds, toggleSoundLike } from '~/api/graphql/sound'
 import DjInfoBox from '~/components/dj/DjInfoBox.vue'
 import CoverImage from '~/components/media/CoverImage.vue'
 import OResponsiveButton from '~/components/form/OResponsiveButton.vue'
@@ -147,25 +150,45 @@ export default {
     data() {
         return {
             sound: null,
-            activeTab: 1
+            activeTab: 1,
+            isToggleLikeLoading: false
         }
     },
     async fetch() {
         try {
             const slug = this.$nuxt.context.params.slug
             const id = this.$nuxt.context.params.id
-            const data = await this.$strapi.graphql({
-                query: getSounds('detailed'),
-                variables: {
-                    where: {
-                        id,
-                        'dj.slug': slug
+            let fields = this.$api.collection.getCollectionFields('sound', 'detailed')
+
+            if (!this.$auth.loggedIn) {
+                fields = fields.filter((field) => field !== 'likes')
+            }
+
+            const { data } = await this.$axios.$request('items/sound', {
+                method: 'search',
+                data: {
+                    query: {
+                        filter: {
+                            _and: [{ id: { _eq: id } }, { dj: { slug: { _eq: slug } } }]
+                        },
+                        fields,
+                        deep: this.$auth.user
+                            ? {
+                                  likes: {
+                                      _filter: {
+                                          user_created: {
+                                              _eq: this.$auth?.user?.id || null
+                                          }
+                                      }
+                                  }
+                              }
+                            : null
                     }
                 }
             })
 
-            if (data.sounds && data.sounds.length > 0) {
-                this.sound = data.sounds[0]
+            if (data && data.length > 0) {
+                this.sound = data[0]
             } else {
                 this.$fetchState.error = 'Sound not found'
                 return this.$nuxt.error({ statusCode: 404, message: 'Sound not found' })
@@ -184,42 +207,54 @@ export default {
             isPlayerLoading: 'isLoading'
         }),
         ...mapGetters('playlist', ['isSoundInPlaylist']),
-        likesCount() {
-            return this.sound ? this.sound.likes.length : 0
-        },
-        isLikedByMe() {
-            if (this.$strapi.user) {
-                return this.sound.likes.some((like) => like.user.id === this.$strapi.user.id)
-            }
-            return false
+        likeButtonVariant() {
+            if (!this.$auth.loggedIn) return 'light'
+            return this.sound.likes.length > 0 ? 'dark' : 'light'
         }
     },
     methods: {
+        ...mapActions(['setIsLoginOpen', 'setLoginActiveComponent']),
         ...mapActions('player', ['loadNewAudio', 'setIsPlaying']),
         ...mapActions('playlist', ['handlePlaySound', 'handleAddOrRemovePlaylistSound']),
         onPlayNewSound(sound) {
             this.handlePlaySound(sound)
             this.loadNewAudio(sound)
         },
-        onToggleLike() {
-            this.sound.isLikedByMe ? this.sound.likesCount-- : this.sound.likesCount++
-            this.sound.isLikedByMe = !this.sound.isLikedByMe
-            this.toggleLike()
-        },
-        async toggleLike() {
+        async onToggleLike() {
+            if (!this.$auth.loggedIn) {
+                this.setLoginActiveComponent('login')
+                this.setIsLoginOpen(true)
+                return
+            }
+            this.isToggleLikeLoading = true
             try {
-                const data = await this.$strapi.graphql({
-                    query: toggleSoundLike('detailed'),
-                    variables: {
-                        id: this.sound.id
-                    }
-                })
-
-                if (data.toggleSoundLike) {
-                    this.sound = data.toggleSoundLike
-                }
+                _.isEmpty(this.sound.likes) ? await this.createLike() : await this.deleteLike()
             } catch (e) {
                 throw new Error(e)
+            } finally {
+                this.isToggleLikeLoading = false
+            }
+        },
+        async createLike() {
+            const result = await this.$axios.post('items/user_sound_like', {
+                sound: this.sound.id
+            })
+
+            if (result.status === 200) {
+                this.sound.likes = [result.data.data.id]
+                this.sound.like_count++
+            } else {
+                throw new Error('Could not toggle like')
+            }
+        },
+        async deleteLike() {
+            const result = await this.$axios.delete(`items/user_sound_like/${this.sound.likes[0]}`)
+
+            if (result.status === 204) {
+                this.sound.likes = []
+                this.sound.like_count--
+            } else {
+                throw new Error('Could not toggle like')
             }
         }
     }
