@@ -16,8 +16,8 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import SoundForm from '~/components/form/SoundForm.vue'
-import { parseResponseErrorMessage } from '~/api/tools'
 
 export default {
     components: {
@@ -36,31 +36,24 @@ export default {
             try {
                 this.isLoading = true
 
-                const formData = new FormData()
+                const photo = await this.createPhoto(formDataObj)
 
-                if (formDataObj.photo) {
-                    const { canvas } = formDataObj.photo.croppedImage
-                    if (canvas) {
-                        const blob = await new Promise((resolve) => canvas.toBlob(resolve))
-                        const fileName = `sound_${formDataObj.name}.${blob.type.split('/')[1]}`
-                        formData.append('files.photo', blob, fileName)
-                    }
+                const soundData = {
+                    ...formDataObj,
+                    dj: this.$auth.user.djs[0].id,
+                    genres: formDataObj.genres
+                        ? formDataObj.genres.map((genre) => ({ genre_id: parseInt(genre.id) }))
+                        : null,
+                    photo: photo?.data?.data?.id ? photo.data.data.id : null,
+                    status: 'published'
                 }
 
-                formData.append(
-                    'data',
-                    JSON.stringify({
-                        ...formDataObj,
-                        genres: formDataObj.genres
-                            ? formDataObj.genres.map((genre) => parseInt(genre.id))
-                            : null
-                    })
-                )
+                const newSound = await this.$axios.post('items/sound', soundData)
 
-                const sound = await this.$strapi.create('sounds', formData)
-
-                if (sound) {
-                    this.$router.push(`/djs/${sound.dj.slug}/sounds/${sound.id}`)
+                if (newSound) {
+                    this.$router.push(
+                        `/djs/${this.$auth.user.djs[0].slug}/sounds/${newSound.data.data.id}`
+                    )
 
                     this.$oruga.notification.open({
                         message: this.$t(`${formDataObj.type}.add_success`, [formDataObj.name]),
@@ -69,9 +62,28 @@ export default {
                     })
                 }
             } catch (e) {
-                this.error = parseResponseErrorMessage(e)
+                this.error = e
             } finally {
                 this.isLoading = false
+            }
+        },
+        async createPhoto(formDataObj) {
+            let newPhoto = null
+
+            if (!_.isEmpty(formDataObj.photo)) {
+                const photoBlob = await this.$media.getCroppedImageBlob(formDataObj.photo)
+
+                if (photoBlob) {
+                    const photoMeta = {
+                        title: `sound_${formDataObj.name}`,
+                        filename_download: `sound_${formDataObj.name}`
+                        // folder: 'TBD - ADD FOLDER LATER'
+                    }
+
+                    newPhoto = await this.$api.file.uploadFile(photoBlob, photoMeta)
+                }
+
+                return newPhoto
             }
         }
     }

@@ -10,11 +10,11 @@
             <o-field
                 :label="label"
                 :class="{ 'has-name': !!value }"
-                :variant="{ danger: !!errors[0], success: valid }"
+                :variant="getFieldVariant(errors, valid)"
                 :message="errors[0]"
             >
                 <div v-if="currentImage && value === 'keep-current'">
-                    <img :src="`http://localhost:1337${currentImage.url}`" />
+                    <img :src="`http://localhost:8055/assets/${currentImage}`" />
                 </div>
                 <o-upload
                     v-else-if="!file || (file && errors[0])"
@@ -76,6 +76,11 @@
 </template>
 
 <script>
+/**
+ * TBD
+ * - remove hardcoded URL http://localhost:8055/assets
+ * - put canvas size somwehre to config
+ */
 import { ValidationProvider } from 'vee-validate'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
@@ -92,7 +97,7 @@ export default {
             type: [Object, String, null]
         },
         currentImage: {
-            type: [Object],
+            type: String,
             default: null
         },
         name: {
@@ -106,6 +111,10 @@ export default {
         rules: {
             type: [Object, String],
             default: ''
+        },
+        isValidationOn: {
+            type: Boolean,
+            default: true
         }
     },
     data() {
@@ -138,6 +147,11 @@ export default {
         onKeepCurrentImage() {
             this.file = null
             this.$emit('input', 'keep-current')
+        },
+        getFieldVariant(errors, valid) {
+            if (this.isValidationOn && !!errors[0]) return 'danger'
+            if (this.isValidationOn && valid) return 'success'
+            return null
         }
     }
 }

@@ -122,21 +122,16 @@ export default {
         async login() {
             try {
                 this.isLoading = true
-                /*
+
                 await this.$auth.loginWith('local', {
                     data: {
-                        identifier: this.email,
+                        email: this.email,
                         password: this.password
                     }
-                }) */
-                await this.$strapi.login({ identifier: this.email, password: this.password })
+                })
                 this.afterSuccessCallback()
             } catch (e) {
-                if (e.response && e.response.data) {
-                    this.error = e.response.data.message[0].messages[0].message
-                } else {
-                    this.error = e
-                }
+                this.error = e.response.data.errors[0].message
             } finally {
                 this.isLoading = false
             }

@@ -53,6 +53,10 @@ export default {
                             this.$router.push('/')
                         }
                         this.setIsLoginOpen(false)
+                        this.$oruga.notification.open({
+                            message: this.$t('user.login_success'),
+                            variant: 'success'
+                        })
                     }
                     break
                 case 'forgot-password':

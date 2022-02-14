@@ -7,3 +7,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+// Hiding label for horizontal field group - add class "no-label"
+.field.is-horizontal.no-label {
+    .field-label {
+        display: none;
+    }
+}

@@ -1,14 +1,9 @@
 <template>
-    <li class="dj-list-item columns is-vcentered">
-        <div class="column is-narrow">
-            <cover-image
-                :cover-image="dj.photo || null"
-                quality="thumbnail"
-                cover-type="dj"
-                :pixel-size="64"
-            />
+    <div class="dj-list-item card">
+        <div class="card-image">
+            <cover-image :cover-image="dj.photo || null" quality="thumbnail" cover-type="dj" />
         </div>
-        <div class="column">
+        <div class="card-content">
             <div class="title is-5">
                 <nuxt-link :to="`/djs/${dj.slug}`">{{ dj.name }}</nuxt-link>
             </div>
@@ -16,7 +11,7 @@
                 {{ dj.city }}
             </div>
         </div>
-    </li>
+    </div>
 </template>
 
 <script>

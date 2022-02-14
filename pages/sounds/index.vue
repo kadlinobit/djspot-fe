@@ -1,7 +1,7 @@
 <template>
     <section class="section">
         <div class="container">
-            <h1 class="title">Sounds {{ getSoundsCount }}</h1>
+            <h1 class="title">Sounds {{ soundsCount }}</h1>
             <o-field>
                 <o-input
                     v-model="searchNameLocal"
@@ -13,52 +13,51 @@
                     <o-button type="is-primary" label="Search" @click="onSearch" />
                 </p>
             </o-field>
-            <o-field grouped>
-                <o-field>
-                    <o-select v-model="sortLocal" @input="onSearch">
-                        <option
-                            v-for="option in getSoundsPageSortOptions"
-                            :key="option.value"
-                            :value="option.value"
-                        >
-                            {{ option.label }}
-                        </option>
-                    </o-select>
-                </o-field>
-                <o-field>
-                    <o-select v-model="searchTypeLocal" @input="onSearch">
-                        <option value="">
-                            {{ `Celá ČR` }}
-                        </option>
-                        <option
-                            v-for="option in getSoundTypeOptions"
-                            :key="option.value"
-                            :value="option.value"
-                        >
-                            {{ option.label }}
-                        </option>
-                    </o-select>
-                </o-field>
-                <o-validated-tag-input
-                    v-model="searchGenresLocal"
-                    name="genres"
-                    :tags="getGenresOptions"
-                    :is-validation-on="false"
-                    field="name"
-                    maxtags="3"
-                    expanded
-                    :placeholder="$t('dj.select_3_genres')"
-                />
+            <o-field class="no-label" horizontal>
+                <o-select v-model="sortLocal" expanded @input="onSearch">
+                    <option
+                        v-for="option in soundsPageSortOptions"
+                        :key="option.value"
+                        :value="option.value"
+                    >
+                        {{ $t(option.label) }}
+                    </option>
+                </o-select>
+
+                <o-select v-model="searchTypeLocal" expanded @input="onSearch">
+                    <option value="">
+                        {{ $t('sound.all_types') }}
+                    </option>
+                    <option
+                        v-for="option in soundTypeOptions"
+                        :key="option.value"
+                        :value="option.value"
+                    >
+                        {{ $t(option.label) }}
+                    </option>
+                </o-select>
+                <client-only>
+                    <o-validated-tag-input
+                        v-model="searchGenresLocal"
+                        name="genres"
+                        :tags="getGenresOptions"
+                        :is-validation-on="false"
+                        field="name"
+                        maxtags="3"
+                        expanded
+                        :placeholder="$t('dj.select_3_genres')"
+                    />
+                </client-only>
             </o-field>
 
             <p v-if="$fetchState.pending">Loading ...</p>
             <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
-            <div v-else>
-                <sounds-page-list :sounds="getSounds[currentPage]" />
+            <div v-else-if="!$fetchState.pending && soundsCount > 0">
+                <sounds-page-list :sounds="sounds[currentPage]" />
 
                 <o-pagination
                     :current="currentPage"
-                    :total="getSoundsCount"
+                    :total="soundsCount"
                     :range-before="1"
                     :range-after="1"
                     order="centered"
@@ -79,7 +78,6 @@
 <script>
 import _ from 'lodash'
 import { mapGetters, mapActions } from 'vuex'
-import { getSounds, getSoundsCount } from '~/api/graphql/sound'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import SoundsPageList from '~/components/sound/SoundsPageList.vue'
 
@@ -101,18 +99,15 @@ export default {
         this.fetchGenres()
         this.syncLocalSearchValues()
 
-        if (
-            _.isArray(this.getSounds[this.currentPage]) &&
-            !_.isEmpty(this.getSounds[this.currentPage])
-        )
+        if (_.isArray(this.sounds[this.currentPage]) && !_.isEmpty(this.sounds[this.currentPage]))
             return
 
         try {
-            this.setSoundsCount(await this.fetchSoundsCount())
-            const sounds = await this.fetchSounds(0)
+            const sounds = await this.fetchSounds(1)
+            this.setSoundsCount(sounds.meta.filter_count)
 
-            if (Array.isArray(sounds)) {
-                this.setNewSounds(sounds)
+            if (Array.isArray(sounds.data)) {
+                this.setNewSounds(sounds.data)
             } else {
                 this.$fetchState.error = 'Sounds not fetched'
                 return this.$nuxt.error({ statusCode: 404, message: 'Sounds not fetched' })
@@ -126,45 +121,17 @@ export default {
     },
     computed: {
         ...mapGetters('soundsPage', [
-            'getCurrentPage',
-            'getPerPage',
-            'getSort',
-            'getSoundsCount',
-            'getSounds',
-            'getWhere',
-            'getSearchName',
-            'getSearchType',
-            'getSearchGenres'
+            'currentPage',
+            'perPage',
+            'sort',
+            'soundsCount',
+            'sounds',
+            'filter',
+            'searchName',
+            'searchType',
+            'searchGenres'
         ]),
-        ...mapGetters('form', [
-            'getSoundsPageSortOptions',
-            'getSoundTypeOptions',
-            'getGenresOptions'
-        ]),
-        currentPage: {
-            get() {
-                return this.getCurrentPage
-            },
-            set(value) {
-                this.setCurrentPage(value)
-            }
-        },
-        perPage: {
-            get() {
-                return this.getPerPage
-            },
-            set(value) {
-                this.setPerPage(value)
-            }
-        },
-        sort: {
-            get() {
-                return this.getSort
-            },
-            set(value) {
-                this.setSort(value)
-            }
-        }
+        ...mapGetters('form', ['soundsPageSortOptions', 'soundTypeOptions', 'fenresOptions'])
     },
     methods: {
         ...mapActions('soundsPage', [
@@ -180,28 +147,28 @@ export default {
             'initNewSearch'
         ]),
         ...mapActions('form', ['fetchGenres']),
-        async fetchSoundsCount() {
-            const soundsCountData = await this.$strapi.graphql({
-                query: getSoundsCount(),
-                variables: {
-                    where: this.getWhere
+        async fetchSounds(page) {
+            let fields = this.$api.collection.getCollectionFields('sound', 'default')
+
+            if (!this.$auth.loggedIn) {
+                fields = fields.filter((field) => field !== 'follows')
+            }
+
+            const sounds = await this.$axios.$request('items/sound', {
+                method: 'search',
+                data: {
+                    query: {
+                        fields,
+                        filter: this.filter,
+                        meta: '*',
+                        limit: this.perPage,
+                        page
+                        // sort: this.sort
+                    }
                 }
             })
 
-            return soundsCountData.soundsCount || 0
-        },
-        async fetchSounds(start) {
-            const soundsData = await this.$strapi.graphql({
-                query: getSounds(),
-                variables: {
-                    sort: this.getSort,
-                    where: this.getWhere,
-                    limit: this.getPerPage,
-                    start
-                }
-            })
-
-            return soundsData.sounds
+            return sounds
         },
         async onSearch() {
             this.initNewSearch({
@@ -214,20 +181,18 @@ export default {
         },
         async onPageChange(pageNumber) {
             this.syncLocalSearchValues()
-            this.currentPage = pageNumber
+            this.setCurrentPage(pageNumber)
 
-            if (!_.isArray(this.getSounds[pageNumber]) || _.isEmpty(this.getSounds[pageNumber])) {
-                const sounds = await this.fetchSounds(
-                    this.currentPage * this.getPerPage - this.getPerPage
-                )
+            if (!_.isArray(this.sounds[pageNumber]) || _.isEmpty(this.sounds[pageNumber])) {
+                const sounds = await this.fetchSounds(pageNumber)
                 this.setPageSounds({ sounds, pageNumber })
             }
         },
         syncLocalSearchValues() {
-            this.searchNameLocal = this.getSearchName
-            this.searchTypeLocal = this.getSearchType
-            this.searchGenresLocal = this.getSearchGenres
-            this.sortLocal = this.getSort
+            this.searchNameLocal = this.searchName
+            this.searchTypeLocal = this.searchType
+            this.searchGenresLocal = this.searchGenres
+            this.sortLocal = this.sort
         }
     }
 }

@@ -31,10 +31,10 @@
                             <div class="tags">
                                 <span
                                     v-for="genre in dj.genres"
-                                    :key="`genre-${genre.id}`"
+                                    :key="`genre-${genre.genre_id.id}`"
                                     class="tag is-peach is-size-5-desktop is-size-6-mobile is-size-6-tablet"
                                 >
-                                    {{ genre.name }}
+                                    {{ genre.genre_id.name }}
                                 </span>
                             </div>
                         </div>
@@ -48,7 +48,11 @@
                         </div>
                     </div>
 
-                    <dj-control-box :dj="dj" :on-toggle-follow="onToggleFollow" />
+                    <dj-control-box
+                        :dj="dj"
+                        :on-toggle-follow="onToggleFollow"
+                        :is-toggle-follow-loading="isToggleFollowLoading"
+                    />
                 </div>
             </div>
         </section>
@@ -79,7 +83,13 @@
 </template>
 
 <script>
-import { getDjs, toggleDjFollow } from '~/api/graphql/dj'
+/**
+ * TBD
+ * - error handling
+ * - better handling of toggleFollow ? (fetch DJ again after toggle?)
+ */
+
+import _ from 'lodash'
 import CoverImage from '~/components/media/CoverImage.vue'
 import SoundList from '~/components/audio/SoundList.vue'
 import DjControlBox from '~/components/dj/DjControlBox.vue'
@@ -94,23 +104,42 @@ export default {
     data() {
         return {
             dj: null,
-            activeTab: 1
+            activeTab: 1,
+            isToggleFollowLoading: false
         }
     },
     async fetch() {
         try {
             const slug = this.$nuxt.context.params.slug
-            const data = await this.$strapi.graphql({
-                query: getDjs('withMixes'),
-                variables: {
-                    where: {
-                        slug
+            let fields = this.$api.collection.getCollectionFields('dj', 'withSounds')
+
+            if (!this.$auth.loggedIn) {
+                fields = fields.filter((field) => field !== 'follows')
+            }
+
+            const { data } = await this.$axios.$request('items/dj', {
+                method: 'search',
+                data: {
+                    query: {
+                        filter: { slug: { _eq: slug } },
+                        fields,
+                        deep: this.$auth.user
+                            ? {
+                                  follows: {
+                                      _filter: {
+                                          user_created: {
+                                              _eq: this.$auth?.user?.id || null
+                                          }
+                                      }
+                                  }
+                              }
+                            : null
                     }
                 }
             })
 
-            if (data.djs && data.djs.length > 0) {
-                this.dj = data.djs[0]
+            if (data && data.length > 0) {
+                this.dj = data[0]
             } else {
                 this.$fetchState.error = 'DJ not found'
                 return this.$nuxt.error({ statusCode: 404, message: 'DJ not found' })
@@ -124,32 +153,45 @@ export default {
     },
     computed: {
         mixes() {
+            if (!this.dj.sounds) return []
             return this.dj.sounds.filter((sound) => sound.type === 'mix') || []
         },
         tracks() {
+            if (!this.dj.sounds) return []
             return this.dj.sounds.filter((sound) => sound.type === 'track') || []
         }
     },
     methods: {
-        onToggleFollow() {
-            this.dj.isFollowedByMe ? this.dj.followsCount-- : this.dj.followsCount++
-            this.dj.isFollowedByMe = !this.dj.isFollowedByMe
-            this.toggleFollow()
-        },
-        async toggleFollow() {
+        async onToggleFollow() {
+            this.isToggleFollowLoading = true
             try {
-                const data = await this.$strapi.graphql({
-                    query: toggleDjFollow('withMixes'),
-                    variables: {
-                        id: this.dj.id
-                    }
-                })
-
-                if (data.toggleDjFollow) {
-                    this.dj = data.toggleDjFollow
-                }
+                _.isEmpty(this.dj.follows) ? await this.createFollow() : await this.deleteFollow()
             } catch (e) {
                 throw new Error(e)
+            } finally {
+                this.isToggleFollowLoading = false
+            }
+        },
+        async createFollow() {
+            const result = await this.$axios.post('items/user_dj_follow', {
+                dj: this.dj.id
+            })
+
+            if (result.status === 200) {
+                this.dj.follows = [result.data.data.id]
+                this.dj.follow_count++
+            } else {
+                throw new Error('Could not toggle follow')
+            }
+        },
+        async deleteFollow() {
+            const result = await this.$axios.delete(`items/user_dj_follow/${this.dj.follows[0]}`)
+
+            if (result.status === 204) {
+                this.dj.follows = []
+                this.dj.follow_count--
+            } else {
+                throw new Error('Could not toggle follow')
             }
         }
     }

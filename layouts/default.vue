@@ -22,7 +22,7 @@
             </template>
         </o-modal>
         <o-sidebar
-            v-if="$strapi.user"
+            v-if="$auth.user"
             variant="light"
             :fullheight="true"
             :fullwidth="false"

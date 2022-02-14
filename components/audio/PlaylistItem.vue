@@ -26,7 +26,11 @@
             />
         </div>
         <div class="column is-text-ellipsis">
-            {{ `${playlistItem.dj.name} – ${playlistItem.name}` }}
+            <span @click="setIsPlaylistOpen(false)">
+                <nuxt-link :to="`/djs/${playlistItem.dj.slug}/sounds/${playlistItem.id}`">
+                    {{ `${playlistItem.dj.name} – ${playlistItem.name}` }}
+                </nuxt-link>
+            </span>
         </div>
 
         <div class="column is-narrow">
@@ -80,6 +84,7 @@ export default {
         }
     },
     methods: {
+        ...mapActions(['setIsPlaylistOpen']),
         ...mapActions('player', ['loadNewAudio', 'setIsPlaying']),
         ...mapActions('playlist', ['deleteSound'])
     }

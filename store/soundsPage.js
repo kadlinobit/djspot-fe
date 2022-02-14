@@ -7,7 +7,7 @@ export const state = () => ({
     searchName: '',
     searchType: '',
     searchGenres: [],
-    sort: 'name:asc',
+    sort: '-name',
     perPage: 5,
     currentPage: 1
 })
@@ -46,7 +46,7 @@ export const mutations = {
 }
 
 export const actions = {
-    setoundsCount({ commit }, soundsCount) {
+    setSoundsCount({ commit }, soundsCount) {
         commit('mutateSetSoundsCount', soundsCount)
     },
     setNewSounds({ commit }, sounds) {
@@ -84,48 +84,75 @@ export const actions = {
 }
 
 export const getters = {
-    getSoundsCount(state) {
+    soundsCount(state) {
         return state.soundsCount
     },
-    getSounds(state) {
+    sounds(state) {
         return state.sounds
     },
-    getSearchName(state) {
+    searchName(state) {
         return state.searchName
     },
-    getSearchType(state) {
+    searchType(state) {
         return state.searchType
     },
-    getSearchGenres(state) {
+    searchGenres(state) {
         return state.searchGenres
     },
-    getSort(state) {
+    sort(state) {
         return state.sort
     },
-    getPerPage(state) {
+    perPage(state) {
         return state.perPage
     },
-    getCurrentPage(state) {
+    currentPage(state) {
         return state.currentPage
     },
-    getWhere(state) {
+    filter(state) {
         const searchName = state.searchName.toLowerCase().trim()
         const searchType = state.searchType.toLowerCase().trim()
         const searchGenres = state.searchGenres
 
-        const where = {}
+        if (!searchName && !searchType && _.isEmpty(searchGenres)) return null
+
+        const filter = { _and: [] }
 
         if (searchName) {
-            where.name_contains = searchName
+            filter._and.push({
+                _or: [
+                    {
+                        name: {
+                            _contains: searchName
+                        }
+                    },
+                    {
+                        dj: {
+                            name: {
+                                _contains: searchName
+                            }
+                        }
+                    }
+                ]
+            })
         }
         if (searchType) {
-            where.type_contains = searchType
+            filter._and.push({
+                type: {
+                    _eq: searchType
+                }
+            })
         }
 
         if (!_.isEmpty(searchGenres)) {
-            where.genres.id = searchGenres.map((genre) => genre.id)
+            filter._and.push({
+                genres: {
+                    genre_id: {
+                        _in: searchGenres.map((genre) => genre.id)
+                    }
+                }
+            })
         }
 
-        return where
+        return filter
     }
 }

@@ -1,11 +1,12 @@
 <template>
+    <!-- <client-only> -->
     <section class="section">
         <div class="container">
-            <h1 class="title">DJs {{ getDjsCount }}</h1>
+            <h1 class="title">DJs {{ djsCount }}</h1>
             <o-field>
                 <o-input
                     v-model="searchNameLocal"
-                    placeholder="Search in DJ name"
+                    :placeholder="$t('dj.search_dj')"
                     type="search"
                     expanded
                 ></o-input>
@@ -13,52 +14,60 @@
                     <o-button type="is-primary" label="Search" @click="onSearch" />
                 </p>
             </o-field>
-            <o-field grouped>
-                <o-field>
-                    <o-select v-model="sortLocal" @input="onSearch">
-                        <option
-                            v-for="option in getDjsPageSortOptions"
-                            :key="option.value"
-                            :value="option.value"
-                        >
-                            {{ option.label }}
-                        </option>
-                    </o-select>
-                </o-field>
-                <o-field>
-                    <o-select v-model="searchCityLocal" @input="onSearch">
-                        <option value="">
-                            {{ `Celá ČR` }}
-                        </option>
-                        <option
-                            v-for="option in getCitiesOptions"
-                            :key="option.value"
-                            :value="option.value"
-                        >
-                            {{ option.label }}
-                        </option>
-                    </o-select>
-                </o-field>
-                <o-validated-tag-input
-                    v-model="searchGenresLocal"
-                    name="genres"
-                    :tags="getGenresOptions"
-                    :is-validation-on="false"
-                    field="name"
-                    maxtags="3"
-                    expanded
-                    :placeholder="$t('dj.select_3_genres')"
-                />
+            <o-field class="no-label" horizontal>
+                <o-select v-model="sortLocal" expanded @input="onSearch">
+                    <option
+                        v-for="option in djsPageSortOptions"
+                        :key="option.value"
+                        :value="option.value"
+                    >
+                        {{ $t(option.label) }}
+                    </option>
+                </o-select>
+                <o-select v-model="searchCityLocal" expanded @input="onSearch">
+                    <option value="">
+                        {{ `Celá ČR` }}
+                    </option>
+                    <option
+                        v-for="option in citiesOptions"
+                        :key="option.value"
+                        :value="option.value"
+                    >
+                        {{ option.label }}
+                    </option>
+                </o-select>
+                <client-only>
+                    <o-validated-tag-input
+                        v-model="searchGenresLocal"
+                        name="genres"
+                        :tags="genresOptions"
+                        :is-validation-on="false"
+                        field="name"
+                        maxtags="3"
+                        expanded
+                        :placeholder="$t('dj.select_3_genres')"
+                    />
+                </client-only>
             </o-field>
 
             <p v-if="$fetchState.pending">Loading ...</p>
             <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
+            <div v-else-if="!$fetchState.pending && djsCount === 0">
+                <section class="hero is-secondary is-medium">
+                    <div class="hero-body">
+                        <p class="title">{{ $t('dj.no_djs_found') }}</p>
+                        <p class="subtitle">
+                            <a @click="resetSearch">{{ $t('dj.reset_search') }}</a>
+                        </p>
+                    </div>
+                </section>
+            </div>
             <div v-else>
-                <dj-list :djs="getDjs[currentPage]" />
+                <dj-list :djs="djs[currentPage]" />
 
                 <o-pagination
                     :current="currentPage"
-                    :total="getDjsCount"
+                    :total="djsCount"
                     :range-before="1"
                     :range-after="1"
                     order="centered"
@@ -74,12 +83,12 @@
             </div>
         </div>
     </section>
+    <!-- </client-only> -->
 </template>
 
 <script>
 import _ from 'lodash'
 import { mapGetters, mapActions } from 'vuex'
-import { getDjs, getDjsCount } from '~/api/graphql/dj'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import DjList from '~/components/dj/DjList.vue'
 
@@ -101,15 +110,14 @@ export default {
         this.fetchGenres()
         this.syncLocalSearchValues()
 
-        if (_.isArray(this.getDjs[this.currentPage]) && !_.isEmpty(this.getDjs[this.currentPage]))
-            return
+        if (_.isArray(this.djs[this.currentPage]) && !_.isEmpty(this.djs[this.currentPage])) return
 
         try {
-            this.setDjsCount(await this.fetchDjsCount())
-            const djs = await this.fetchDjs(0)
+            const djs = await this.fetchDjs(1)
+            this.setDjsCount(djs.meta.filter_count)
 
-            if (Array.isArray(djs)) {
-                this.setNewDjs(djs)
+            if (Array.isArray(djs.data)) {
+                this.setNewDjs(djs.data)
             } else {
                 this.$fetchState.error = 'DJs not fetched'
                 return this.$nuxt.error({ statusCode: 404, message: 'DJs not fetched' })
@@ -123,41 +131,17 @@ export default {
     },
     computed: {
         ...mapGetters('djsPage', [
-            'getCurrentPage',
-            'getPerPage',
-            'getSort',
-            'getDjsCount',
-            'getDjs',
-            'getWhere',
-            'getSearchName',
-            'getSearchCity',
-            'getSearchGenres'
+            'currentPage',
+            'perPage',
+            'sort',
+            'djsCount',
+            'djs',
+            'filter',
+            'searchName',
+            'searchCity',
+            'searchGenres'
         ]),
-        ...mapGetters('form', ['getDjsPageSortOptions', 'getCitiesOptions', 'getGenresOptions']),
-        currentPage: {
-            get() {
-                return this.getCurrentPage
-            },
-            set(value) {
-                this.setCurrentPage(value)
-            }
-        },
-        perPage: {
-            get() {
-                return this.getPerPage
-            },
-            set(value) {
-                this.setPerPage(value)
-            }
-        },
-        sort: {
-            get() {
-                return this.getSort
-            },
-            set(value) {
-                this.setSort(value)
-            }
-        }
+        ...mapGetters('form', ['djsPageSortOptions', 'citiesOptions', 'genresOptions'])
     },
     methods: {
         ...mapActions('djsPage', [
@@ -173,28 +157,28 @@ export default {
             'initNewSearch'
         ]),
         ...mapActions('form', ['fetchGenres']),
-        async fetchDjsCount() {
-            const djsCountData = await this.$strapi.graphql({
-                query: getDjsCount(),
-                variables: {
-                    where: this.getWhere
+        async fetchDjs(page) {
+            const djs = await this.$axios.$request('items/dj', {
+                method: 'search',
+                data: {
+                    query: {
+                        filter: this.filter,
+                        meta: '*',
+                        limit: this.perPage,
+                        page,
+                        sort: this.sort
+                    }
                 }
             })
 
-            return djsCountData.djsCount || 0
+            return djs
         },
-        async fetchDjs(start) {
-            const djsData = await this.$strapi.graphql({
-                query: getDjs(),
-                variables: {
-                    sort: this.getSort,
-                    where: this.getWhere,
-                    limit: this.getPerPage,
-                    start
-                }
-            })
+        async resetSearch() {
+            this.searchNameLocal = ''
+            this.searchCityLocal = ''
+            this.searchGenresLocal = []
 
-            return djsData.djs
+            await this.onSearch()
         },
         async onSearch() {
             this.initNewSearch({
@@ -207,20 +191,18 @@ export default {
         },
         async onPageChange(pageNumber) {
             this.syncLocalSearchValues()
-            this.currentPage = pageNumber
+            this.setCurrentPage(pageNumber)
 
-            if (!_.isArray(this.getDjs[pageNumber]) || _.isEmpty(this.getDjs[pageNumber])) {
-                const djs = await this.fetchDjs(
-                    this.currentPage * this.getPerPage - this.getPerPage
-                )
-                this.setPageDjs({ djs, pageNumber })
+            if (!_.isArray(this.djs[pageNumber]) || _.isEmpty(this.djs[pageNumber])) {
+                const pageDjs = await this.fetchDjs(this.currentPage)
+                this.setPageDjs({ djs: pageDjs.data, pageNumber })
             }
         },
         syncLocalSearchValues() {
-            this.searchNameLocal = this.getSearchName
-            this.searchCityLocal = this.getSearchCity
-            this.searchGenresLocal = this.getSearchGenres
-            this.sortLocal = this.getSort
+            this.searchNameLocal = this.searchName
+            this.searchCityLocal = this.searchCity
+            this.searchGenresLocal = this.searchGenres
+            this.sortLocal = this.sort
         }
     }
 }

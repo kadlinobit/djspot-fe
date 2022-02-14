@@ -1,92 +1,96 @@
 <template>
-    <div>
-        <o-notification v-if="success" type="success" :closable="false">
-            {{ $t(success) }}
-        </o-notification>
+    <client-only>
+        <div class="form dj-form">
+            <o-notification v-if="success" type="success" :closable="false">
+                {{ $t(success) }}
+            </o-notification>
 
-        <o-notification v-if="error" type="danger" :closable="false">
-            {{ $t(error) }}
-        </o-notification>
+            <o-notification v-if="error" type="danger" :closable="false">
+                {{ $t(error) }}
+            </o-notification>
 
-        <ValidationObserver ref="observer" slim>
-            <form v-if="!success" method="post" @submit.prevent>
-                <div class="columns is-tablet">
-                    <div class="column is-half-tablet is-three-fifths-desktop">
-                        <o-validated-field
-                            v-model="formData.name"
-                            name="name"
-                            type="text"
-                            :label="$t('dj.name')"
-                            :placeholder="$t('dj.dj_name_placeholder')"
-                            rules="required|no_dj_prefix|alpha_num_dash_space"
-                        />
-                        <o-validated-field
-                            v-model="formData.slug"
-                            name="slug"
-                            :disabled="true"
-                            type="text"
-                            :label="$t('dj.slug')"
-                            rules="required"
-                        />
-                        <o-validated-field
-                            v-model="formData.email"
-                            name="email"
-                            type="email"
-                            :label="$t('dj.email')"
-                            rules="email"
-                        />
-                        <o-validated-select
-                            v-model="formData.city"
-                            name="city"
-                            :label="$t('dj.city')"
-                            rules="required"
-                            :options="citiesOptions"
-                            :expanded="true"
-                            :placeholder="$t('dj.select_city')"
-                        />
-                        <o-validated-tag-input
-                            v-model="formData.genres"
-                            name="genres"
-                            :label="$t('dj.genres')"
-                            rules="required"
-                            :tags="availableGenres"
-                            field="name"
-                            maxtags="3"
-                            :placeholder="$t('dj.select_3_genres')"
-                        />
+            <ValidationObserver ref="observer" slim>
+                <form v-if="!success" method="post" @submit.prevent>
+                    <div class="columns is-tablet">
+                        <div class="column is-half-tablet is-three-fifths-desktop">
+                            <o-validated-field
+                                v-model="formData.name"
+                                name="name"
+                                type="text"
+                                :label="$t('dj.name')"
+                                :placeholder="$t('dj.dj_name_placeholder')"
+                                rules="required|no_dj_prefix|alpha_num_dash_space"
+                            />
+                            <o-validated-field
+                                v-model="formData.slug"
+                                name="slug"
+                                :disabled="true"
+                                type="text"
+                                :label="$t('dj.slug')"
+                                rules="required"
+                            />
+                            <o-validated-field
+                                v-model="formData.email"
+                                name="email"
+                                type="email"
+                                :label="$t('dj.email')"
+                                rules="email"
+                            />
+                            <o-validated-select
+                                v-model="formData.city"
+                                name="city"
+                                :label="$t('dj.city')"
+                                rules="required"
+                                :options="citiesOptions"
+                                :expanded="true"
+                                :placeholder="$t('dj.select_city')"
+                            />
+                            <o-validated-tag-input
+                                v-model="formData.genres"
+                                name="genres"
+                                :label="$t('dj.genres')"
+                                rules="required"
+                                :tags="availableGenres"
+                                field="name"
+                                maxtags="3"
+                                :placeholder="$t('dj.select_3_genres')"
+                            />
+                        </div>
+                        <div class="column is-half-tablet is-two-fifths-desktop">
+                            <o-validated-image-crop-upload
+                                v-model="formData.photo"
+                                name="photo"
+                                :label="$t('dj.photo')"
+                                rules="image_type"
+                                :current-image="initialData ? initialData.photo : null"
+                            />
+                        </div>
                     </div>
-                    <div class="column is-half-tablet is-two-fifths-desktop">
-                        <o-validated-image-crop-upload
-                            v-model="formData.photo"
-                            name="photo"
-                            :label="$t('dj.photo')"
-                            rules="image_type"
-                            :current-image="initialData ? initialData.photo : null"
-                        />
-                    </div>
-                </div>
 
-                <o-validated-bm-editor
-                    v-model="formData.bio"
-                    name="bio"
-                    type="textarea"
-                    rules="required"
-                    :label="$t('dj.bio')"
-                />
+                    <o-validated-bm-editor
+                        v-model="formData.bio"
+                        name="bio"
+                        type="textarea"
+                        rules="required"
+                        :label="$t('dj.bio')"
+                    />
 
-                <div class="field is-grouped is-grouped-right">
-                    <div class="control">
-                        <o-button variant="light" @click="onCancel">
-                            {{ $t('form.cancel') }}
-                        </o-button>
-                        <o-button :disabled="isLoading" variant="dark" @click="onSubmit">
-                            {{ initialData ? $t('dj.save_profile') : $t('dj.do_create_profile') }}
-                        </o-button>
+                    <div class="field is-grouped is-grouped-right">
+                        <div class="control">
+                            <o-button variant="light" @click="onCancel">
+                                {{ $t('form.cancel') }}
+                            </o-button>
+                            <o-button :disabled="isLoading" variant="dark" @click="onSubmit">
+                                {{
+                                    initialData ? $t('dj.save_profile') : $t('dj.do_create_profile')
+                                }}
+                            </o-button>
+                        </div>
                     </div>
-                </div>
-            </form>
-        </ValidationObserver>
-    </div>
+                </form>
+            </ValidationObserver>
+        </div>
+    </client-only>
 </template>
 
 <script>
@@ -98,7 +102,6 @@ import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUpload.vue'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
-import { getGenreTags } from '~/api/graphql/genre'
 
 extend('email', email)
 extend('required', required)
@@ -135,7 +138,6 @@ export default {
         OValidatedBmEditor
     },
     middleware: ['authorized'],
-    plugins: ['vee-validate'],
     props: {
         initialData: {
             type: Object,
@@ -178,7 +180,7 @@ export default {
     },
     computed: {
         ...mapGetters({
-            citiesOptions: 'form/getCitiesOptions'
+            citiesOptions: 'form/citiesOptions'
         }),
         djName() {
             return this.formData.name
@@ -205,21 +207,13 @@ export default {
             }
         }
         // Check if initial data contains photo - if so, set form to keep existing photo
-        if (
-            this.initialData &&
-            this.initialData.photo &&
-            this.initialData.photo.id &&
-            this.initialData.photo.url
-        ) {
+        if (this.initialData && this.initialData.photo) {
             this.formData.photo = 'keep-current'
             this.currentPhoto = this.initialData.photo
         }
 
-        const genreTagsAll = await this.$strapi.graphql({
-            query: getGenreTags()
-        })
-
-        this.availableGenres = genreTagsAll.genres
+        const genreTagsAll = await this.$axios.$get('items/genre')
+        this.availableGenres = genreTagsAll.data
     },
     methods: {
         onSubmit() {
@@ -240,6 +234,7 @@ export default {
             this.$router.back()
         },
         createSlug(value) {
+            if (!value) return ''
             return value
                 .toLowerCase()
                 .normalize('NFD')

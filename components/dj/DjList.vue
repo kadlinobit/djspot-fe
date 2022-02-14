@@ -1,10 +1,16 @@
 <template>
-    <ul v-if="isDjsListEmpty">
+    <div v-if="isDjListEmpty">
         <dj-list-item-skeleton v-for="i in 5" :key="i" />
-    </ul>
-    <ul v-else class="dj-list">
-        <dj-list-item v-for="dj in djs" :key="dj.id" :dj="dj" />
-    </ul>
+    </div>
+    <div v-else class="columns is-mobile is-multiline dj-list">
+        <div
+            v-for="dj in djs"
+            :key="dj.id"
+            class="column is-2-widescreen is-3-desktop is-4-tablet is-6-mobile"
+        >
+            <dj-list-item :dj="dj" />
+        </div>
+    </div>
 </template>
 
 <script>
@@ -24,7 +30,7 @@ export default {
         }
     },
     computed: {
-        isDjsListEmpty() {
+        isDjListEmpty() {
             return _.isEmpty(this.djs)
         }
     }

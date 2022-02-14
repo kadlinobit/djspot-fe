@@ -7,7 +7,7 @@ export const state = () => ({
     searchName: '',
     searchCity: '',
     searchGenres: [],
-    sort: 'name:asc',
+    sort: 'name',
     perPage: 5,
     currentPage: 1
 })
@@ -84,48 +84,64 @@ export const actions = {
 }
 
 export const getters = {
-    getDjsCount(state) {
+    djsCount(state) {
         return state.djsCount
     },
-    getDjs(state) {
+    djs(state) {
         return state.djs
     },
-    getSearchName(state) {
+    searchName(state) {
         return state.searchName
     },
-    getSearchCity(state) {
+    searchCity(state) {
         return state.searchCity
     },
-    getSearchGenres(state) {
+    searchGenres(state) {
         return state.searchGenres
     },
-    getSort(state) {
+    sort(state) {
         return state.sort
     },
-    getPerPage(state) {
+    perPage(state) {
         return state.perPage
     },
-    getCurrentPage(state) {
+    currentPage(state) {
         return state.currentPage
     },
-    getWhere(state) {
+    filter(state) {
         const searchName = state.searchName.toLowerCase().trim()
         const searchCity = state.searchCity.toLowerCase().trim()
         const searchGenres = state.searchGenres
 
-        const where = {}
+        if (!searchName && !searchCity && _.isEmpty(searchGenres)) return null
+
+        const filter = { _and: [] }
 
         if (searchName) {
-            where.name_contains = searchName
+            filter._and.push({
+                name: {
+                    _contains: searchName
+                }
+            })
         }
         if (searchCity) {
-            where.city_contains = searchCity
+            filter._and.push({
+                city: {
+                    _eq: searchCity
+                }
+            })
         }
 
         if (!_.isEmpty(searchGenres)) {
-            where.genres.id = searchGenres.map((genre) => genre.id)
+            filter._and.push({
+                genres: {
+                    genre_id: {
+                        _in: searchGenres.map((genre) => genre.id)
+                    }
+                }
+            })
         }
 
-        return where
+        return filter
     }
 }

@@ -32,15 +32,16 @@ export default defineNuxtConfig({
 
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
-        { src: '~plugins/axios', ssr: true },
         { src: '~/plugins/vee-validate.js', ssr: false },
         { src: '~/plugins/audio.js' },
         { src: '~/plugins/media.js' },
         { src: '~/plugins/time.js' },
         { src: '~/plugins/oruga.js' },
         { src: '~/plugins/marked.js' },
-        { src: '~/plugins/vue-dompurify-html.js', ssr: false }, // TODO - REMOVE
-        { src: '~/plugins/persisted-state.client.js' }
+        { src: '~/plugins/vue-dompurify-html.js', ssr: false }, // TBD - REMOVE
+        { src: '~/plugins/persisted-state.client.js' },
+        { src: '~/plugins/directus.js' }, // TBD - remove
+        { src: '~/plugins/api/index.js' }
     ],
 
     // Auto import components: https://go.nuxtjs.dev/config-components
@@ -56,9 +57,8 @@ export default defineNuxtConfig({
     modules: [
         // https://go.nuxtjs.dev/axios
         '@nuxtjs/axios',
-        '@nuxtjs/auth',
-        '@nuxtjs/i18n',
-        '@nuxtjs/strapi'
+        '@nuxtjs/auth-next',
+        '@nuxtjs/i18n'
     ],
 
     i18n: {
@@ -82,44 +82,50 @@ export default defineNuxtConfig({
     },
     // Axios module configuration: https://go.nuxtjs.dev/config-axios
     axios: {
-        baseURL: 'http://localhost:1337'
+        baseURL: 'http://localhost:8055'
     },
     /*
      ** Auth module configuration
      ** See https://auth.nuxtjs.org/schemes/local.html#options
      */
-    // TBD - probably remove
+
     auth: {
         strategies: {
             local: {
+                scheme: 'refresh',
+                token: {
+                    property: 'data.access_token',
+                    maxAge: 900000,
+                    global: true
+                    // type: 'Bearer'
+                },
+                refreshToken: {
+                    property: 'data.refresh_token',
+                    data: 'refresh_token',
+                    maxAge: 60 * 60 * 24 * 7
+                },
+                user: {
+                    property: 'data'
+                    // autoFetch: true
+                },
                 endpoints: {
-                    login: {
-                        url: 'auth/local',
-                        method: 'post',
-                        propertyName: 'jwt'
-                    },
-                    user: {
-                        url: 'users/me',
-                        method: 'get',
-                        propertyName: false
-                    },
-                    logout: false
+                    login: { url: '/auth/login', method: 'post' },
+                    refresh: { url: '/auth/refresh', method: 'post' },
+                    user: { url: '/users/me?fields=*,djs.*', method: 'get' }, // TBD - update fields loaded on user fetch
+                    logout: { url: '/auth/logout', method: 'post' }
                 }
+                // autoLogout: false
             }
-        }
-    },
-    strapi: {
-        url: process.env.STRAPI_URL || 'http://localhost:1337',
-        key: 'strapi_jwt',
-        expires: '31d',
-        cookie: {
-            sameSite: 'lax',
-            path: '/'
         }
     },
     // Build Configuration: https://go.nuxtjs.dev/config-build
     build: {
-        transpile: ['vee-validate/dist/rules']
+        transpile: ['vee-validate/dist/rules'],
+        extend(config, ctx) {
+            if (ctx.isDev) {
+                config.devtool = ctx.isClient ? 'source-map' : 'inline-source-map'
+            }
+        }
     },
 
     publicRuntimeConfig: {

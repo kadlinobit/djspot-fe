@@ -2,7 +2,7 @@
     <section class="section">
         <div class="container">
             <h1 class="title">{{ $t('dj.create_profile') }}</h1>
-            <DjForm
+            <dj-form
                 :on-form-submit="createDj"
                 :error-in="error"
                 :success-in="success"
@@ -14,10 +14,11 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import DjForm from '~/components/form/DjForm.vue'
-import { parseResponseErrorMessage } from '~/api/tools'
 
 export default {
+    name: 'DjNewPage',
     components: {
         DjForm
     },
@@ -33,31 +34,21 @@ export default {
         async createDj(formDataObj) {
             try {
                 this.isLoading = true
-                const formData = new FormData()
+                const photo = await this.createPhoto(formDataObj)
 
-                if (formDataObj.photo) {
-                    const { canvas } = formDataObj.photo.croppedImage
-                    if (canvas) {
-                        const blob = await new Promise((resolve) => canvas.toBlob(resolve))
-                        const fileName = `dj_${formDataObj.slug}_photo.${blob.type.split('/')[1]}`
-                        formData.append('files.photo', blob, fileName)
-                    }
+                const djData = {
+                    ...formDataObj,
+                    genres: formDataObj.genres
+                        ? formDataObj.genres.map((genre) => ({ genre_id: parseInt(genre.id) }))
+                        : null,
+                    photo: photo?.data?.data?.id ? photo.data.data.id : null,
+                    status: 'published'
                 }
 
-                formData.append(
-                    'data',
-                    JSON.stringify({
-                        ...formDataObj,
-                        genres: formDataObj.genres
-                            ? formDataObj.genres.map((genre) => parseInt(genre.id))
-                            : null
-                    })
-                )
+                const newDj = await this.$axios.post('items/dj', djData)
+                await this.$auth.fetchUser()
 
-                const dj = await this.$strapi.create('djs', formData)
-                await this.$strapi.fetchUser()
-
-                this.$router.push(`/djs/${dj.slug}`)
+                this.$router.push(`/djs/${newDj.data.data.slug}`)
 
                 this.$oruga.notification.open({
                     message: this.$t('dj.created_successfully'),
@@ -65,9 +56,28 @@ export default {
                     duration: 7000
                 })
             } catch (e) {
-                this.error = parseResponseErrorMessage(e)
+                this.error = e
             } finally {
                 this.isLoading = false
+            }
+        },
+        async createPhoto(formDataObj) {
+            let newPhoto = null
+
+            if (!_.isEmpty(formDataObj.photo)) {
+                const photoBlob = await this.$media.getCroppedImageBlob(formDataObj.photo)
+
+                if (photoBlob) {
+                    const photoMeta = {
+                        title: `dj_${formDataObj.slug}`,
+                        filename_download: `dj_${formDataObj.slug}`
+                        // folder: 'TBD - ADD FOLDER LATER'
+                    }
+
+                    newPhoto = await this.$api.file.uploadFile(photoBlob, photoMeta)
+                }
+
+                return newPhoto
             }
         }
     }
