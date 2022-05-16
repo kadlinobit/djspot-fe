@@ -76,7 +76,8 @@ const collectionsConfig = {
                 'type',
                 'duration',
                 'photo',
-                'genres.genre_id.*'
+                'genres.genre_id.*',
+                'status'
             ]
         }
     },

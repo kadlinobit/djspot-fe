@@ -91,12 +91,21 @@
                             </o-button>
                         </div>
                         <div class="control">
-                            <o-button :disabled="isLoading" variant="dark" @click="onSubmit">
+                            <o-button :disabled="isLoading" variant="dark" @click="onSave">
                                 {{
                                     initialData
                                         ? $t(`${formData.type}.save`)
                                         : $t(`${formData.type}.add`)
                                 }}
+                            </o-button>
+                        </div>
+                        <div v-if="initialData && initialData.status === 'draft'" class="control">
+                            <o-button
+                                :disabled="isLoading"
+                                variant="primary"
+                                @click="onSaveAndPublish"
+                            >
+                                {{ $t(`${formData.type}.save_and_publish`) }}
                             </o-button>
                         </div>
                     </div>
@@ -237,7 +246,19 @@ export default {
         this.debouncedGetAudioUrl = _.debounce(this.getAudioUrl, 500)
     },
     methods: {
-        onSubmit() {
+        onSave() {
+            this.onSubmit(this.formData, `${this.formData.type}.edit_success`)
+        },
+        onSaveAndPublish() {
+            this.onSubmit(
+                {
+                    ...this.formData,
+                    status: 'published'
+                },
+                `${this.formData.type}.save_and_publish_success`
+            )
+        },
+        onSubmit(formDataObj, successMessage) {
             this.error = null
             this.$refs.observer.validate().then((success) => {
                 if (!success) {
@@ -245,12 +266,12 @@ export default {
                         message: this.$t('validation.form_validation_error'),
                         rootClass: 'toast',
                         variant: 'danger',
-                        duration: 500000
+                        duration: 7000
                     })
                     return
                 }
 
-                this.onFormSubmit(this.formData)
+                this.onFormSubmit(formDataObj, successMessage)
             })
         },
         onCancel() {

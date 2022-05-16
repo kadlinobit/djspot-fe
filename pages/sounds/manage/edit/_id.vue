@@ -19,9 +19,22 @@ TODO:
                     </h1>
                 </div>
                 <div class="column is-narrow">
-                    <o-button variant="danger" @click.stop="onDeleteSound">
-                        {{ $t(`${initialData.type}.delete`) }}
-                    </o-button>
+                    <o-dropdown aria-role="list" position="bottom-left">
+                        <o-button slot="trigger" slot-scope="{ active }" variant="danger">
+                            <o-icon :icon="active ? 'chevron-up' : 'chevron-down'"></o-icon>
+                        </o-button>
+
+                        <o-dropdown-item aria-role="listitem" @click="onDeleteSound">
+                            {{ $t(`${initialData.type}.delete`) }}
+                        </o-dropdown-item>
+                        <o-dropdown-item
+                            v-if="initialData.status === 'published'"
+                            aria-role="listitem"
+                            @click="onUnpublishSound"
+                        >
+                            {{ $t(`${initialData.type}.unpublish`) }}
+                        </o-dropdown-item>
+                    </o-dropdown>
                 </div>
             </div>
             <sound-form
@@ -79,7 +92,7 @@ export default {
         }
     },
     methods: {
-        async editSound(formDataObj) {
+        async editSound(formDataObj, successMessage = 'sound.edit_success') {
             try {
                 this.isLoading = true
 
@@ -108,7 +121,7 @@ export default {
                 )
 
                 this.$oruga.notification.open({
-                    message: this.$t(`${formDataObj.type}.updated_successfully`),
+                    message: this.$t(successMessage, [formDataObj.name]),
                     variant: 'success',
                     duration: 7000
                 })
@@ -131,6 +144,28 @@ export default {
                 newPhotoMeta
             )
             return photoResult
+        },
+        onUnpublishSound() {
+            const { id, type, name } = this.initialData
+
+            const formDataObj = {
+                id,
+                status: 'draft',
+                photo: 'keep-current',
+                name
+            }
+
+            this.$oruga.modal.open({
+                active: true,
+                component: ConfirmModal,
+                props: {
+                    title: this.$t(`${type}.unpublish`),
+                    message: this.$t(`${type}.unpublish_confirm_message`, [name]),
+                    confirmText: this.$t(`${type}.unpublish`),
+                    cancelText: this.$t('form.cancel'),
+                    onConfirm: () => this.editSound(formDataObj, `${type}.unpublish_success`)
+                }
+            })
         },
         onDeleteSound() {
             const { type, name } = this.initialData

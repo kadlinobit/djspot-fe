@@ -8,7 +8,7 @@ export const state = () => ({
     searchCity: '',
     searchGenres: [],
     sort: 'name',
-    perPage: 5,
+    perPage: 12,
     currentPage: 1
 })
 

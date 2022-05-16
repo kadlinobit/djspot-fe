@@ -40,7 +40,7 @@
                     <o-validated-tag-input
                         v-model="searchGenresLocal"
                         name="genres"
-                        :tags="getGenresOptions"
+                        :tags="genresOptions"
                         :is-validation-on="false"
                         field="name"
                         maxtags="3"
@@ -131,7 +131,7 @@ export default {
             'searchType',
             'searchGenres'
         ]),
-        ...mapGetters('form', ['soundsPageSortOptions', 'soundTypeOptions', 'fenresOptions'])
+        ...mapGetters('form', ['soundsPageSortOptions', 'soundTypeOptions', 'genresOptions'])
     },
     methods: {
         ...mapActions('soundsPage', [
