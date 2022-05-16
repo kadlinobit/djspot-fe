@@ -13,24 +13,7 @@
                     <div class="column">
                         <div class="columns is-mobile is-vcentered">
                             <div class="column is-narrow">
-                                <client-only>
-                                    <o-button
-                                        v-if="!currentSound || currentSound.id !== sound.id"
-                                        :disabled="isPlayerLoading"
-                                        variant="text"
-                                        size="large"
-                                        icon-left="play"
-                                        @click.prevent="() => onPlayNewSound(sound)"
-                                    />
-                                    <o-button
-                                        v-if="currentSound && currentSound.id === sound.id"
-                                        :disabled="isPlayerLoading"
-                                        variant="text"
-                                        size="large"
-                                        :icon-left="isPlaying ? 'pause' : 'play'"
-                                        @click.prevent="() => setIsPlaying(!isPlaying)"
-                                    />
-                                </client-only>
+                                <button-play-pause :sound="sound" size="large" variant="text" />
                             </div>
                             <div class="column">
                                 <h1 class="title is-size-4-mobile is-size-3-desktop">
@@ -139,13 +122,15 @@ import { mapActions, mapGetters } from 'vuex'
 import DjInfoBox from '~/components/dj/DjInfoBox.vue'
 import CoverImage from '~/components/media/CoverImage.vue'
 import OResponsiveButton from '~/components/form/OResponsiveButton.vue'
+import ButtonPlayPause from '~/components/audio/ButtonPlayPause.vue'
 
 export default {
     name: 'SoundDetailsPage',
     components: {
         DjInfoBox,
         CoverImage,
-        OResponsiveButton
+        OResponsiveButton,
+        ButtonPlayPause
     },
     data() {
         return {
@@ -201,11 +186,6 @@ export default {
         }
     },
     computed: {
-        ...mapGetters('player', {
-            currentSound: 'currentSound',
-            isPlaying: 'isPlaying',
-            isPlayerLoading: 'isLoading'
-        }),
         ...mapGetters('playlist', ['isSoundInPlaylist']),
         likeButtonVariant() {
             if (!this.$auth.loggedIn) return 'light'
@@ -214,12 +194,7 @@ export default {
     },
     methods: {
         ...mapActions(['setIsLoginOpen', 'setLoginActiveComponent']),
-        ...mapActions('player', ['loadNewAudio', 'setIsPlaying']),
-        ...mapActions('playlist', ['handlePlaySound', 'handleAddOrRemovePlaylistSound']),
-        onPlayNewSound(sound) {
-            this.handlePlaySound(sound)
-            this.loadNewAudio(sound)
-        },
+        ...mapActions('playlist', ['handleAddOrRemovePlaylistSound']),
         async onToggleLike() {
             if (!this.$auth.loggedIn) {
                 this.setLoginActiveComponent('login')

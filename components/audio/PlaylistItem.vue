@@ -3,27 +3,8 @@
         <div class="column is-narrow playlist-item-handle mr-1">
             <o-icon icon="swap-vertical" />
         </div>
-        <div
-            v-if="!currentSound || currentSound.id !== playlistItem.id"
-            class="column is-narrow mr-1"
-        >
-            <o-button
-                :disabled="isPlayerLoading"
-                variant="text"
-                icon-left="play"
-                @click.prevent="() => loadNewAudio(playlistItem)"
-            />
-        </div>
-        <div
-            v-if="currentSound && currentSound.id === playlistItem.id"
-            class="column is-narrow mr-1"
-        >
-            <o-button
-                :disabled="isPlayerLoading"
-                variant="text"
-                :icon-left="isPlaying ? 'pause' : 'play'"
-                @click.prevent="() => setIsPlaying(!isPlaying)"
-            />
+        <div class="column is-narrow mr-1">
+            <button-play-pause :sound="playlistItem" />
         </div>
         <div class="column is-text-ellipsis">
             <span @click="setIsPlaylistOpen(false)">
@@ -36,27 +17,22 @@
         <div class="column is-narrow">
             <span :class="['tag', soundTagType]">{{ $t(`${playlistItem.type}.type`) }}</span>
         </div>
-        <o-button
-            v-if="!currentSound || currentSound.id !== playlistItem.id"
-            variant="text"
-            :disabled="isPlayerLoading"
-            custom-class="column is-narrow"
-            icon-left="delete-sweep"
-            @click.prevent="() => deleteSound(playlistItem)"
-        />
-        <o-icon
-            v-else
-            custom-class="column is-narrow"
-            icon="checkbox-blank-circle"
-            variant="success m-3"
-            size="small"
-        />
+        <div class="column is-narrow">
+            <button-playlist-add-remove :sound="playlistItem" />
+        </div>
     </li>
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions } from 'vuex'
+import ButtonPlayPause from '~/components/audio/ButtonPlayPause.vue'
+import ButtonPlaylistAddRemove from '~/components/audio/ButtonPlaylistAddRemove.vue'
+
 export default {
+    components: {
+        ButtonPlayPause,
+        ButtonPlaylistAddRemove
+    },
     props: {
         playlistItem: {
             type: Object,
@@ -64,12 +40,6 @@ export default {
         }
     },
     computed: {
-        ...mapGetters('player', {
-            currentSound: 'currentSound',
-            isPlaying: 'isPlaying',
-            isPlayerLoading: 'isLoading'
-        }),
-        ...mapGetters('playlist', ['isSoundInPlaylist']),
         soundTagType() {
             let tagType
             switch (this.playlistItem.type) {
@@ -84,9 +54,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['setIsPlaylistOpen']),
-        ...mapActions('player', ['loadNewAudio', 'setIsPlaying']),
-        ...mapActions('playlist', ['deleteSound'])
+        ...mapActions(['setIsPlaylistOpen'])
     }
 }
 </script>
