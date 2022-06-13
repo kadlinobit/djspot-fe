@@ -38,9 +38,7 @@ export default defineNuxtConfig({
         { src: '~/plugins/time.js' },
         { src: '~/plugins/oruga.js' },
         { src: '~/plugins/marked.js' },
-        { src: '~/plugins/vue-dompurify-html.js', ssr: false }, // TBD - REMOVE
-        { src: '~/plugins/persisted-state.client.js' },
-        { src: '~/plugins/directus.js' }, // TBD - remove
+        // { src: '~/plugins/persisted-state.client.js' }, // TBD - NOT WORKING WITH VUE2
         { src: '~/plugins/api/index.js' }
     ],
 
@@ -58,9 +56,12 @@ export default defineNuxtConfig({
         // https://go.nuxtjs.dev/axios
         '@nuxtjs/axios',
         '@nuxtjs/auth-next',
-        '@nuxtjs/i18n'
+        '@nuxtjs/i18n',
+        'nuxt-directus'
     ],
-
+    directus: {
+        url: 'http://localhost:8055'
+    },
     i18n: {
         vueI18nLoader: true,
         strategy: 'no_prefix',
