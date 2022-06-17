@@ -1,5 +1,6 @@
 import { marked } from 'marked'
 import DOMPurify from 'isomorphic-dompurify'
+import { defineNuxtPlugin } from '#app'
 
 marked.setOptions({
     renderer: new marked.Renderer(),
@@ -27,7 +28,7 @@ const renderer = {
 
 marked.use({ renderer })
 
-export default (context, inject) => {
+export default defineNuxtPlugin((nuxtApp) => {
     function markdownToHtml(input) {
         if (typeof input !== 'string') return input
         return DOMPurify.sanitize(marked(escapeHtml(input)))
@@ -45,5 +46,5 @@ export default (context, inject) => {
         markdownToHtml
     }
 
-    inject('marked', api)
-}
+    nuxtApp.provide('marked', api)
+})

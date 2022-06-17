@@ -3,17 +3,18 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/de'
 import 'dayjs/locale/cs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { defineNuxtPlugin } from '#app'
 
-export default (context, inject) => {
+export default defineNuxtPlugin((nuxtApp) => {
     dayjs.extend(relativeTime)
 
     function fromNow(dateString) {
-        return dayjs(dateString).locale(context.app.i18n.locale).fromNow()
+        return dayjs(dateString).locale(nuxtApp.$i18n.locale).fromNow()
     }
 
     const api = {
         fromNow
     }
 
-    inject('time', api)
-}
+    nuxtApp.provide('time', api)
+})
