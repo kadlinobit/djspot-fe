@@ -25,20 +25,16 @@ export default defineNuxtConfig({
     },
 
     // Global CSS: https://go.nuxtjs.dev/config-css
-    css: [
-        '~/assets/scss/main.scss',
-        '@mdi/font/css/materialdesignicons.min.css' // TBD - probably remove
-    ],
+    css: ['~/assets/scss/main.scss', '@mdi/font/css/materialdesignicons.min.css'],
 
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
-        { src: '~/plugins/vee-validate.js', ssr: false },
+        { src: '~/plugins/vee-validate.client.js', ssr: false },
         { src: '~/plugins/audio.js' },
         { src: '~/plugins/media.js' },
         { src: '~/plugins/time.js' },
         { src: '~/plugins/oruga.js' },
         { src: '~/plugins/marked.js' },
-        // { src: '~/plugins/persisted-state.client.js' }, // TBD - NOT WORKING WITH VUE2
         { src: '~/plugins/api/index.js' }
     ],
 
@@ -60,7 +56,11 @@ export default defineNuxtConfig({
         'nuxt-directus'
     ],
     directus: {
-        url: 'http://localhost:8055'
+        url: 'http://localhost:8055',
+        fetchUserParams: {
+            fields: ['*', 'djs.*']
+        },
+        autoFetch: true
     },
     i18n: {
         vueI18nLoader: true,
