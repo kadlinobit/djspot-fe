@@ -25,22 +25,16 @@ export default defineNuxtConfig({
     },
 
     // Global CSS: https://go.nuxtjs.dev/config-css
-    css: [
-        '~/assets/scss/main.scss',
-        '@mdi/font/css/materialdesignicons.min.css' // TBD - probably remove
-    ],
+    css: ['~/assets/scss/main.scss', '@mdi/font/css/materialdesignicons.min.css'],
 
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
-        { src: '~/plugins/vee-validate.js', ssr: false },
+        { src: '~/plugins/vee-validate.client.js', ssr: false },
         { src: '~/plugins/audio.js' },
         { src: '~/plugins/media.js' },
         { src: '~/plugins/time.js' },
         { src: '~/plugins/oruga.js' },
         { src: '~/plugins/marked.js' },
-        { src: '~/plugins/vue-dompurify-html.js', ssr: false }, // TBD - REMOVE
-        { src: '~/plugins/persisted-state.client.js' },
-        { src: '~/plugins/directus.js' }, // TBD - remove
         { src: '~/plugins/api/index.js' }
     ],
 
@@ -54,13 +48,14 @@ export default defineNuxtConfig({
     ],
 
     // Modules: https://go.nuxtjs.dev/config-modules
-    modules: [
-        // https://go.nuxtjs.dev/axios
-        '@nuxtjs/axios',
-        '@nuxtjs/auth-next',
-        '@nuxtjs/i18n'
-    ],
-
+    modules: ['@nuxtjs/axios', '@nuxtjs/auth-next', '@nuxtjs/i18n', 'nuxt-directus'],
+    directus: {
+        url: 'http://localhost:8055',
+        fetchUserParams: {
+            fields: ['*', 'djs.*']
+        },
+        autoFetch: true
+    },
     i18n: {
         vueI18nLoader: true,
         strategy: 'no_prefix',

@@ -2,8 +2,9 @@ import Url from 'url-parse'
 import _ from 'lodash'
 import base64 from 'base-64'
 import utf8 from 'utf8'
+import { defineNuxtPlugin } from '#app'
 
-export default (context, inject) => {
+export default defineNuxtPlugin((nuxtApp) => {
     /**
      * Function that decides whether string is a valid URL
      * @param {string} url - URL in string format
@@ -140,5 +141,5 @@ export default (context, inject) => {
         formatSoundForPlaylist
     }
 
-    inject('audio', api)
-}
+    nuxtApp.provide('audio', api)
+})

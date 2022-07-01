@@ -64,78 +64,84 @@
         </div>
     </div>
 </template>
-
-<script>
+<script setup lang="ts">
 import { extend, ValidationObserver } from 'vee-validate'
-import { required, email } from 'vee-validate/dist/rules'
+import { required as ruleRequired, email as ruleEmail } from 'vee-validate/dist/rules'
 import { mapActions } from 'vuex'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 
-extend('email', email)
-extend('required', required)
+extend('email', ruleEmail)
+extend('required', ruleRequired)
 
-export default {
-    components: {
-        ValidationObserver,
-        OValidatedField
-    },
-    props: {
-        displayType: {
-            type: String,
-            default: 'page'
-        },
-        afterSuccessCallback: {
-            type: Function,
-            default: () => {}
-        }
-    },
-    data() {
-        return {
-            email: '',
-            password: '',
-            error: null,
-            success: null,
-            isLoading: false
-        }
-    },
-    fetch() {
-        if (this.$nuxt.context.route.query.success) {
-            this.success = this.$nuxt.context.route.query.success
-        }
-    },
-    methods: {
-        ...mapActions(['setIsLoginOpen', 'setLoginActiveComponent']),
-        onSubmit() {
-            this.error = null
-            this.success = null
-            this.$refs.observer.validate().then((success) => {
-                if (!success) {
-                    this.$oruga.notification.open({
-                        message: this.$t('validation.form_validation_error'),
-                        variant: 'danger'
-                    })
-                    return
-                }
-                this.login()
+const { $auth, $oruga } = useNuxtApp()
+const { login } = useDirectusAuth()
+
+interface Props {
+    displayType?: string
+    afterSuccessCallback?: Function
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    displayType: 'page',
+    afterSuccessCallback: () => {}
+})
+
+const emit = defineEmits(['loginSuccess'])
+
+const observer = ref(null)
+const email = ref('')
+const password = ref('')
+const error = ref(null)
+const success = ref(null)
+const isLoading = ref(false)
+
+const { setIsLoginOpen, setLoginActiveComponent } = mapActions([
+    'setIsLoginOpen',
+    'setLoginActiveComponent'
+])
+
+onMounted(() => {
+    error.value = null
+    success.value = null
+    isLoading.value = false
+})
+
+function onSubmit() {
+    error.value = null
+    success.value = null
+    observer.value.validate().then((success) => {
+        if (!success) {
+            $oruga.notification.open({
+                message: this.$t('validation.form_validation_error'),
+                variant: 'danger'
             })
-        },
-        async login() {
-            try {
-                this.isLoading = true
-
-                await this.$auth.loginWith('local', {
-                    data: {
-                        email: this.email,
-                        password: this.password
-                    }
-                })
-                this.afterSuccessCallback()
-            } catch (e) {
-                this.error = e.response.data.errors[0].message
-            } finally {
-                this.isLoading = false
-            }
+            return
         }
+        onLogin()
+    })
+}
+async function onLogin() {
+    try {
+        isLoading.value = true
+
+        await $auth.loginWith('local', {
+            data: {
+                email: email.value,
+                password: password.value
+            }
+        })
+
+        // await login({
+        //     email: email.value,
+        //     password: password.value
+        // })
+
+        props.afterSuccessCallback()
+    } catch (e) {
+        error.value =
+            e.response?.data?.errors[0]?.message || 'Something went wrong and there is no data'
+    } finally {
+        isLoading.value = false
     }
 }
 </script>
