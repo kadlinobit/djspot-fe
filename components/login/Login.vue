@@ -45,7 +45,7 @@
                 </nuxt-link>
                 <a
                     v-if="displayType === 'modal'"
-                    @click="() => setLoginActiveComponent('register')"
+                    @click="() => (mainStore.loginActiveComponent = 'register')"
                 >
                     {{ $t('user.do_register') }}
                 </a>
@@ -56,7 +56,10 @@
                 </nuxt-link>
                 <a
                     v-if="displayType === 'modal'"
-                    @click="() => setLoginActiveComponent('forgot-password')"
+                    @click="
+                        () =>
+                            (mainStore.loginActiveComponent = 'forgot-password')
+                    "
                 >
                     {{ $t('user.forgot_password') }}?
                 </a>
@@ -66,15 +69,20 @@
 </template>
 <script setup lang="ts">
 import { extend, ValidationObserver } from 'vee-validate'
-import { required as ruleRequired, email as ruleEmail } from 'vee-validate/dist/rules'
-import { mapActions } from 'vuex'
+import {
+    required as ruleRequired,
+    email as ruleEmail
+} from 'vee-validate/dist/rules'
 import OValidatedField from '~/components/form/OValidatedField.vue'
+import { useMainStore } from '~/stores'
 
 extend('email', ruleEmail)
 extend('required', ruleRequired)
 
 const { $auth, $oruga } = useNuxtApp()
-const { login } = useDirectusAuth()
+const mainStore = useMainStore()
+
+// const { login } = useDirectusAuth()
 
 interface Props {
     displayType?: string
@@ -94,11 +102,6 @@ const password = ref('')
 const error = ref(null)
 const success = ref(null)
 const isLoading = ref(false)
-
-const { setIsLoginOpen, setLoginActiveComponent } = mapActions([
-    'setIsLoginOpen',
-    'setLoginActiveComponent'
-])
 
 onMounted(() => {
     error.value = null
@@ -139,7 +142,8 @@ async function onLogin() {
         props.afterSuccessCallback()
     } catch (e) {
         error.value =
-            e.response?.data?.errors[0]?.message || 'Something went wrong and there is no data'
+            e.response?.data?.errors[0]?.message ||
+            'Something went wrong and there is no data'
     } finally {
         isLoading.value = false
     }
