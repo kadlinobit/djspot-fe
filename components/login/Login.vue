@@ -124,24 +124,22 @@ async function onLogin() {
     try {
         isLoading.value = true
 
-        // await $auth.loginWith('local', {
-        //     data: {
-        //         email: email.value,
-        //         password: password.value
-        //     }
-        // })
-
-        await login({
-            email: email.value,
-            password: password.value
+        await $auth.loginWith('local', {
+            data: {
+                email: email.value,
+                password: password.value
+            }
         })
 
+        // await login({
+        //     email: email.value,
+        //     password: password.value
+        // })
+
         props.afterSuccessCallback()
-        emit('loginSuccess')
     } catch (e) {
         error.value =
-            e.response?.data?.errors[0]?.message ||
-            this.$t('Something went wrong and there is no data')
+            e.response?.data?.errors[0]?.message || 'Something went wrong and there is no data'
     } finally {
         isLoading.value = false
     }

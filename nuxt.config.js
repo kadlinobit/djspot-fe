@@ -48,13 +48,7 @@ export default defineNuxtConfig({
     ],
 
     // Modules: https://go.nuxtjs.dev/config-modules
-    modules: [
-        // https://go.nuxtjs.dev/axios
-        '@nuxtjs/axios',
-        '@nuxtjs/auth-next',
-        '@nuxtjs/i18n',
-        'nuxt-directus'
-    ],
+    modules: ['@nuxtjs/axios', '@nuxtjs/auth-next', '@nuxtjs/i18n', 'nuxt-directus'],
     directus: {
         url: 'http://localhost:8055',
         fetchUserParams: {
