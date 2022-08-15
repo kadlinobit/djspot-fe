@@ -1,7 +1,8 @@
+import { defineStore } from 'pinia'
 import _ from 'lodash'
 
-export const state = () => ({
-    cities: [
+export const useFormStore = defineStore('form', () => {
+    const cities = ref([
         'Aš',
         'Benešov',
         'Beroun',
@@ -208,9 +209,9 @@ export const state = () => ({
         'Železný Brod',
         'Židlochovice',
         'Žďár nad Sázavou'
-    ],
-    genres: [],
-    djsPageSortOptions: [
+    ])
+    const genres = ref([])
+    const djsPageSortOptions = ref([
         {
             value: 'name',
             label: 'form.sort.a_z'
@@ -231,8 +232,8 @@ export const state = () => ({
             value: '-follow_count',
             label: 'form.sort.most_followed'
         }
-    ],
-    soundsPageSortOptions: [
+    ])
+    const soundsPageSortOptions = ref([
         {
             value: 'name',
             label: 'form.sort.a_z'
@@ -253,8 +254,8 @@ export const state = () => ({
             value: '-like_count',
             label: 'form.sort.most_liked'
         }
-    ],
-    soundTypeOptions: [
+    ])
+    const soundTypeOptions = ref([
         {
             value: 'mix',
             label: 'mix.type'
@@ -263,40 +264,36 @@ export const state = () => ({
             value: 'track',
             label: 'track.type'
         }
-    ]
-})
-export const mutations = {
-    mutateSetGenres(state, genres) {
-        state.genres = genres
-    }
-}
+    ])
 
-export const actions = {
-    async fetchGenres({ commit, state }) {
-        if (_.isEmpty(state.genres)) {
-            const genres = await this.$axios.$get('items/genre')
-
-            commit('mutateSetGenres', genres.data)
-        }
-    }
-}
-
-export const getters = {
-    citiesOptions(state) {
-        return state.cities.map((city) => {
+    // GETTERS
+    const citiesOptions = computed(() => {
+        return cities.value.map((city) => {
             return { value: city, label: city }
         })
-    },
-    djsPageSortOptions(state) {
-        return state.djsPageSortOptions
-    },
-    genresOptions(state) {
-        return state.genres
-    },
-    soundTypeOptions(state) {
-        return state.soundTypeOptions
-    },
-    soundsPageSortOptions(state) {
-        return state.soundsPageSortOptions
+    })
+
+    const genresOptions = computed(() => {
+        return genres.value
+    })
+
+    // ACTIONS
+    function setGenres(val) {
+        genres.value = val
     }
-}
+
+    return {
+        cities,
+        genres,
+        djsPageSortOptions,
+        soundsPageSortOptions,
+        soundTypeOptions,
+
+        // GETTERS
+        citiesOptions,
+        genresOptions,
+
+        // ACTIONS
+        setGenres
+    }
+})

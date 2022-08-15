@@ -6,7 +6,10 @@ export default defineNuxtConfig({
     alias: {
         tslib: 'tslib/tslib.es6.js'
     },
-    // bridge: false,
+    // TODO - Add @vueuse/head to be able to use new useHead composable
+    // bridge: {
+    //     meta: true
+    // },
     head: {
         title: 'djspot-fe',
         htmlAttrs: {
@@ -93,35 +96,36 @@ export default defineNuxtConfig({
      ** See https://auth.nuxtjs.org/schemes/local.html#options
      */
 
-    // auth: {
-    //     strategies: {
-    //         local: {
-    //             scheme: 'refresh',
-    //             token: {
-    //                 property: 'data.access_token',
-    //                 maxAge: 900000,
-    //                 global: true
-    //                 // type: 'Bearer'
-    //             },
-    //             refreshToken: {
-    //                 property: 'data.refresh_token',
-    //                 data: 'refresh_token',
-    //                 maxAge: 60 * 60 * 24 * 7
-    //             },
-    //             user: {
-    //                 property: 'data'
-    //                 // autoFetch: true
-    //             },
-    //             endpoints: {
-    //                 login: { url: '/auth/login', method: 'post' },
-    //                 refresh: { url: '/auth/refresh', method: 'post' },
-    //                 user: { url: '/users/me?fields=*,djs.*', method: 'get' }, // TBD - update fields loaded on user fetch
-    //                 logout: { url: '/auth/logout', method: 'post' }
-    //             }
-    //             // autoLogout: false
-    //         }
-    //     }
-    // },
+    auth: {
+        strategies: {
+            local: {
+                scheme: 'refresh',
+                token: {
+                    property: 'data.access_token',
+                    maxAge: 900000,
+                    global: true
+                    // type: 'Bearer'
+                },
+                refreshToken: {
+                    property: 'data.refresh_token',
+                    data: 'refresh_token',
+                    maxAge: 60 * 60 * 24 * 7
+                },
+                user: {
+                    property: 'data'
+                    // autoFetch: true
+                },
+                endpoints: {
+                    login: { url: '/auth/login', method: 'post' },
+                    refresh: { url: '/auth/refresh', method: 'post' },
+                    user: { url: '/users/me?fields=*,djs.*', method: 'get' }, // TBD - update fields loaded on user fetch
+                    logout: { url: '/auth/logout', method: 'post' }
+                }
+                // autoLogout: false
+            }
+        },
+        redirect: false
+    },
     // Build Configuration: https://go.nuxtjs.dev/config-build
     build: {
         transpile: ['vee-validate/dist/rules'],

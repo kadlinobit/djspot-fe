@@ -27,7 +27,14 @@ module.exports = {
         'vue/multi-word-component-names': [
             'error',
             {
-                ignores: ['Login', 'Navbar', 'Register']
+                ignores: [
+                    'Login',
+                    'Navbar',
+                    'Register',
+                    'default',
+                    'Playlist',
+                    'index'
+                ]
             }
         ]
     }

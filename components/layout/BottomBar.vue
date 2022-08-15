@@ -2,33 +2,31 @@
     <section :class="`bottom-bar ${bottomBarHiddenClass}`">
         <div class="bottom-bar-inner">
             <PlayerGlobal />
-            <div class="bottom-bar-switch" @click="toggleIsBottomBarOpen">
-                <o-icon :icon="isBottomBarOpen ? 'chevron-down' : 'playlist-play'" />
+            <div
+                class="bottom-bar-switch"
+                @click="mainStore.toggleIsBottomBarOpen"
+            >
+                <o-icon
+                    :icon="
+                        mainStore.isBottomBarOpen
+                            ? 'chevron-down'
+                            : 'playlist-play'
+                    "
+                />
             </div>
         </div>
     </section>
 </template>
 
-<script>
-import { mapActions, mapGetters } from 'vuex'
+<script setup lang="ts">
 import PlayerGlobal from '~/components/audio/PlayerGlobal/PlayerGlobal.vue'
-export default {
-    components: {
-        PlayerGlobal
-    },
-    computed: {
-        ...mapGetters(['isBottomBarOpen']),
-        bottomBarHiddenClass() {
-            return this.isBottomBarOpen ? '' : 'hidden'
-        }
-    },
-    methods: {
-        ...mapActions(['setIsBottomBarOpen']),
-        toggleIsBottomBarOpen() {
-            this.setIsBottomBarOpen(!this.isBottomBarOpen)
-        }
-    }
-}
+
+import { useMainStore } from '~/stores'
+const mainStore = useMainStore()
+
+const bottomBarHiddenClass = computed(() => {
+    return mainStore.isBottomBarOpen ? '' : 'hidden'
+})
 </script>
 
 <style lang="scss" scoped>

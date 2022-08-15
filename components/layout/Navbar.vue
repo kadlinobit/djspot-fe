@@ -22,7 +22,7 @@
             <a
                 role="button"
                 class="navbar-burger"
-                :class="{ 'is-active': isMenuExpanded.value }"
+                :class="{ 'is-active': isMenuExpanded }"
                 aria-label="menu"
                 aria-expanded="false"
                 data-target="navbar-main-menu"
@@ -37,7 +37,7 @@
         <div
             id="navbar-main-menu"
             class="navbar-menu"
-            :class="{ 'is-active': isMenuExpanded.value }"
+            :class="{ 'is-active': isMenuExpanded }"
         >
             <div class="navbar-start">
                 <nuxt-link class="navbar-item" to="/djs">{{
@@ -67,6 +67,8 @@
 <script setup lang="ts">
 import LanguageSelection from '~/components/layout/LanguageSelection.vue'
 import { useMainStore } from '~/stores'
+
+const { $auth } = useNuxtApp()
 
 const mainStore = useMainStore()
 const isMenuExpanded = ref(false)

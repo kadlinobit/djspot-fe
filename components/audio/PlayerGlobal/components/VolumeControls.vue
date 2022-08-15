@@ -1,13 +1,13 @@
 <template>
-    <div v-if="showCancelLoadingButton" class="has-text-centered">
-        <o-button variant="danger" @click.stop="resetAudio">
+    <div v-if="playerStore.showCancelLoadingButton" class="has-text-centered">
+        <o-button variant="danger" @click.stop="playerStore.resetAudio">
             {{ $t('player.cancel_loading') }}
         </o-button>
     </div>
     <div v-else class="columns is-vcentered is-mobile is-gapless">
         <div class="column is-narrow mr-3">
             <o-button
-                :disabled="!isLoaded || isError"
+                :disabled="!playerStore.isLoaded || playerStore.isError"
                 variant="primary"
                 size="size-6"
                 :icon-left="volumeIcon"
@@ -16,12 +16,12 @@
         </div>
         <div class="column mr-4">
             <o-slider
-                :value="volume"
+                :value="playerStore.volume"
                 :tooltip="false"
                 :max="100"
-                :disabled="!isLoaded || isError"
+                :disabled="!playerStore.isLoaded || playerStore.isError"
                 variant="secondary"
-                @input="(newVolume) => setVolume(newVolume)"
+                @input="(newVolume) => playerStore.setVolume(newVolume)"
             />
         </div>
         <div class="column is-narrow">
@@ -29,7 +29,7 @@
                 variant="primary"
                 size="size-6"
                 icon-left="playlist-music"
-                @click.stop="() => setIsPlaylistOpen(true)"
+                @click.stop="() => mainStore.setIsPlaylistOpen(true)"
             />
         </div>
         <div class="column is-narrow mr-2">
@@ -37,50 +37,38 @@
                 variant="primary"
                 size="size-6"
                 icon-left="chevron-down"
-                @click.stop="() => setIsBottomBarOpen(false)"
+                @click.stop="() => mainStore.setIsBottomBarOpen(false)"
             />
         </div>
     </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
-export default {
-    computed: {
-        ...mapGetters('player', [
-            'isLoaded',
-            'previousVolume',
-            'volume',
-            'isLoading',
-            'isError',
-            'isMuted',
-            'showCancelLoadingButton'
-        ]),
-        volumeIcon() {
-            let volumeIcon = 'volume-off'
-            if (this.volume > 0 && this.volume <= 30) {
-                volumeIcon = 'volume-low'
-            }
-            if (this.volume > 30 && this.volume <= 60) {
-                volumeIcon = 'volume-medium'
-            }
-            if (this.volume > 60) {
-                volumeIcon = 'volume-high'
-            }
-            return volumeIcon
-        }
-    },
-    methods: {
-        ...mapActions(['setIsPlaylistOpen', 'setIsBottomBarOpen']),
-        ...mapActions('player', ['setPreviousVolume', 'setVolume', 'setIsMuted']),
-        onMute() {
-            if (this.isMuted) {
-                return this.setVolume(this.previousVolume)
-            }
+<script setup lang="ts">
+import { useMainStore, usePlayerStore, usePlaylistStore } from '~/stores'
+const mainStore = useMainStore()
+const playerStore = usePlayerStore()
+const playlistStore = usePlaylistStore()
 
-            this.setPreviousVolume(this.volume)
-            this.setVolume(0)
-        }
+const volumeIcon = computed(() => {
+    let volumeIcon = 'volume-off'
+    if (playerStore.volume > 0 && playerStore.volume <= 30) {
+        volumeIcon = 'volume-low'
     }
+    if (playerStore.volume > 30 && playerStore.volume <= 60) {
+        volumeIcon = 'volume-medium'
+    }
+    if (playerStore.volume > 60) {
+        volumeIcon = 'volume-high'
+    }
+    return volumeIcon
+})
+
+function onMute() {
+    if (playerStore.isMuted) {
+        return playerStore.setVolume(playerStore.previousVolume)
+    }
+
+    playerStore.setPreviousVolume(playerStore.volume)
+    playerStore.setVolume(0)
 }
 </script>

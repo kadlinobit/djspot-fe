@@ -1,35 +1,38 @@
 <template>
-    <!-- <client-only> -->
     <section class="section">
         <div class="container">
-            <h1 class="title">DJs {{ djsCount }}</h1>
+            <h1 class="title">DJs {{ djsData?.meta?.filter_count || 0 }}</h1>
             <o-field>
                 <o-input
-                    v-model="searchNameLocal"
-                    :placeholder="$t('dj.search_dj')"
+                    v-model="name"
+                    :placeholder="$i18n.t('dj.search_dj')"
                     type="search"
                     expanded
                 ></o-input>
                 <p class="control">
-                    <o-button type="is-primary" label="Search" @click="onSearch" />
+                    <o-button
+                        type="is-primary"
+                        label="Search"
+                        @click="onSearch"
+                    />
                 </p>
             </o-field>
             <o-field class="no-label" horizontal>
-                <o-select v-model="sortLocal" expanded @input="onSearch">
+                <o-select v-model="sort" expanded @input="onSearch">
                     <option
-                        v-for="option in djsPageSortOptions"
+                        v-for="option in formStore.djsPageSortOptions"
                         :key="option.value"
                         :value="option.value"
                     >
-                        {{ $t(option.label) }}
+                        {{ $i18n.t(option.label) }}
                     </option>
                 </o-select>
-                <o-select v-model="searchCityLocal" expanded @input="onSearch">
+                <o-select v-model="city" expanded @input="onSearch">
                     <option value="">
                         {{ `Celá ČR` }}
                     </option>
                     <option
-                        v-for="option in citiesOptions"
+                        v-for="option in formStore.citiesOptions"
                         :key="option.value"
                         :value="option.value"
                     >
@@ -38,36 +41,39 @@
                 </o-select>
                 <client-only>
                     <o-validated-tag-input
-                        v-model="searchGenresLocal"
+                        v-model="genres"
                         name="genres"
-                        :tags="genresOptions"
+                        :tags="formStore.genresOptions"
                         :is-validation-on="false"
                         field="name"
                         maxtags="3"
                         expanded
-                        :placeholder="$t('dj.select_3_genres')"
+                        :placeholder="$i18n.t('dj.select_3_genres')"
+                        @input="onSearch"
                     />
                 </client-only>
             </o-field>
 
-            <p v-if="$fetchState.pending">Loading ...</p>
-            <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
-            <div v-else-if="!$fetchState.pending && djsCount === 0">
+            <!-- <p v-if="pending">Loading ...</p> -->
+            <p v-if="error">{{ error.message }}</p>
+            <div v-else-if="!pending && djsData?.meta?.filter_count === 0">
                 <section class="hero is-secondary is-medium">
                     <div class="hero-body">
-                        <p class="title">{{ $t('dj.no_djs_found') }}</p>
+                        <p class="title">{{ $i18n.t('dj.no_djs_found') }}</p>
                         <p class="subtitle">
-                            <a @click="resetSearch">{{ $t('dj.reset_search') }}</a>
+                            <a @click="resetSearch">{{
+                                $i18n.t('dj.reset_search')
+                            }}</a>
                         </p>
                     </div>
                 </section>
             </div>
             <div v-else>
-                <dj-list :djs="djs[currentPage]" />
+                <dj-list :djs="djsData?.data" />
 
                 <o-pagination
-                    :current="currentPage"
-                    :total="djsCount"
+                    :current="page"
+                    :total="djsData?.meta?.filter_count"
                     :range-before="1"
                     :range-after="1"
                     order="centered"
@@ -83,127 +89,159 @@
             </div>
         </div>
     </section>
-    <!-- </client-only> -->
 </template>
 
-<script>
+<script setup lang="ts">
 import _ from 'lodash'
-import { mapGetters, mapActions } from 'vuex'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import DjList from '~/components/dj/DjList.vue'
+import { useFormStore } from '~/stores'
 
-export default {
-    name: 'DjsPage',
-    components: {
-        OValidatedTagInput,
-        DjList
-    },
-    data() {
-        return {
-            searchNameLocal: '',
-            searchCityLocal: '',
-            searchGenresLocal: [],
-            sortLocal: ''
-        }
-    },
-    async fetch() {
-        this.fetchGenres()
-        this.syncLocalSearchValues()
+const { $i18n, $auth, $api } = useNuxtApp()
+const route = useRoute()
+const router = useRouter()
+const formStore = useFormStore()
 
-        if (_.isArray(this.djs[this.currentPage]) && !_.isEmpty(this.djs[this.currentPage])) return
+const name = ref(route.query.name ? route.query.name : '')
+const city = ref(route.query.city ? route.query.city : '')
+const genres = ref([]) // FILLED IN OnMounted
+const sort = ref(route.query.sort ? route.query.sort : 'name')
+const perPage = ref(4)
+const page = ref(route.query.page ? parseInt(route.query.page) : 1)
 
-        try {
-            const djs = await this.fetchDjs(1)
-            this.setDjsCount(djs.meta.filter_count)
+const urlFilter = computed(() => {
+    const urlFilterObj = {}
+    if (name.value) urlFilterObj.name = name.value.toLowerCase()
+    if (city.value) urlFilterObj.city = city.value
+    if (!_.isEmpty(genres))
+        urlFilterObj.genres = genres.value.map((genre) => genre.id)
 
-            if (Array.isArray(djs.data)) {
-                this.setNewDjs(djs.data)
-            } else {
-                this.$fetchState.error = 'DJs not fetched'
-                return this.$nuxt.error({ statusCode: 404, message: 'DJs not fetched' })
-            }
-        } catch (e) {
-            this.$fetchState.error = e
-            if (e.statusCode && e.statusCode === 404) {
-                return this.$nuxt.error({ statusCode: 404, message: e.message })
-            }
-        }
-    },
-    computed: {
-        ...mapGetters('djsPage', [
-            'currentPage',
-            'perPage',
-            'sort',
-            'djsCount',
-            'djs',
-            'filter',
-            'searchName',
-            'searchCity',
-            'searchGenres'
-        ]),
-        ...mapGetters('form', ['djsPageSortOptions', 'citiesOptions', 'genresOptions'])
-    },
-    methods: {
-        ...mapActions('djsPage', [
-            'setCurrentPage',
-            'setPerPage',
-            'setSort',
-            'setDjsCount',
-            'setNewDjs',
-            'setPageDjs',
-            'setSearchName',
-            'setSearchCity',
-            'setSearchGenres',
-            'initNewSearch'
-        ]),
-        ...mapActions('form', ['fetchGenres']),
-        async fetchDjs(page) {
-            const djs = await this.$axios.$request('items/dj', {
-                method: 'search',
-                data: {
-                    query: {
-                        filter: this.filter,
-                        meta: '*',
-                        limit: this.perPage,
-                        page,
-                        sort: this.sort
-                    }
-                }
-            })
+    return !_.isEmpty(urlFilterObj) ? urlFilterObj : null
+})
 
-            return djs
-        },
-        async resetSearch() {
-            this.searchNameLocal = ''
-            this.searchCityLocal = ''
-            this.searchGenresLocal = []
-
-            await this.onSearch()
-        },
-        async onSearch() {
-            this.initNewSearch({
-                searchName: this.searchNameLocal,
-                searchCity: this.searchCityLocal,
-                searchGenres: this.searchGenresLocal,
-                sort: this.sortLocal
-            })
-            await this.$fetch()
-        },
-        async onPageChange(pageNumber) {
-            this.syncLocalSearchValues()
-            this.setCurrentPage(pageNumber)
-
-            if (!_.isArray(this.djs[pageNumber]) || _.isEmpty(this.djs[pageNumber])) {
-                const pageDjs = await this.fetchDjs(this.currentPage)
-                this.setPageDjs({ djs: pageDjs.data, pageNumber })
-            }
-        },
-        syncLocalSearchValues() {
-            this.searchNameLocal = this.searchName
-            this.searchCityLocal = this.searchCity
-            this.searchGenresLocal = this.searchGenres
-            this.sortLocal = this.sort
-        }
+const urlQuery = computed(() => {
+    return {
+        limit: perPage.value,
+        page: page.value,
+        sort: sort.value,
+        ...urlFilter.value
     }
+})
+
+const requestQuery = computed(() => {
+    let fields = $api.collection.getCollectionFields('dj', 'default')
+
+    if ($auth.loggedIn) {
+        fields = fields.filter((field) => field !== 'follows')
+    }
+    return {
+        meta: '*',
+        fields,
+        limit: perPage.value,
+        page: page.value,
+        sort: sort.value,
+        filter: requestFilter.value
+    }
+})
+
+const requestFilter = computed(() => {
+    if (!name.value && !city.value && _.isEmpty(genres.value)) return null
+
+    const requestFilterObj = { _and: [] }
+
+    if (name.value) {
+        requestFilterObj._and.push({
+            name: {
+                _contains: name.value.toLowerCase().trim()
+            }
+        })
+    }
+    if (city.value) {
+        requestFilterObj._and.push({
+            city: {
+                _eq: city.value.toLowerCase().trim()
+            }
+        })
+    }
+
+    if (!_.isEmpty(genres.value)) {
+        requestFilterObj._and.push({
+            genres: {
+                genre_id: {
+                    _in: genres.value.map((genre) => genre.id)
+                }
+            }
+        })
+    }
+
+    return requestFilterObj
+})
+
+const {
+    data: djsData,
+    pending,
+    refresh,
+    error
+} = useLazyAsyncData('djsPageQuery', () => {
+    const djsData = $fetch('http://localhost:8055/items/dj', {
+        method: 'SEARCH',
+        body: JSON.stringify({
+            query: requestQuery.value
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+
+    return djsData
+})
+
+function pushRouterQuery() {
+    router.push({
+        path: '/djs',
+        query: _.isEmpty(urlQuery.value) ? null : urlQuery.value
+    })
+}
+
+function onSearch() {
+    page.value = 1
+    pushRouterQuery()
+    refresh()
+}
+function onPageChange(pageNumber) {
+    page.value = pageNumber
+    pushRouterQuery()
+    refresh()
+}
+
+onMounted(async () => {
+    if (_.isEmpty(formStore.genresOptions)) {
+        const { data: genresData } = await $fetch(
+            'http://localhost:8055/items/genre'
+        )
+        formStore.setGenres(genresData)
+    }
+
+    // Fill in genres
+    if (route.query.genres) {
+        const urlGenres = Array.isArray(route.query.genres)
+            ? route.query.genres.map((genreId) => parseInt(genreId))
+            : [parseInt(route.query.genres)]
+
+        genres.value = formStore.genresOptions.filter((genreOption) =>
+            urlGenres.includes(genreOption.id)
+        )
+    }
+
+    refresh()
+})
+
+function resetSearch() {
+    name.value = ''
+    city.value = ''
+    genres.value = []
+    sort.value = 'name'
+
+    onSearch()
 }
 </script>

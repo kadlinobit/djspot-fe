@@ -15,7 +15,7 @@
                 <header class="modal-card-head">
                     <h4 class="title is-4">
                         {{
-                            $t(
+                            $i18n.t(
                                 `user.${mainStore.loginActiveComponent}`.replace(
                                     '-',
                                     '_'
@@ -25,10 +25,22 @@
                     </h4>
                 </header>
                 <section class="modal-card-body">
-                    <component
-                        :is="mainStore.loginActiveComponent"
+                    <login
+                        v-if="mainStore.loginActiveComponent === 'login'"
                         display-type="modal"
-                        :after-success-callback="afterSuccessCallbackFunction"
+                        @loginSuccess="afterLoginSuccess"
+                    />
+                    <forgot-password
+                        v-else-if="
+                            mainStore.loginActiveComponent === 'forgot-password'
+                        "
+                        display-type="modal"
+                    />
+                    <register
+                        v-else-if="
+                            mainStore.loginActiveComponent === 'register'
+                        "
+                        display-type="modal"
                     />
                 </section>
                 <footer class="modal-card-foot"></footer>
@@ -43,31 +55,20 @@ import ForgotPassword from './ForgotPassword.vue'
 import Register from './Register.vue'
 import { useMainStore } from '~/stores'
 
-const { $auth, $oruga, $route } = useNuxtApp()
+const { $auth, $oruga, $i18n } = useNuxtApp()
 const mainStore = useMainStore()
 
-function afterSuccessCallbackFunction() {
-    let callbackFunction
-    switch (mainStore.loginActiveComponent) {
-        case 'login':
-            callbackFunction = () => {
-                if (this.$route.path === '/login') {
-                    this.$router.push('/')
-                }
-                this.setIsLoginOpen(false)
-                this.$oruga.notification.open({
-                    message: this.$t('user.login_success'),
-                    variant: 'success'
-                })
-            }
-            break
-        case 'forgot-password':
-            callbackFunction = () => {}
-            break
-        case 'register':
-            callbackFunction = () => {}
-            break
-    }
-    return callbackFunction
+const router = useRouter()
+const route = useRoute()
+
+function afterLoginSuccess() {
+    // if (route.path === '/login') {
+    //     router.push('/')
+    // }
+    mainStore.setIsLoginOpen(false)
+    $oruga.notification.open({
+        message: $i18n.t('user.login_success'),
+        variant: 'success'
+    })
 }
 </script>
