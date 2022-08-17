@@ -8,8 +8,8 @@
             aria-role="dialog"
             aria-label="Playlist modal"
             aria-modal
-            :active="isPlaylistOpen"
-            @close="() => setIsPlaylistOpen(false)"
+            :active="mainStore.isPlaylistOpen"
+            @close="() => (mainStore.isPlaylistOpen = false)"
         >
             <template #default>
                 <div class="modal-card" style="width: auto">
@@ -28,8 +28,8 @@
             :fullwidth="false"
             :overlay="true"
             :right="false"
-            :open="isSidebarOpen"
-            @close="() => setIsSidebarOpen(false)"
+            :open="mainStore.isSidebarOpen"
+            @close="() => (mainStore.isSidebarOpen = false)"
         >
             <SidebarMenu />
         </o-sidebar>
@@ -41,37 +41,26 @@
     </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup lang="ts">
 import Navbar from '~/components/layout/Navbar.vue'
 import SidebarMenu from '~/components/layout/SidebarMenu.vue'
 import BottomBar from '~/components/layout/BottomBar.vue'
 import Playlist from '~/components/audio/Playlist.vue'
 import LoginModal from '~/components/login/LoginModal.vue'
 
-export default {
-    components: {
-        Navbar,
-        SidebarMenu,
-        BottomBar,
-        Playlist,
-        LoginModal
-    },
-    head() {
-        return {
-            htmlAttrs: {
-                class:
-                    this.isPlaylistOpen || this.isLoginOpen || this.isSidebarOpen
-                        ? 'is-clipped'
-                        : ''
-            }
+import { useMainStore } from '~/stores'
+const mainStore = useMainStore()
+const { $auth } = useNuxtApp()
+
+// TODO - Rewrite to new useHead composable (but there is a problem with @vueuse/head)
+function head() {
+    return {
+        htmlAttrs: {
+            class:
+                this.isPlaylistOpen || this.isLoginOpen || this.isSidebarOpen
+                    ? 'is-clipped'
+                    : ''
         }
-    },
-    computed: {
-        ...mapGetters(['isSidebarOpen', 'isPlaylistOpen', 'isLoginOpen'])
-    },
-    methods: {
-        ...mapActions(['setIsSidebarOpen', 'setIsPlaylistOpen'])
     }
 }
 </script>

@@ -6,7 +6,10 @@ export default defineNuxtConfig({
     alias: {
         tslib: 'tslib/tslib.es6.js'
     },
-    // bridge: false,
+    // TODO - Add @vueuse/head to be able to use new useHead composable
+    // bridge: {
+    //     meta: true
+    // },
     head: {
         title: 'djspot-fe',
         htmlAttrs: {
@@ -25,7 +28,10 @@ export default defineNuxtConfig({
     },
 
     // Global CSS: https://go.nuxtjs.dev/config-css
-    css: ['~/assets/scss/main.scss', '@mdi/font/css/materialdesignicons.min.css'],
+    css: [
+        '~/assets/scss/main.scss',
+        '@mdi/font/css/materialdesignicons.min.css'
+    ],
 
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
@@ -44,18 +50,24 @@ export default defineNuxtConfig({
     // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
     buildModules: [
         // https://go.nuxtjs.dev/eslint
-        '@nuxtjs/eslint-module'
+        '@nuxtjs/eslint-module',
+        ['@pinia/nuxt', { disableVuex: false }]
     ],
 
     // Modules: https://go.nuxtjs.dev/config-modules
-    modules: ['@nuxtjs/axios', '@nuxtjs/auth-next', '@nuxtjs/i18n', 'nuxt-directus'],
-    directus: {
-        url: 'http://localhost:8055',
-        fetchUserParams: {
-            fields: ['*', 'djs.*']
-        },
-        autoFetch: true
-    },
+    modules: [
+        '@nuxtjs/axios',
+        '@nuxtjs/auth-next',
+        '@nuxtjs/i18n'
+        // 'nuxt-directus'
+    ],
+    // directus: {
+    //     url: 'http://localhost:8055',
+    //     fetchUserParams: {
+    //         fields: ['*', 'djs.*']
+    //     },
+    //     autoFetch: true
+    // },
     i18n: {
         vueI18nLoader: true,
         strategy: 'no_prefix',
@@ -111,14 +123,17 @@ export default defineNuxtConfig({
                 }
                 // autoLogout: false
             }
-        }
+        },
+        redirect: false
     },
     // Build Configuration: https://go.nuxtjs.dev/config-build
     build: {
         transpile: ['vee-validate/dist/rules'],
         extend(config, ctx) {
             if (ctx.isDev) {
-                config.devtool = ctx.isClient ? 'source-map' : 'inline-source-map'
+                config.devtool = ctx.isClient
+                    ? 'source-map'
+                    : 'inline-source-map'
             }
         }
     },

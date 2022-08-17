@@ -7,15 +7,19 @@
             <button-play-pause :sound="playlistItem" />
         </div>
         <div class="column is-text-ellipsis">
-            <span @click="setIsPlaylistOpen(false)">
-                <nuxt-link :to="`/djs/${playlistItem.dj.slug}/sounds/${playlistItem.id}`">
+            <span @click="mainStore.setIsPlaylistOpen(false)">
+                <nuxt-link
+                    :to="`/djs/${playlistItem.dj.slug}/sounds/${playlistItem.id}`"
+                >
                     {{ `${playlistItem.dj.name} – ${playlistItem.name}` }}
                 </nuxt-link>
             </span>
         </div>
 
         <div class="column is-narrow">
-            <span :class="['tag', soundTagType]">{{ $t(`${playlistItem.type}.type`) }}</span>
+            <span :class="['tag', soundTagType]">{{
+                $t(`${playlistItem.type}.type`)
+            }}</span>
         </div>
         <div class="column is-narrow">
             <button-playlist-add-remove :sound="playlistItem" />
@@ -23,40 +27,32 @@
     </li>
 </template>
 
-<script>
-import { mapActions } from 'vuex'
+<script setup lang="ts">
+import { useMainStore } from '~/stores'
 import ButtonPlayPause from '~/components/audio/ButtonPlayPause.vue'
 import ButtonPlaylistAddRemove from '~/components/audio/ButtonPlaylistAddRemove.vue'
 
-export default {
-    components: {
-        ButtonPlayPause,
-        ButtonPlaylistAddRemove
-    },
-    props: {
-        playlistItem: {
-            type: Object,
-            required: true
-        }
-    },
-    computed: {
-        soundTagType() {
-            let tagType
-            switch (this.playlistItem.type) {
-                case 'mix':
-                    tagType = 'is-primary'
-                    break
-                case 'track':
-                    tagType = 'is-success'
-                    break
-            }
-            return tagType
-        }
-    },
-    methods: {
-        ...mapActions(['setIsPlaylistOpen'])
+const mainStore = useMainStore()
+
+const props = defineProps({
+    playlistItem: {
+        type: Object,
+        required: true
     }
-}
+})
+
+const soundTagType = computed(() => {
+    let tagType
+    switch (props.playlistItem.type) {
+        case 'mix':
+            tagType = 'is-primary'
+            break
+        case 'track':
+            tagType = 'is-success'
+            break
+    }
+    return tagType
+})
 </script>
 
 <style lang="scss" scoped>

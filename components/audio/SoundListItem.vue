@@ -4,7 +4,9 @@
             <button-play-pause :sound="sound" variant="text" />
         </div>
         <div class="column is-text-ellipsis mr-1">
-            <nuxt-link :to="{ path: `/djs/${sound.dj.slug}/sounds/${sound.id}` }">
+            <nuxt-link
+                :to="{ path: `/djs/${sound?.dj?.slug}/sounds/${sound.id}` }"
+            >
                 {{ `${sound.dj.name} – ${sound.name}` }}
             </nuxt-link>
         </div>
@@ -20,20 +22,14 @@
     </li>
 </template>
 
-<script>
+<script setup lang="ts">
 import ButtonPlayPause from '~/components/audio/ButtonPlayPause.vue'
 import ButtonPlaylistAddRemove from '~/components/audio/ButtonPlaylistAddRemove.vue'
 
-export default {
-    components: {
-        ButtonPlayPause,
-        ButtonPlaylistAddRemove
-    },
-    props: {
-        sound: {
-            type: Object,
-            required: true
-        }
+const props = defineProps({
+    sound: {
+        type: Object,
+        required: true
     }
-}
+})
 </script>

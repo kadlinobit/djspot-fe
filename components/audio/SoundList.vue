@@ -4,18 +4,13 @@
     </ul>
 </template>
 
-<script>
+<script setup lang="ts">
 import SoundListItem from '~/components/audio/SoundListItem.vue'
 
-export default {
-    components: {
-        SoundListItem
-    },
-    props: {
-        sounds: {
-            type: Array,
-            required: true
-        }
+const props = defineProps({
+    sounds: {
+        type: Array<Object>,
+        required: true
     }
-}
+})
 </script>

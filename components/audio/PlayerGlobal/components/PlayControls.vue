@@ -2,7 +2,11 @@
     <div class="columns is-vcentered is-mobile is-gapless">
         <div class="column">
             <o-button
-                :disabled="!isLoaded || isError || !canPlayPrevious"
+                :disabled="
+                    !playerStore.isLoaded ||
+                    playerStore.isError ||
+                    !canPlayPrevious
+                "
                 variant="primary"
                 size="size-6"
                 icon-left="skip-previous"
@@ -11,7 +15,7 @@
         </div>
         <div class="column">
             <o-button
-                :disabled="!isLoaded || isError"
+                :disabled="!playerStore.isLoaded || playerStore.isError"
                 variant="primary"
                 size="size-6"
                 icon-left="stop"
@@ -20,16 +24,18 @@
         </div>
         <div class="column">
             <o-button
-                :disabled="!isLoaded || isError"
+                :disabled="!playerStore.isLoaded || playerStore.isError"
                 variant="primary"
                 size="size-6"
-                :icon-left="isPlaying ? 'pause' : 'play'"
-                @click.stop="setIsPlaying(!isPlaying)"
+                :icon-left="playerStore.isPlaying ? 'pause' : 'play'"
+                @click.stop="playerStore.setIsPlaying(!playerStore.isPlaying)"
             />
         </div>
         <div class="column">
             <o-button
-                :disabled="!isLoaded || isError || !canPlayNext"
+                :disabled="
+                    !playerStore.isLoaded || playerStore.isError || !canPlayNext
+                "
                 variant="primary"
                 size="size-6"
                 icon-left="skip-next"
@@ -39,57 +45,60 @@
     </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup lang="ts">
+import { usePlayerStore, usePlaylistStore } from '~/stores'
+const playerStore = usePlayerStore()
+const playlistStore = usePlaylistStore()
 
-export default {
-    props: {
-        audioRefName: {
-            type: String,
-            required: true
-        }
-    },
-    computed: {
-        ...mapGetters('playlist', [
-            'playlist',
-            'isSoundInPlaylist',
-            'playlistSize',
-            'soundIndexInPlaylist'
-        ]),
-        ...mapGetters('player', ['currentSound', 'isLoaded', 'isPlaying', 'isLoading', 'isError']),
-        canPlayNext() {
-            if (
-                this.isSoundInPlaylist(this.currentSound) &&
-                this.playlistSize > 1 &&
-                this.soundIndexInPlaylist(this.currentSound) < this.playlistSize - 1
-            )
-                return true
-            return false
-        },
-        canPlayPrevious() {
-            if (
-                this.isSoundInPlaylist(this.currentSound) &&
-                this.playlistSize > 1 &&
-                this.soundIndexInPlaylist(this.currentSound) > 0
-            )
-                return true
-            return false
-        }
-    },
-    methods: {
-        ...mapActions('player', ['setIsPlaying', 'setPreviousVolume', 'loadNewAudio']),
-        stop() {
-            this.setIsPlaying(false)
-            this.$parent.$refs[this.audioRefName].currentTime = 0
-        },
-        playNext() {
-            if (this.canPlayNext)
-                this.loadNewAudio(this.playlist[this.soundIndexInPlaylist(this.currentSound) + 1])
-        },
-        playPrevious() {
-            if (this.canPlayPrevious)
-                this.loadNewAudio(this.playlist[this.soundIndexInPlaylist(this.currentSound) - 1])
-        }
-    }
+interface Props {
+    htmlAudioRef?: any
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    htmlAudioRef: null
+})
+
+// const props = defineProps({ htmlAudioRef: Object })
+const htmlAudio = toRef(props, 'htmlAudioRef')
+
+const canPlayNext = computed(() => {
+    if (
+        playlistStore.isSoundInPlaylist(playerStore.currentSound) &&
+        playlistStore.playlistSize > 1 &&
+        playlistStore.soundIndexInPlaylist(playerStore.currentSound) <
+            playlistStore.playlistSize - 1
+    )
+        return true
+    return false
+})
+const canPlayPrevious = computed<boolean>(() => {
+    if (
+        playlistStore.isSoundInPlaylist(playerStore.currentSound) &&
+        playlistStore.playlistSize > 1 &&
+        playlistStore.soundIndexInPlaylist(playerStore.currentSound) > 0
+    )
+        return true
+    return false
+})
+
+function stop() {
+    playerStore.setIsPlaying(false)
+    htmlAudio.value.currentTime = 0
+}
+function playNext() {
+    if (canPlayNext)
+        playerStore.loadNewAudio(
+            playlistStore.playlist[
+                playlistStore.soundIndexInPlaylist(playerStore.currentSound) + 1
+            ]
+        )
+}
+function playPrevious() {
+    if (canPlayPrevious)
+        playerStore.loadNewAudio(
+            playlistStore.playlist[
+                playlistStore.soundIndexInPlaylist(playerStore.currentSound) - 1
+            ]
+        )
 }
 </script>

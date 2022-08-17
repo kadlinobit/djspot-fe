@@ -2,23 +2,25 @@
     <client-only>
         <div class="form dj-form">
             <o-notification v-if="success" type="success" :closable="false">
-                {{ $t(success) }}
+                {{ $i18n.t(success) }}
             </o-notification>
 
             <o-notification v-if="error" type="danger" :closable="false">
-                {{ $t(error) }}
+                {{ $i18n.t(error) }}
             </o-notification>
 
             <ValidationObserver ref="observer" slim>
                 <form v-if="!success" method="post" @submit.prevent>
                     <div class="columns is-tablet">
-                        <div class="column is-half-tablet is-three-fifths-desktop">
+                        <div
+                            class="column is-half-tablet is-three-fifths-desktop"
+                        >
                             <o-validated-field
                                 v-model="formData.name"
                                 name="name"
                                 type="text"
-                                :label="$t('dj.name')"
-                                :placeholder="$t('dj.dj_name_placeholder')"
+                                :label="$i18n.t('dj.name')"
+                                :placeholder="$i18n.t('dj.dj_name_placeholder')"
                                 rules="required|no_dj_prefix|alpha_num_dash_space"
                             />
                             <o-validated-field
@@ -26,43 +28,47 @@
                                 name="slug"
                                 :disabled="true"
                                 type="text"
-                                :label="$t('dj.slug')"
+                                :label="$i18n.t('dj.slug')"
                                 rules="required"
                             />
                             <o-validated-field
                                 v-model="formData.email"
                                 name="email"
                                 type="email"
-                                :label="$t('dj.email')"
+                                :label="$i18n.t('dj.email')"
                                 rules="email"
                             />
                             <o-validated-select
                                 v-model="formData.city"
                                 name="city"
-                                :label="$t('dj.city')"
+                                :label="$i18n.t('dj.city')"
                                 rules="required"
-                                :options="citiesOptions"
+                                :options="formStore.citiesOptions"
                                 :expanded="true"
-                                :placeholder="$t('dj.select_city')"
+                                :placeholder="$i18n.t('dj.select_city')"
                             />
                             <o-validated-tag-input
                                 v-model="formData.genres"
                                 name="genres"
-                                :label="$t('dj.genres')"
+                                :label="$i18n.t('dj.genres')"
                                 rules="required"
                                 :tags="availableGenres"
                                 field="name"
                                 maxtags="3"
-                                :placeholder="$t('dj.select_3_genres')"
+                                :placeholder="$i18n.t('dj.select_3_genres')"
                             />
                         </div>
-                        <div class="column is-half-tablet is-two-fifths-desktop">
+                        <div
+                            class="column is-half-tablet is-two-fifths-desktop"
+                        >
                             <o-validated-image-crop-upload
                                 v-model="formData.photo"
                                 name="photo"
-                                :label="$t('dj.photo')"
+                                :label="$i18n.t('dj.photo')"
                                 rules="image_type"
-                                :current-image="initialData ? initialData.photo : null"
+                                :current-image="
+                                    initialData ? initialData.photo : null
+                                "
                             />
                         </div>
                     </div>
@@ -71,18 +77,24 @@
                         v-model="formData.bio"
                         name="bio"
                         type="textarea"
-                        rules="required"
-                        :label="$t('dj.bio')"
+                        rules=""
+                        :label="$i18n.t('dj.bio')"
                     />
 
                     <div class="field is-grouped is-grouped-right">
                         <div class="control">
                             <o-button variant="light" @click="onCancel">
-                                {{ $t('form.cancel') }}
+                                {{ $i18n.t('form.cancel') }}
                             </o-button>
-                            <o-button :disabled="isLoading" variant="dark" @click="onSubmit">
+                            <o-button
+                                :disabled="isLoading"
+                                variant="dark"
+                                @click="onSubmit"
+                            >
                                 {{
-                                    initialData ? $t('dj.save_profile') : $t('dj.do_create_profile')
+                                    initialData
+                                        ? $i18n.t('dj.save_profile')
+                                        : $i18n.t('dj.do_create_profile')
                                 }}
                             </o-button>
                         </div>
@@ -93,18 +105,23 @@
     </client-only>
 </template>
 
-<script>
+<script setup lang="ts">
+// TODO - make slug editable
+// TODO - slug availability check online plus validation in form
 import { extend, ValidationObserver } from 'vee-validate'
-import { required, email } from 'vee-validate/dist/rules'
-import { mapGetters } from 'vuex'
+import {
+    required as ruleRequired,
+    email as ruleEmail
+} from 'vee-validate/dist/rules'
+import { useFormStore } from '~/stores'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUpload.vue'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
 
-extend('email', email)
-extend('required', required)
+extend('email', ruleEmail)
+extend('required', ruleRequired)
 
 extend('alpha_num_dash_space', (value) => {
     if (value.match(/^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi)) {
@@ -121,127 +138,130 @@ extend('no_dj_prefix', (value) => {
 })
 
 extend('image_type', (file) => {
-    if (file === null || ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+    if (
+        file === null ||
+        ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)
+    ) {
         return true
     }
 
     return 'validation.image_type'
 })
 
-export default {
-    components: {
-        ValidationObserver,
-        OValidatedField,
-        OValidatedSelect,
-        OValidatedImageCropUpload,
-        OValidatedTagInput,
-        OValidatedBmEditor
-    },
-    middleware: ['authorized'],
-    props: {
-        initialData: {
-            type: Object,
-            default: null
-        },
-        errorIn: {
-            type: [Error, String],
-            default: null
-        },
-        successIn: {
-            type: String,
-            default: null
-        },
-        onFormSubmit: {
-            type: Function,
-            required: true
-        },
-        mode: {
-            type: String,
-            default: 'new'
-        }
-    },
-    data() {
-        return {
-            formData: {
-                name: null,
-                slug: null,
-                email: null,
-                bio: null,
-                photo: null,
-                city: null,
-                genres: null
-            },
-            availableGenres: null,
-            currentPhoto: null,
-            success: null,
-            error: null,
-            isLoading: false
-        }
-    },
-    computed: {
-        ...mapGetters({
-            citiesOptions: 'form/citiesOptions'
-        }),
-        djName() {
-            return this.formData.name
-        }
-    },
-    watch: {
-        djName(value) {
-            this.formData.slug = this.createSlug(value)
-        },
-        errorIn(value) {
-            this.error = value
-        },
-        successIn(value) {
-            this.success = value
-        },
-        isLoadingIn(value) {
-            this.isLoading = value
-        }
-    },
-    async mounted() {
-        if (this.initialData) {
-            this.formData = {
-                ...this.initialData
-            }
-        }
-        // Check if initial data contains photo - if so, set form to keep existing photo
-        if (this.initialData && this.initialData.photo) {
-            this.formData.photo = 'keep-current'
-            this.currentPhoto = this.initialData.photo
-        }
+const formStore = useFormStore()
 
-        const genreTagsAll = await this.$axios.$get('items/genre')
-        this.availableGenres = genreTagsAll.data
-    },
-    methods: {
-        onSubmit() {
-            this.error = null
-            this.$refs.observer.validate().then((success) => {
-                if (!success) {
-                    this.$oruga.notification.open({
-                        message: this.$t('validation.form_validation_error'),
-                        variant: 'danger'
-                    })
-                    return
-                }
+// TODO - find out why definePageMeta is not working
+// definePageMeta({
+//     middleware: 'authorized'
+// })
 
-                this.onFormSubmit(this.formData)
-            })
-        },
-        onCancel() {
-            this.$router.back()
-        },
-        createSlug(value) {
-            if (!value) return ''
-            return value
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036F]/g, '')
-                .replace(/ /g, '-')
-                .replace(/[^\w-]+/g, '')
+const { $axios, $i18n, $router, $oruga } = useNuxtApp()
+
+interface InitialData {
+    name?: string
+    slug?: string
+    email?: string
+    bio?: string
+    photo?: string
+    city?: string
+    genres?: Array<string>
+}
+
+interface Props {
+    initialData?: InitialData
+    errorIn?: [Error, string]
+    successIn?: string
+    isLoadingIn?: boolean
+    onFormSubmit: Function
+    mode?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    initialData: null,
+    errorIn: null,
+    successIn: null,
+    mode: 'new'
+})
+
+const formData = ref({
+    name: null,
+    slug: null,
+    email: null,
+    bio: null,
+    photo: null,
+    city: null,
+    genres: null
+})
+
+const availableGenres = ref(null)
+const currentPhoto = ref(null)
+const success = ref(null)
+const error = ref(null)
+const isLoading = ref(false)
+const observer = ref(null)
+
+watch(
+    () => formData.value.name,
+    (val) => {
+        formData.value.slug = createSlug(val)
+    }
+)
+
+watch(
+    () => props.errorIn,
+    (val) => (error.value = val)
+)
+
+watch(
+    () => props.successIn,
+    (val) => (success.value = val)
+)
+
+watch(
+    () => props.isLoadingIn,
+    (val) => (isLoading.value = val)
+)
+
+onMounted(async () => {
+    if (props.initialData) {
+        formData.value = {
+            ...props.initialData
         }
     }
+    // Check if initial data contains photo - if so, set form to keep existing photo
+    if (props.initialData && props.initialData.photo) {
+        formData.value.photo = 'keep-current'
+        currentPhoto.value = props.initialData.photo
+    }
+
+    const genreTagsAll = await $axios.$get('items/genre')
+    availableGenres.value = genreTagsAll.data
+})
+
+function onSubmit() {
+    error.value = null
+    observer.value.validate().then((success) => {
+        if (!success) {
+            $oruga.notification.open({
+                message: $i18n.t('validation.form_validation_error'),
+                variant: 'danger'
+            })
+            return
+        }
+
+        props.onFormSubmit(formData.value)
+    })
+}
+function onCancel() {
+    $router.back()
+}
+function createSlug(val) {
+    if (!val) return ''
+    return val
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036F]/g, '')
+        .replace(/ /g, '-')
+        .replace(/[^\w-]+/g, '')
 }
 </script>

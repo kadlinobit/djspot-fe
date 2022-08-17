@@ -7,21 +7,40 @@
         aria-role="dialog"
         aria-label="Login modal"
         aria-modal
-        :active="isLoginOpen"
-        @close="() => setIsLoginOpen(false)"
+        :active="mainStore.isLoginOpen"
+        @close="() => (mainStore.isLoginOpen = false)"
     >
         <template #default>
             <div class="modal-card" style="width: auto">
                 <header class="modal-card-head">
                     <h4 class="title is-4">
-                        {{ $t(`user.${loginActiveComponent}`.replace('-', '_')) }}
+                        {{
+                            $i18n.t(
+                                `user.${mainStore.loginActiveComponent}`.replace(
+                                    '-',
+                                    '_'
+                                )
+                            )
+                        }}
                     </h4>
                 </header>
                 <section class="modal-card-body">
-                    <component
-                        :is="loginActiveComponent"
+                    <login
+                        v-if="mainStore.loginActiveComponent === 'login'"
                         display-type="modal"
-                        :after-success-callback="afterSuccessCallbackFunction"
+                        @loginSuccess="afterLoginSuccess"
+                    />
+                    <forgot-password
+                        v-else-if="
+                            mainStore.loginActiveComponent === 'forgot-password'
+                        "
+                        display-type="modal"
+                    />
+                    <register
+                        v-else-if="
+                            mainStore.loginActiveComponent === 'register'
+                        "
+                        display-type="modal"
                     />
                 </section>
                 <footer class="modal-card-foot"></footer>
@@ -30,47 +49,26 @@
     </o-modal>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup lang="ts">
 import Login from './Login.vue'
 import ForgotPassword from './ForgotPassword.vue'
 import Register from './Register.vue'
+import { useMainStore } from '~/stores'
 
-export default {
-    components: {
-        Login,
-        ForgotPassword,
-        Register
-    },
-    computed: {
-        ...mapGetters(['isLoginOpen', 'loginActiveComponent']),
-        afterSuccessCallbackFunction() {
-            let callbackFunction
-            switch (this.loginActiveComponent) {
-                case 'login':
-                    callbackFunction = () => {
-                        if (this.$route.path === '/login') {
-                            this.$router.push('/')
-                        }
-                        this.setIsLoginOpen(false)
-                        this.$oruga.notification.open({
-                            message: this.$t('user.login_success'),
-                            variant: 'success'
-                        })
-                    }
-                    break
-                case 'forgot-password':
-                    callbackFunction = () => {}
-                    break
-                case 'register':
-                    callbackFunction = () => {}
-                    break
-            }
-            return callbackFunction
-        }
-    },
-    methods: {
-        ...mapActions(['setIsLoginOpen'])
-    }
+const { $auth, $oruga, $i18n } = useNuxtApp()
+const mainStore = useMainStore()
+
+const router = useRouter()
+const route = useRoute()
+
+function afterLoginSuccess() {
+    // if (route.path === '/login') {
+    //     router.push('/')
+    // }
+    mainStore.setIsLoginOpen(false)
+    $oruga.notification.open({
+        message: $i18n.t('user.login_success'),
+        variant: 'success'
+    })
 }
 </script>

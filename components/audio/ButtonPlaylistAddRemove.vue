@@ -2,12 +2,21 @@
     <client-only>
         <div class="button-playlist-add-remove">
             <o-button
-                v-if="!currentSound || currentSound.id !== sound.id"
-                :disabled="isPlayerLoading"
+                v-if="
+                    !playerStore.currentSound ||
+                    playerStore.currentSound.id !== sound.id
+                "
+                :disabled="playerStore.isLoading"
                 :variant="variant"
                 :size="size"
-                :icon-left="isSoundInPlaylist(sound) ? 'delete-sweep' : 'playlist-plus'"
-                @click="() => handleAddOrRemovePlaylistSound(sound)"
+                :icon-left="
+                    playlistStore.isSoundInPlaylist(sound)
+                        ? 'delete-sweep'
+                        : 'playlist-plus'
+                "
+                @click="
+                    () => playlistStore.handleAddOrRemovePlaylistSound(sound)
+                "
             />
             <o-icon
                 v-else
@@ -20,33 +29,20 @@
     </client-only>
 </template>
 
-<script>
-import { mapActions, mapGetters } from 'vuex'
+<script setup lang="ts">
+import { usePlayerStore, usePlaylistStore } from '~/stores'
+const playerStore = usePlayerStore()
+const playlistStore = usePlaylistStore()
 
-export default {
-    props: {
-        sound: {
-            type: Object,
-            required: true
-        },
-        size: {
-            type: String,
-            default: null
-        },
-        variant: {
-            type: String,
-            default: 'text'
-        }
-    },
-    computed: {
-        ...mapGetters('player', {
-            currentSound: 'currentSound',
-            isPlayerLoading: 'isLoading'
-        }),
-        ...mapGetters('playlist', ['isSoundInPlaylist'])
-    },
-    methods: {
-        ...mapActions('playlist', ['handleAddOrRemovePlaylistSound'])
-    }
+interface Props {
+    sound: object
+    size?: string
+    variant?: string
 }
+
+const props = withDefaults(defineProps<Props>(), {
+    sound: null,
+    size: null,
+    variant: 'text'
+})
 </script>

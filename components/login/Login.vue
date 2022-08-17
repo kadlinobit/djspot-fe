@@ -1,11 +1,11 @@
 <template>
     <div class="form-login page-login">
         <o-notification v-if="success" variant="success" :closable="false">
-            {{ $t(success) }}
+            {{ $i18n.t(success) }}
         </o-notification>
 
         <o-notification v-if="error" variant="danger" :closable="false">
-            {{ $t(error) }}
+            {{ $i18n.t(error) }}
         </o-notification>
 
         <ValidationObserver ref="observer" slim>
@@ -14,14 +14,14 @@
                     v-model="email"
                     name="email"
                     type="email"
-                    :label="$t('user.email')"
+                    :label="$i18n.t('user.email')"
                     rules="required|email"
                 />
                 <o-validated-field
                     v-model="password"
                     name="password"
                     type="password"
-                    :label="$t('user.password')"
+                    :label="$i18n.t('user.password')"
                     rules="required"
                 />
                 <div class="field">
@@ -29,9 +29,9 @@
                         <o-button
                             :disabled="isLoading"
                             variant="dark is-fullwidth"
-                            @click="onSubmit"
+                            @click="() => onSubmit()"
                         >
-                            {{ $t('user.do_login') }}
+                            {{ $i18n.t('user.do_login') }}
                         </o-button>
                     </div>
                 </div>
@@ -39,26 +39,29 @@
         </ValidationObserver>
         <div class="has-text-centered" style="margin-top: 20px">
             <p>
-                {{ $t('user.dont_have_an_account') }}
+                {{ $i18n.t('user.dont_have_an_account') }}
                 <nuxt-link v-if="displayType === 'page'" to="/register">
-                    {{ $t('user.do_register') }}
+                    {{ $i18n.t('user.do_register') }}
                 </nuxt-link>
                 <a
                     v-if="displayType === 'modal'"
-                    @click="() => setLoginActiveComponent('register')"
+                    @click="() => (mainStore.loginActiveComponent = 'register')"
                 >
-                    {{ $t('user.do_register') }}
+                    {{ $i18n.t('user.do_register') }}
                 </a>
             </p>
             <p>
                 <nuxt-link v-if="displayType === 'page'" to="/forgot-password">
-                    {{ $t('user.forgot_password') }}?
+                    {{ $i18n.t('user.forgot_password') }}?
                 </nuxt-link>
                 <a
                     v-if="displayType === 'modal'"
-                    @click="() => setLoginActiveComponent('forgot-password')"
+                    @click="
+                        () =>
+                            (mainStore.loginActiveComponent = 'forgot-password')
+                    "
                 >
-                    {{ $t('user.forgot_password') }}?
+                    {{ $i18n.t('user.forgot_password') }}?
                 </a>
             </p>
         </div>
@@ -66,24 +69,27 @@
 </template>
 <script setup lang="ts">
 import { extend, ValidationObserver } from 'vee-validate'
-import { required as ruleRequired, email as ruleEmail } from 'vee-validate/dist/rules'
-import { mapActions } from 'vuex'
+import {
+    required as ruleRequired,
+    email as ruleEmail
+} from 'vee-validate/dist/rules'
 import OValidatedField from '~/components/form/OValidatedField.vue'
+import { useMainStore } from '~/stores'
 
 extend('email', ruleEmail)
 extend('required', ruleRequired)
 
-const { $auth, $oruga } = useNuxtApp()
-const { login } = useDirectusAuth()
+const { $auth, $oruga, $i18n } = useNuxtApp()
+const mainStore = useMainStore()
+
+// const { login } = useDirectusAuth()
 
 interface Props {
     displayType?: string
-    afterSuccessCallback?: Function
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    displayType: 'page',
-    afterSuccessCallback: () => {}
+    displayType: 'page'
 })
 
 const emit = defineEmits(['loginSuccess'])
@@ -94,11 +100,6 @@ const password = ref('')
 const error = ref(null)
 const success = ref(null)
 const isLoading = ref(false)
-
-const { setIsLoginOpen, setLoginActiveComponent } = mapActions([
-    'setIsLoginOpen',
-    'setLoginActiveComponent'
-])
 
 onMounted(() => {
     error.value = null
@@ -112,7 +113,7 @@ function onSubmit() {
     observer.value.validate().then((success) => {
         if (!success) {
             $oruga.notification.open({
-                message: this.$t('validation.form_validation_error'),
+                message: $i18n.t('validation.form_validation_error'),
                 variant: 'danger'
             })
             return
@@ -135,11 +136,11 @@ async function onLogin() {
         //     email: email.value,
         //     password: password.value
         // })
-
-        props.afterSuccessCallback()
+        emit('loginSuccess')
     } catch (e) {
         error.value =
-            e.response?.data?.errors[0]?.message || 'Something went wrong and there is no data'
+            e.response?.data?.errors[0]?.message ||
+            'Something went wrong and there is no data'
     } finally {
         isLoading.value = false
     }

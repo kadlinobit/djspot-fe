@@ -20,7 +20,7 @@
                 <li v-if="!djProfile" @click="closeSidebar">
                     <nuxt-link to="/djs/manage/new">
                         <o-icon icon="plus" size="small" />
-                        <span>{{ $t('dj.create_profile') }}</span>
+                        <span>{{ $i18n.t('dj.create_profile') }}</span>
                     </nuxt-link>
                 </li>
                 <li v-else>
@@ -30,13 +30,13 @@
                         <li @click="closeSidebar">
                             <nuxt-link :to="`/djs/${djProfile.slug}`">
                                 <o-icon icon="account-box" size="small" />
-                                <span>{{ $t('dj.profile') }}</span>
+                                <span>{{ $i18n.t('dj.profile') }}</span>
                             </nuxt-link>
                         </li>
                         <li @click="closeSidebar">
                             <nuxt-link to="/sounds/manage/new">
                                 <o-icon icon="plus" size="small" />
-                                <span>{{ $t('sound.add') }}</span>
+                                <span>{{ $i18n.t('sound.add') }}</span>
                             </nuxt-link>
                         </li>
                     </ul>
@@ -46,44 +46,42 @@
     </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import _ from 'lodash'
-import { mapActions } from 'vuex'
+import { useMainStore } from '~/stores'
+const mainStore = useMainStore()
 
-export default {
-    props: {
-        open: Boolean
-    },
-    computed: {
-        djProfile() {
-            if (!_.isEmpty(this.$auth.user.djs)) {
-                return this.$auth.user.djs[0]
-            }
-            return null
-        }
-    },
-    methods: {
-        ...mapActions(['setIsSidebarOpen']),
-        async logout() {
-            this.closeSidebar()
-            await this.$auth.logout({
-                data: {
-                    refresh_token: this.$auth.strategy.refreshToken.get()
-                }
-            })
-            this.$oruga.notification.open({
-                message: this.$t('user.logout_success'),
-                variant: 'success'
-            })
-        },
-        // TBD - probably remove
-        // navigate(url) {
-        //     this.$router.push(url)
-        //     this.setIsSidebarOpen(false)
-        // },
-        closeSidebar() {
-            this.setIsSidebarOpen(false)
-        }
+const { $auth, $oruga, $i18n } = useNuxtApp()
+
+interface Props {
+    open?: Boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    open: false
+})
+
+const djProfile = computed(() => {
+    if (!_.isEmpty($auth.user.djs)) {
+        return $auth.user.djs[0]
     }
+    return null
+})
+
+async function logout() {
+    closeSidebar()
+    await $auth.logout({
+        data: {
+            refresh_token: $auth.strategy.refreshToken.get()
+        }
+    })
+    $oruga.notification.open({
+        message: $i18n.t('user.logout_success'),
+        variant: 'success'
+    })
+}
+
+function closeSidebar() {
+    mainStore.isSidebarOpen = false
 }
 </script>

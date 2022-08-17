@@ -1,11 +1,11 @@
 <template>
     <div class="form-login page-register">
         <o-notification v-if="success" variant="success" :closable="false">
-            {{ $t(success) }}
+            {{ $i18n.t(success) }}
         </o-notification>
 
         <o-notification v-if="error" variant="danger" :closable="false">
-            {{ $t(error) }}
+            {{ $i18n.t(error) }}
         </o-notification>
 
         <ValidationObserver ref="observer" slim>
@@ -14,7 +14,7 @@
                     v-model="username"
                     name="username"
                     type="text"
-                    :label="$t('user.username')"
+                    :label="$i18n.t('user.username')"
                     rules="required"
                 />
 
@@ -22,7 +22,7 @@
                     v-model="email"
                     name="email"
                     type="email"
-                    :label="$t('user.email')"
+                    :label="$i18n.t('user.email')"
                     rules="required|email"
                 />
 
@@ -31,7 +31,7 @@
                     vid="password1"
                     name="password1"
                     type="password"
-                    :label="$t('user.password')"
+                    :label="$i18n.t('user.password')"
                     rules="required"
                 />
 
@@ -39,7 +39,7 @@
                     v-model="password2"
                     name="password2"
                     type="password"
-                    :label="$t('user.password_again')"
+                    :label="$i18n.t('user.password_again')"
                     rules="required|confirmed:password1"
                 />
                 <div class="field">
@@ -49,7 +49,7 @@
                             variant="dark is-fullwidth"
                             @click="onSubmit"
                         >
-                            {{ $t('user.do_register') }}
+                            {{ $i18n.t('user.do_register') }}
                         </o-button>
                     </div>
                 </div>
@@ -57,96 +57,93 @@
         </ValidationObserver>
 
         <div class="has-text-centered" style="margin-top: 20px">
-            {{ $t('user.already_got_an_account') }}
+            {{ $i18n.t('user.already_got_an_account') }}
             <nuxt-link v-if="displayType === 'page'" to="/login">
-                {{ $t('user.do_login') }}
+                {{ $i18n.t('user.do_login') }}
             </nuxt-link>
-            <a v-if="displayType === 'modal'" @click="() => setLoginActiveComponent('login')">
-                {{ $t('user.do_login') }}
+            <a
+                v-if="displayType === 'modal'"
+                @click="() => mainStore.setLoginActiveComponent('login')"
+            >
+                {{ $i18n.t('user.do_login') }}
             </a>
         </div>
     </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { extend, ValidationObserver } from 'vee-validate'
-import { required, email, confirmed } from 'vee-validate/dist/rules'
-import { mapActions } from 'vuex'
+import {
+    required as requiredRule,
+    email as emailRule,
+    confirmed as confirmedRule
+} from 'vee-validate/dist/rules'
 import OValidatedField from '~/components/form/OValidatedField.vue'
+import { useMainStore } from '~/stores'
+const mainStore = useMainStore()
 
-extend('email', email)
-extend('required', required)
-extend('confirmed', confirmed)
+const { $i18n, $oruga, $axios } = useNuxtApp()
 
-export default {
-    components: {
-        ValidationObserver,
-        OValidatedField
-    },
-    props: {
-        displayType: {
-            type: String,
-            default: 'page'
-        },
-        afterSuccessCallback: {
-            type: Function,
-            default: () => {}
-        }
-    },
-    data() {
-        return {
-            username: '',
-            email: '',
-            password1: '',
-            password2: '',
-            success: null,
-            error: null,
-            isLoading: false
-        }
-    },
-    methods: {
-        ...mapActions(['setIsLoginOpen', 'setLoginActiveComponent']),
-        onSubmit() {
-            this.error = null
-            this.$refs.observer.validate().then((success) => {
-                if (!success) {
-                    this.$oruga.notification.open({
-                        message: this.$t('validation.form_validation_error'),
-                        variant: 'danger'
-                    })
-                    return
-                }
-                this.register()
+extend('email', emailRule)
+extend('required', requiredRule)
+extend('confirmed', confirmedRule)
+
+interface Props {
+    displayType?: string
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    displayType: 'page'
+})
+
+const username = ref('')
+const email = ref('')
+const password1 = ref('')
+const password2 = ref('')
+const success = ref(null)
+const error = ref(null)
+const isLoading = ref(false)
+const observer = ref(null)
+
+function onSubmit() {
+    error.value = null
+    observer.value.validate().then((success) => {
+        if (!success) {
+            $oruga.notification.open({
+                message: $i18n.t('validation.form_validation_error'),
+                variant: 'danger'
             })
-        },
-        async register() {
-            try {
-                this.isLoading = true
-                /*
-                this.$axios.setToken(false)
-                await this.$axios.post('auth/local/register', {
-                    username: this.username,
-                    email: this.email,
-                    password: this.password1
-                }) */
-
-                await this.$strapi.register({
-                    email: this.email,
-                    username: this.username,
-                    password: this.password1
-                })
-
-                this.success = 'user.register_success_message'
-            } catch (e) {
-                if (e.response && e.response.data) {
-                    this.error = e.response.data.message[0].messages[0].message
-                } else {
-                    this.error = e
-                }
-            } finally {
-                this.isLoading = false
-            }
+            return
         }
+        register()
+    })
+}
+async function register() {
+    try {
+        isLoading.value = true
+
+        $axios.setToken(false)
+        await $axios.post('auth/local/register', {
+            username,
+            email,
+            password: password1
+        })
+
+        // await $strapi.register({
+        //     email: email,
+        //     username: username,
+        //     password: password1
+        // })
+
+        success.value = 'user.register_success_message'
+    } catch (e) {
+        if (e.response && e.response.data) {
+            error.value = e.response.data.message[0].messages[0].message
+        } else {
+            error.value = e
+        }
+    } finally {
+        isLoading.value = false
     }
 }
 </script>

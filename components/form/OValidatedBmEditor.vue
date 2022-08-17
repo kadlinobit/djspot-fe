@@ -1,5 +1,11 @@
 <template>
-    <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
+    <ValidationProvider
+        v-slot="{ errors, valid }"
+        :vid="vid"
+        :name="name"
+        :rules="rules"
+        slim
+    >
         <o-field
             :label="label"
             :variant="getFieldVariant(errors, valid)"
@@ -15,9 +21,9 @@
 
             <div class="control">
                 <bm-editor
-                    :value="value"
                     :placeholder="placeholder"
-                    @input="(value) => $emit('input', value)"
+                    :modelValue="value"
+                    @update:modelValue="$emit('input', $event)"
                 />
             </div>
         </o-field>

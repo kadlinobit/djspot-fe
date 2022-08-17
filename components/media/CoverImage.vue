@@ -2,51 +2,53 @@
     <div class="cover-image" :style="coverImageStyle"></div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup lang="ts">
+import { useMediaStore } from '~/stores'
+const mediaStore = useMediaStore()
+const { $media } = useNuxtApp()
 
-export default {
-    props: {
-        coverImage: {
-            type: String,
-            default: null
-        },
-        coverType: {
-            type: String,
-            default: 'sound'
-        },
-        quality: {
-            type: String,
-            default: null
-        },
-        pixelSize: {
-            type: Number,
-            default: null
-        }
-    },
-    computed: {
-        ...mapGetters('media', ['getDefaultCoverImage']),
-        coverImageUrl() {
-            if (this.coverImage) {
-                return this.$media.getImageUrl(this.coverImage, this.quality)
-            } else {
-                return 'http://localhost:3000' + this.getDefaultCoverImage(this.coverType)
-            }
-        },
-        coverImageStyle() {
-            const style = {}
-            style.backgroundImage = `url(${this.coverImageUrl})`
-            if (this.pixelSize) {
-                style.width = `${this.pixelSize}px`
-                style.height = `${this.pixelSize}px`
-            } else {
-                style.width = `100%`
-                style.paddingTop = `100%`
-            }
-            return style
-        }
-    }
+interface Props {
+    coverImage?: string
+    coverType?: string
+    quality?: string
+    pixelSize?: number
 }
+
+const props = withDefaults(defineProps<Props>(), {
+    coverImage: null,
+    coverType: 'sound',
+    quality: null,
+    pixelSize: null
+})
+
+const coverImageUrl = computed(() => {
+    if (props.coverImage) {
+        return $media.getImageUrl(props.coverImage, props.quality)
+    } else {
+        return `http://localhost:3000${mediaStore.getDefaultCoverImage(
+            props.coverType
+        )}`
+    }
+})
+const coverImageStyle = computed(() => {
+    interface CoverImageStyle {
+        backgroundImage?: string
+        width?: string
+        height?: string
+        paddingTop?: string
+    }
+
+    const style: CoverImageStyle = {}
+    style.backgroundImage = `url(${coverImageUrl.value})`
+    if (props.pixelSize) {
+        style.width = `${props.pixelSize}px`
+        style.height = `${props.pixelSize}px`
+    } else {
+        style.width = `100%`
+        style.paddingTop = `100%`
+    }
+    return style
+})
 </script>
 
 <style lang="scss" scoped>

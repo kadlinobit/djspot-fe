@@ -11,25 +11,19 @@
     </div>
 </template>
 
-<script>
-// import { mapActions } from 'vuex'
+<script setup lang="ts">
 import Draggable from 'vuedraggable'
 import PlaylistItem from '~/components/audio/PlaylistItem.vue'
+import { usePlaylistStore } from '~/stores'
 
-export default {
-    components: {
-        Draggable,
-        PlaylistItem
+const playlistStore = usePlaylistStore()
+
+const playlist = computed({
+    get() {
+        return playlistStore.playlist
     },
-    computed: {
-        playlist: {
-            get() {
-                return this.$store.getters['playlist/playlist']
-            },
-            set(value) {
-                this.$store.dispatch('playlist/setPlaylist', value)
-            }
-        }
+    set(value) {
+        playlistStore.setPlaylist(value)
     }
-}
+})
 </script>
