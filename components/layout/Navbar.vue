@@ -41,10 +41,10 @@
         >
             <div class="navbar-start">
                 <nuxt-link class="navbar-item" to="/djs">{{
-                    $t('dj.djs')
+                    $i18n.t('dj.djs')
                 }}</nuxt-link>
                 <nuxt-link class="navbar-item" to="/sounds">{{
-                    $t('sound.sounds')
+                    $i18n.t('sound.sounds')
                 }}</nuxt-link>
             </div>
             <div class="navbar-end">
@@ -55,7 +55,7 @@
                             class="button is-light"
                             @click="() => (mainStore.isLoginOpen = true)"
                         >
-                            {{ $t('user.login') }}
+                            {{ $i18n.t('user.login') }}
                         </a>
                     </div>
                 </div>
@@ -68,7 +68,7 @@
 import LanguageSelection from '~/components/layout/LanguageSelection.vue'
 import { useMainStore } from '~/stores'
 
-const { $auth } = useNuxtApp()
+const { $auth, $i18n } = useNuxtApp()
 
 const mainStore = useMainStore()
 const isMenuExpanded = ref(false)

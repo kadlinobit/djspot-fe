@@ -14,7 +14,9 @@
                         <div class="column">
                             <div class="columns is-mobile is-vcentered">
                                 <div class="column">
-                                    <h1 class="title is-size-3-mobile is-size-2-desktop">
+                                    <h1
+                                        class="title is-size-3-mobile is-size-2-desktop"
+                                    >
                                         {{ dj.name }}
                                     </h1>
                                     <h2 class="subtitle">{{ dj.city }}</h2>
@@ -50,8 +52,8 @@
 
                     <dj-control-box
                         :dj="dj"
-                        :on-toggle-follow="onToggleFollow"
                         :is-toggle-follow-loading="isToggleFollowLoading"
+                        @toggleFollow="() => onToggleFollow()"
                     />
                 </div>
             </div>
@@ -60,20 +62,30 @@
         <section class="section p-3">
             <div class="container is-max-desktop">
                 <o-tabs
-                    v-if="dj.bio || (mixes && mixes.length > 0) || (tracks && tracks.length > 0)"
+                    v-if="
+                        dj.bio ||
+                        (mixes && mixes.length > 0) ||
+                        (tracks && tracks.length > 0)
+                    "
                     v-model="activeTab"
                     :expanded="true"
                     :animated="true"
                 >
                     <o-tab-item v-if="!!dj.bio" label="Bio">
-                        <div class="content" v-html="$marked.markdownToHtml(dj.bio)" />
+                        <div
+                            class="content"
+                            v-html="$marked.markdownToHtml(dj.bio)"
+                        />
                     </o-tab-item>
 
                     <o-tab-item v-if="mixes && mixes.length > 0" label="Sety">
                         <SoundList :sounds="mixes" />
                     </o-tab-item>
 
-                    <o-tab-item v-if="tracks && tracks.length > 0" label="Tracky">
+                    <o-tab-item
+                        v-if="tracks && tracks.length > 0"
+                        label="Tracky"
+                    >
                         <SoundList :sounds="tracks" />
                     </o-tab-item>
                 </o-tabs>
@@ -111,7 +123,10 @@ export default {
     async fetch() {
         try {
             const slug = this.$nuxt.context.params.slug
-            let fields = this.$api.collection.getCollectionFields('dj', 'withSounds')
+            let fields = this.$api.collection.getCollectionFields(
+                'dj',
+                'withSounds'
+            )
 
             if (!this.$auth.loggedIn) {
                 fields = fields.filter((field) => field !== 'follows')
@@ -142,7 +157,10 @@ export default {
                 this.dj = data[0]
             } else {
                 this.$fetchState.error = 'DJ not found'
-                return this.$nuxt.error({ statusCode: 404, message: 'DJ not found' })
+                return this.$nuxt.error({
+                    statusCode: 404,
+                    message: 'DJ not found'
+                })
             }
         } catch (e) {
             this.$fetchState.error = e
@@ -158,14 +176,18 @@ export default {
         },
         tracks() {
             if (!this.dj.sounds) return []
-            return this.dj.sounds.filter((sound) => sound.type === 'track') || []
+            return (
+                this.dj.sounds.filter((sound) => sound.type === 'track') || []
+            )
         }
     },
     methods: {
         async onToggleFollow() {
             this.isToggleFollowLoading = true
             try {
-                _.isEmpty(this.dj.follows) ? await this.createFollow() : await this.deleteFollow()
+                _.isEmpty(this.dj.follows)
+                    ? await this.createFollow()
+                    : await this.deleteFollow()
             } catch (e) {
                 throw new Error(e)
             } finally {
@@ -185,7 +207,9 @@ export default {
             }
         },
         async deleteFollow() {
-            const result = await this.$axios.delete(`items/user_dj_follow/${this.dj.follows[0]}`)
+            const result = await this.$axios.delete(
+                `items/user_dj_follow/${this.dj.follows[0]}`
+            )
 
             if (result.status === 204) {
                 this.dj.follows = []

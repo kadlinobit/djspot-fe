@@ -18,7 +18,7 @@
 
         <div class="column is-narrow">
             <span :class="['tag', soundTagType]">{{
-                $t(`${playlistItem.type}.type`)
+                $i18n.t(`${playlistItem.type}.type`)
             }}</span>
         </div>
         <div class="column is-narrow">
@@ -32,6 +32,7 @@ import { useMainStore } from '~/stores'
 import ButtonPlayPause from '~/components/audio/ButtonPlayPause.vue'
 import ButtonPlaylistAddRemove from '~/components/audio/ButtonPlaylistAddRemove.vue'
 
+const { $i18n } = useNuxtApp()
 const mainStore = useMainStore()
 
 const props = defineProps({

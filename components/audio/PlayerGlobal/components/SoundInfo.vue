@@ -4,7 +4,7 @@
         variant="danger pt-3 pb-3"
         role="alert"
     >
-        {{ $t('player.error_loading_file') }}
+        {{ $i18n.t('player.error_loading_file') }}
     </o-notification>
     <div v-else class="columns is-vcentered is-mobile is-relative">
         <!--  -->
@@ -43,5 +43,5 @@
 <script setup lang="ts">
 import { usePlayerStore } from '~/stores'
 const playerStore = usePlayerStore()
-const { $audio } = useNuxtApp()
+const { $audio, $i18n } = useNuxtApp()
 </script>

@@ -1,7 +1,11 @@
 <template>
     <div class="dj-list-item card">
         <div class="card-image">
-            <cover-image :cover-image="dj.photo || null" quality="thumbnail" cover-type="dj" />
+            <cover-image
+                :cover-image="dj.photo || null"
+                quality="thumbnail"
+                cover-type="dj"
+            />
         </div>
         <div class="card-content">
             <div class="title is-5">
@@ -14,18 +18,14 @@
     </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import CoverImage from '~/components/media/CoverImage.vue'
 
-export default {
-    components: {
-        CoverImage
-    },
-    props: {
-        dj: {
-            type: Object,
-            default: null
-        }
-    }
+interface Props {
+    dj: Object
 }
+
+const props = withDefaults(defineProps<Props>(), {
+    dj: () => ({})
+})
 </script>
