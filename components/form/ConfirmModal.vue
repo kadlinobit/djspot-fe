@@ -19,53 +19,45 @@
             <button type="button" class="button" @click="close">
                 <span>{{ cancelText }}</span>
             </button>
-            <button type="button" class="button is-danger" @click="confirmAndClose">
+            <button
+                type="button"
+                class="button is-danger"
+                @click="confirmAndClose"
+            >
                 <span>{{ confirmText }}</span>
             </button>
         </footer>
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        title: {
-            type: String,
-            default: 'Confirm'
-        },
-        hasIcon: {
-            type: Boolean,
-            default: true
-        },
-        icon: {
-            type: String,
-            default: 'alert-circle'
-        },
-        message: {
-            type: String,
-            default: 'Are you sure you want to do this?'
-        },
-        cancelText: {
-            type: String,
-            default: 'Cancel'
-        },
-        confirmText: {
-            type: String,
-            default: 'Confirm'
-        },
-        onConfirm: {
-            type: Function,
-            default: () => {}
-        }
-    },
-    methods: {
-        confirmAndClose() {
-            this.onConfirm()
-            this.close()
-        },
-        close() {
-            this.$emit('close')
-        }
-    }
+<script setup lang="ts">
+const emit = defineEmits(['close'])
+
+interface Props {
+    title?: string
+    hasIcon?: boolean
+    icon?: string
+    message?: string
+    cancelText?: string
+    confirmText?: string
+    onConfirm?: Function
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    title: 'Confirm',
+    hasIcon: true,
+    icon: 'alert-circle',
+    message: 'Are you sure you want to do this?',
+    cancelText: 'Cancel',
+    confirmText: 'Confirm',
+    onConfirm: () => {}
+})
+
+function confirmAndClose() {
+    props.onConfirm()
+    close()
+}
+function close() {
+    emit('close')
 }
 </script>

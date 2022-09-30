@@ -23,18 +23,10 @@
     </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import CoverImage from '~/components/media/CoverImage.vue'
 
-export default {
-    components: {
-        CoverImage
-    },
-    props: {
-        dj: {
-            type: Object,
-            required: true
-        }
-    }
-}
+const props = defineProps({
+    dj: Object
+})
 </script>
