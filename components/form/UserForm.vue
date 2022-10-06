@@ -109,6 +109,15 @@ const formStore = useFormStore()
 //     middleware: 'authorized'
 // })
 
+type FormSubmitData = {
+    formData: Object
+    successMessage?: string
+}
+
+const emit = defineEmits<{
+    (e: 'formSubmit', formSubmitData: FormSubmitData): void
+}>()
+
 interface InitialData {
     name?: string
     slug?: string
@@ -121,17 +130,16 @@ interface InitialData {
 
 interface Props {
     initialData?: InitialData
-    errorIn?: [Error, string]
-    successIn?: string
-    isLoadingIn?: boolean
-    onFormSubmit: Function
+    error?: Error | Object | string
+    success?: string
+    isLoading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     initialData: null,
-    errorIn: null,
-    successIn: null,
-    loadingIn: false
+    error: null,
+    success: null,
+    isLoading: false
 })
 
 const formData = ref({
@@ -143,9 +151,6 @@ const formData = ref({
     password_check: null
 })
 
-const success = ref(null)
-const error = ref(null)
-const isLoading = ref(false)
 const observer = ref(null)
 
 const languagesOptions = computed(() => {
@@ -153,21 +158,6 @@ const languagesOptions = computed(() => {
         .map((locale) => ({ value: locale.iso, label: locale.name }))
         .sort((a, b) => a.value.localeCompare(b.value))
 })
-
-watch(
-    () => props.errorIn,
-    (val) => (error.value = val)
-)
-
-watch(
-    () => props.successIn,
-    (val) => (success.value = val)
-)
-
-watch(
-    () => props.isLoadingIn,
-    (val) => (isLoading.value = val)
-)
 
 onMounted(() => {
     if (props.initialData) {
@@ -177,8 +167,18 @@ onMounted(() => {
     }
 })
 
+watch(
+    () => props.initialData,
+    (val) => {
+        if (val) {
+            formData.value = {
+                ...props.initialData
+            }
+        }
+    }
+)
+
 function onSubmit() {
-    error.value = null
     observer.value.validate().then((success) => {
         if (!success) {
             $oruga.notification.open({
@@ -187,8 +187,10 @@ function onSubmit() {
             })
             return
         }
-
-        props.onFormSubmit(formData, 'user.profile_update_success')
+        emit('formSubmit', {
+            formData: { ...formData.value },
+            successMessage: 'user.profile_update_success'
+        })
         formData.value.password_check = null
         observer.value.reset()
     })

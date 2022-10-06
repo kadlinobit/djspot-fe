@@ -49,9 +49,11 @@
 <script setup lang="ts">
 import _ from 'lodash'
 import { useMainStore } from '~/stores'
+import { useAuth } from '~/composables/directus'
 const mainStore = useMainStore()
+const auth = useAuth()
 
-const { $auth, $oruga, $i18n } = useNuxtApp()
+const { $oruga, $i18n } = useNuxtApp()
 
 interface Props {
     open?: Boolean
@@ -62,19 +64,15 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const djProfile = computed(() => {
-    if (!_.isEmpty($auth.user.djs)) {
-        return $auth.user.djs[0]
+    if (!_.isEmpty(auth.user.value.djs)) {
+        return auth.user.value.djs[0]
     }
     return null
 })
 
 async function logout() {
     closeSidebar()
-    await $auth.logout({
-        data: {
-            refresh_token: $auth.strategy.refreshToken.get()
-        }
-    })
+    await auth.logout()
     $oruga.notification.open({
         message: $i18n.t('user.logout_success'),
         variant: 'success'

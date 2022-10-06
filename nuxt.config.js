@@ -61,6 +61,7 @@ export default defineNuxtConfig({
         '@nuxtjs/i18n'
         // 'nuxt-directus'
     ],
+    // TODO - should this be here or in the runtimeConfig????
     // directus: {
     //     url: 'http://localhost:8055',
     //     fetchUserParams: {
@@ -137,7 +138,18 @@ export default defineNuxtConfig({
             }
         }
     },
-
+    runtimeConfig: {
+        public: {
+            // TODO - should this be here or in the root???
+            // directus: {
+            //     url: 'http://localhost:8055',
+            //     fetchUserParams: {
+            //         fields: ['*', 'djs.*']
+            //     },
+            //     autoFetch: true
+            // }
+        }
+    },
     publicRuntimeConfig: {
         API_AUTH_URL: 'http://localhost:1337', // TBD - probably remove
         DOMAIN: 'http://localhost:1337'

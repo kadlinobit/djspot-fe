@@ -24,18 +24,6 @@ module.exports = {
         'prettier/prettier': 'off',
         'max-len': [1, { code: 120, tabWidth: 4, ignoreUrls: true }],
         '@typescript-eslint/no-unused-vars': 'off',
-        'vue/multi-word-component-names': [
-            'error',
-            {
-                ignores: [
-                    'Login',
-                    'Navbar',
-                    'Register',
-                    'default',
-                    'Playlist',
-                    'index'
-                ]
-            }
-        ]
+        'vue/multi-word-component-names': 'off'
     }
 }

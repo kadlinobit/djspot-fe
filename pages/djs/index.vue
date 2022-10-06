@@ -96,8 +96,10 @@ import _ from 'lodash'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import DjList from '~/components/dj/DjList.vue'
 import { useFormStore } from '~/stores'
+import { useAuth } from '~/composables/directus'
 
-const { $i18n, $auth, $api } = useNuxtApp()
+const { $i18n, $api } = useNuxtApp()
+const auth = useAuth()
 const route = useRoute()
 const router = useRouter()
 const formStore = useFormStore()
@@ -131,7 +133,7 @@ const urlQuery = computed(() => {
 const requestQuery = computed(() => {
     let fields = $api.collection.getCollectionFields('dj', 'default')
 
-    if ($auth.loggedIn) {
+    if (auth.loggedIn.value) {
         fields = fields.filter((field) => field !== 'follows')
     }
     return {

@@ -31,8 +31,10 @@
 
 <script setup lang="ts">
 import OResponsiveButton from '~/components/form/OResponsiveButton.vue'
+import { useAuth } from '~/composables/directus'
 
-const { $i18n, $auth } = useNuxtApp()
+const { $i18n } = useNuxtApp()
+const auth = useAuth()
 
 defineEmits(['toggleFollow'])
 
@@ -47,7 +49,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const followButtonVariant = computed(() => {
-    if (!$auth.loggedIn) return 'light'
+    if (!auth.loggedIn.value) return 'light'
     return props.dj.follows.length > 0 ? 'dark' : 'light'
 })
 </script>

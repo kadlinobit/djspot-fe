@@ -2,11 +2,11 @@
     <client-only>
         <div class="form user-form">
             <o-notification v-if="success" variant="success" :closable="false">
-                {{ $t(success) }}
+                {{ $i18n.t(success) }}
             </o-notification>
 
             <o-notification v-if="error" variant="danger" :closable="false">
-                {{ $t(error) }}
+                {{ $i18n.t(error) }}
             </o-notification>
 
             <ValidationObserver ref="observer" slim>
@@ -16,28 +16,32 @@
                         vid="password"
                         name="password"
                         type="password"
-                        :label="$t('user.new_password')"
+                        :label="$i18n.t('user.new_password')"
                         rules="required"
                     />
 
                     <o-validated-field
-                        v-model="password_again"
-                        name="password_again"
+                        v-model="passwordAgain"
+                        name="passwordAgain"
                         type="password"
-                        :label="$t('user.new_password_again')"
+                        :label="$i18n.t('user.new_password_again')"
                         rules="required|confirmed:password"
                     />
                     <o-validated-field
                         v-model="formData.password_check"
                         name="password_check"
                         type="password"
-                        :label="$t('user.current_password_check')"
+                        :label="$i18n.t('user.current_password_check')"
                         rules="required"
                     />
                     <div class="field is-grouped is-grouped-right">
                         <div class="control">
-                            <o-button :disabled="isLoading" variant="dark" @click="onSubmit">
-                                {{ $t('user.do_change_password') }}
+                            <o-button
+                                :disabled="isLoading"
+                                variant="dark"
+                                @click="onSubmit"
+                            >
+                                {{ $i18n.t('user.do_change_password') }}
                             </o-button>
                         </div>
                     </div>
@@ -47,74 +51,67 @@
     </client-only>
 </template>
 
-<script>
+<script setup lang="ts">
 import { extend, ValidationObserver } from 'vee-validate'
-import { required, confirmed } from 'vee-validate/dist/rules'
+import {
+    required as ruleRequired,
+    confirmed as ruleConfirmed
+} from 'vee-validate/dist/rules'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 
-extend('required', required)
-extend('confirmed', confirmed)
+extend('required', ruleRequired)
+extend('confirmed', ruleConfirmed)
 
-export default {
-    components: {
-        ValidationObserver,
-        OValidatedField
-    },
-    middleware: ['authorized'],
-    props: {
-        errorIn: {
-            type: [Error, String],
-            default: null
-        },
-        successIn: {
-            type: String,
-            default: null
-        },
-        onFormSubmit: {
-            type: Function,
-            required: true
-        }
-    },
-    data() {
-        return {
-            formData: {
-                password: null,
-                password_check: null
-            },
-            password_again: null,
-            success: null,
-            error: null,
-            isLoading: false
-        }
-    },
-    watch: {
-        errorIn(value) {
-            this.error = value
-        },
-        successIn(value) {
-            this.success = value
-        },
-        isLoadingIn(value) {
-            this.isLoading = value
-        }
-    },
-    methods: {
-        onSubmit() {
-            this.error = null
-            this.$refs.observer.validate().then((success) => {
-                if (!success) {
-                    this.$oruga.notification.open({
-                        message: this.$t('validation.form_validation_error'),
-                        variant: 'danger'
-                    })
-                    return
-                }
+const { $i18n, $oruga } = useNuxtApp()
 
-                this.onFormSubmit(this.formData, 'user.password_change_success')
-                this.formData.password_check = null
-                this.$refs.observer.reset()
+// TODO - find out why definePageMeta is not working
+// definePageMeta({
+//     middleware: 'authorized'
+// })
+
+type FormSubmitData = {
+    formData: Object
+    successMessage?: string
+}
+
+const emit = defineEmits<{
+    (e: 'formSubmit', formSubmitData: FormSubmitData): void
+}>()
+
+interface Props {
+    error?: Error | Object | string
+    success?: string
+    isLoading?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    error: null,
+    success: null,
+    isLoading: false
+})
+
+const formData = ref({
+    password: null,
+    password_check: null
+})
+const passwordAgain = ref(null)
+const observer = ref(null)
+
+function onSubmit() {
+    observer.value.validate().then((success) => {
+        if (!success) {
+            $oruga.notification.open({
+                message: $i18n.t('validation.form_validation_error'),
+                variant: 'danger'
             })
+            return
         }
-    }
+        emit('formSubmit', {
+            formData: { ...formData.value },
+            successMessage: 'user.password_change_success'
+        })
+        formData.value.password_check = null
+        observer.value.reset()
+    })
 }
 </script>

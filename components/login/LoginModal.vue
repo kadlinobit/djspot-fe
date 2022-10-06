@@ -55,7 +55,7 @@ import ForgotPassword from './ForgotPassword.vue'
 import Register from './Register.vue'
 import { useMainStore } from '~/stores'
 
-const { $auth, $oruga, $i18n } = useNuxtApp()
+const { $oruga, $i18n } = useNuxtApp()
 const mainStore = useMainStore()
 
 const router = useRouter()
