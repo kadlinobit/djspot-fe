@@ -131,7 +131,7 @@ async function editUser({ formData, successMessage }) {
             variant: 'success'
         })
     } catch (e) {
-        error.value = $api.tools.parseResponseErrorMessage(e)
+        error.value = $api.tools.parseErrorMessage(e)
     } finally {
         isLoading.value = false
         initialData.value.password_check = null

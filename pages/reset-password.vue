@@ -4,12 +4,22 @@
             <div class="container">
                 <div class="columns">
                     <div class="column is-4 is-offset-4">
-                        <h2 class="title has-text-centered">{{ $t('user.reset_password') }}</h2>
+                        <h2 class="title has-text-centered">
+                            {{ $t('user.reset_password') }}
+                        </h2>
 
-                        <o-notification v-if="success" variant="success" :closable="false">
+                        <o-notification
+                            v-if="success"
+                            variant="success"
+                            :closable="false"
+                        >
                             {{ $t(success) }}
                         </o-notification>
-                        <o-notification v-if="error" variant="danger" :closable="false">
+                        <o-notification
+                            v-if="error"
+                            variant="danger"
+                            :closable="false"
+                        >
                             {{ $t(error) }}
                         </o-notification>
                         <ValidationObserver ref="observer">
@@ -43,7 +53,11 @@
                                 </div>
                             </form>
                         </ValidationObserver>
-                        <div v-if="success" class="has-text-centered" style="margin-top: 20px">
+                        <div
+                            v-if="success"
+                            class="has-text-centered"
+                            style="margin-top: 20px"
+                        >
                             <p>
                                 <nuxt-link :to="{ path: '/login' }">
                                     {{ $t('user.go_to_login_page') }}
@@ -114,7 +128,7 @@ export default {
 
                 this.success = 'user.password_reset_success'
             } catch (e) {
-                this.error = this.$api.tools.parseResponseErrorMessage(e)
+                this.error = this.$api.tools.parseErrorMessage(e)
             } finally {
                 this.isLoading = false
             }

@@ -2,16 +2,16 @@
     <client-only>
         <section class="section">
             <o-loading :active="isLoading" />
-            <o-notification v-if="success" variant="success">
-                {{ $i18n.t(success) }}
+            <o-notification v-if="successMessage" variant="success">
+                {{ $i18n.t(successMessage) }}
             </o-notification>
 
-            <o-notification v-if="error" type="danger">
-                {{ $i18n.t(error) }}
+            <o-notification v-if="errorMessage" type="danger">
+                {{ $i18n.t(errorMessage) }}
             </o-notification>
 
             <ValidationObserver ref="observer" slim>
-                <form v-if="!success" method="post" @submit.prevent>
+                <form v-if="!successMessage" method="post" @submit.prevent>
                     <div class="columns is-tablet">
                         <div
                             class="column is-half-tablet is-three-fifths-desktop"
@@ -209,15 +209,15 @@ interface InitialData {
 
 interface Props {
     initialData?: InitialData
-    error?: Error | Object | string
-    success?: string
+    errorMessage?: string
+    successMessage?: string
     isLoading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     initialData: null,
-    error: null,
-    success: null,
+    errorMessage: null,
+    successMessage: null,
     isLoading: false
 })
 
@@ -272,7 +272,7 @@ onMounted(async () => {
 })
 
 function onSave() {
-    onSubmit(formData.value, `${formData.value.type}.edit_success`)
+    onSubmit({ ...formData.value }, `${formData.value.type}.edit_success`)
 }
 function onSaveAndPublish() {
     onSubmit(
@@ -284,8 +284,8 @@ function onSaveAndPublish() {
     )
 }
 function onSubmit(formDataObj, successMessage) {
-    observer.value.validate().then((success) => {
-        if (!success) {
+    observer.value.validate().then((isValid) => {
+        if (!isValid) {
             $oruga.notification.open({
                 message: $i18n.t('validation.form_validation_error'),
                 rootClass: 'toast',

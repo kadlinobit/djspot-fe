@@ -11,7 +11,8 @@
             "oldest": "Nejstarší",
             "most_followed": "Nejsledovanější",
             "most_liked": "Nejoblíbenější"
-        }
+        },
+        "reset_search": "Resetovat vyhledávání"
     },
     "user": {
         "user_profile": "Uživatelský profil",
@@ -85,7 +86,6 @@
         "follow": "Sledovat",
         "followers": "Sledujících",
         "no_djs_found": "Bohužel, nenašli jsme žádné DJs.",
-        "reset_search": "Resetovat vyhledávání",
         "search_dj": "Hledat DJe..."
     },
     "mix": {
@@ -144,7 +144,9 @@
         "url_placeholder": "Adresa kde se nachází zvukový soubor",
         "select_sound_type": "Vyber typ audia",
         "info": "Info",
-        "all_types": "Všechny typy"
+        "all_types": "Všechny typy",
+        "no_sounds_found": "Bohužel, nenašli jsme žádné sety ani tracky."
+
     },
     "playlist": {
         "added_to_playlist": "Audio '{0}' přidáno do playlistu",

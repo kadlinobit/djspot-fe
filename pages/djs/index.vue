@@ -1,7 +1,7 @@
 <template>
     <section class="section">
         <div class="container">
-            <h1 class="title">DJs {{ djsData?.meta?.filter_count || 0 }}</h1>
+            <h1 class="title">DJs {{ djs?.meta?.filter_count || 0 }}</h1>
             <o-field>
                 <o-input
                     v-model="name"
@@ -54,26 +54,33 @@
                 </client-only>
             </o-field>
 
-            <!-- <p v-if="pending">Loading ...</p> -->
-            <p v-if="error">{{ error.message }}</p>
-            <div v-else-if="!pending && djsData?.meta?.filter_count === 0">
+            <o-loading
+                v-if="fetchPending"
+                :full-page="false"
+                :active="fetchPending"
+                :can-cancel="true"
+            />
+            <div v-else-if="fetchfetchError">
+                {{ fetchfetchError }}
+            </div>
+            <div v-else-if="!fetchPending && djs?.meta?.filter_count === 0">
                 <section class="hero is-secondary is-medium">
                     <div class="hero-body">
                         <p class="title">{{ $i18n.t('dj.no_djs_found') }}</p>
                         <p class="subtitle">
                             <a @click="resetSearch">{{
-                                $i18n.t('dj.reset_search')
+                                $i18n.t('form.reset_search')
                             }}</a>
                         </p>
                     </div>
                 </section>
             </div>
             <div v-else>
-                <dj-list :djs="djsData?.data" />
+                <dj-list :djs="djs?.data" />
 
                 <o-pagination
                     :current="page"
-                    :total="djsData?.meta?.filter_count"
+                    :total="djs?.meta?.filter_count"
                     :range-before="1"
                     :range-after="1"
                     order="centered"
@@ -96,13 +103,14 @@ import _ from 'lodash'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import DjList from '~/components/dj/DjList.vue'
 import { useFormStore } from '~/stores'
-import { useAuth } from '~/composables/directus'
+import useDirectus, { useAuth } from '~/composables/directus'
 
 const { $i18n, $api } = useNuxtApp()
-const auth = useAuth()
 const route = useRoute()
 const router = useRouter()
 const formStore = useFormStore()
+const auth = useAuth()
+const directus = useDirectus()
 
 const name = ref(route.query.name ? route.query.name : '')
 const city = ref(route.query.city ? route.query.city : '')
@@ -180,23 +188,31 @@ const requestFilter = computed(() => {
 })
 
 const {
-    data: djsData,
-    pending,
+    data: djs,
+    pending: fetchPending,
     refresh,
-    error
-} = useLazyAsyncData('djsPageQuery', () => {
-    const djsData = $fetch('http://localhost:8055/items/dj', {
-        method: 'SEARCH',
-        body: JSON.stringify({
-            query: requestQuery.value
-        }),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-
-    return djsData
-})
+    error: fetchError
+} = useLazyAsyncData(
+    'djsPageQuery',
+    async function () {
+        // FETCH WAY
+        // TODO -REMOVE
+        // const djs = $fetch('http://localhost:8055/items/dj', {
+        //     method: 'SEARCH',
+        //     body: JSON.stringify({
+        //         query: requestQuery.value
+        //     }),
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // })
+        const djs = await directus.items('dj').readByQuery({
+            ...requestQuery.value
+        })
+        return djs
+    },
+    { server: false }
+)
 
 function pushRouterQuery() {
     router.push({
@@ -218,10 +234,8 @@ function onPageChange(pageNumber) {
 
 onMounted(async () => {
     if (_.isEmpty(formStore.genresOptions)) {
-        const { data: genresData } = await $fetch(
-            'http://localhost:8055/items/genre'
-        )
-        formStore.setGenres(genresData)
+        const { data } = await directus.items('genre').readByQuery()
+        formStore.setGenres(data)
     }
 
     // Fill in genres

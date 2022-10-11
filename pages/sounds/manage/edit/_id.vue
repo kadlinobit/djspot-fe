@@ -50,9 +50,9 @@ TODO:
                 </div>
             </div>
             <sound-form
-                :error-in="error"
-                :success-in="success"
-                :is-loading-in="isLoading"
+                :error-message="errorMessage"
+                :success-message="success"
+                :is-loading="isLoading"
                 :initial-data="initialData"
                 @formSubmit="editSound"
             />
@@ -63,7 +63,7 @@ TODO:
 <script setup lang="ts">
 import SoundForm from '~/components/form/SoundForm.vue'
 import ConfirmModal from '~/components/form/ConfirmModal.vue'
-import { parseResponseErrorMessage } from '~/api/tools'
+import { parseErrorMessage } from '~/api/tools'
 import useDirectus, { useAuth } from '~/composables/directus'
 
 const directus = useDirectus()
@@ -81,6 +81,11 @@ const error = ref(null)
 const success = ref(null)
 const isLoading = ref(false)
 
+const errorMessage = computed(() => {
+    const errorMessage = $api.tools.parseErrorMessage(error.value)
+    return errorMessage
+})
+
 const {
     data: initialData,
     pending: fetchPending,
@@ -97,7 +102,6 @@ const {
         const data = await directus.items('sound').readOne(id, {
             fields: $api.collection.getCollectionFields('sound', 'form')
         })
-        console.log(data)
         return {
             ...data,
             genres: data.genres.map((genre) => genre.genre_id)
@@ -255,7 +259,7 @@ async function deleteSound() {
             duration: 7000
         })
     } catch (e) {
-        error.value = parseResponseErrorMessage(e)
+        error.value = parseErrorMessage(e)
     } finally {
         isLoading.value = false
     }

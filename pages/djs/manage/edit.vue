@@ -1,37 +1,40 @@
 <template>
     <section class="section">
         <o-loading
-            v-if="$fetchState.pending"
+            v-if="fetchPending"
             :full-page="false"
-            :active.sync="$fetchState.pending"
+            :active="fetchPending"
             :can-cancel="true"
         />
-        <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
         <div v-else class="container">
             <div class="columns is-gapless is-vcentered">
                 <div class="column">
                     <h1 class="title">
-                        {{ `${initialData.name} - ${$t('dj.edit_profile')}` }}
+                        {{
+                            `${initialData.name} - ${$i18n.t(
+                                'dj.edit_profile'
+                            )}`
+                        }}
                     </h1>
                 </div>
                 <div class="column is-narrow">
                     <o-button variant="danger" @click="onDeleteDj()">
-                        {{ $t('dj.delete_profile') }}
+                        {{ $i18n.t('dj.delete_profile') }}
                     </o-button>
                 </div>
             </div>
             <dj-form
                 :initial-data="initialData"
-                :on-form-submit="editDj"
-                :error-in="error"
-                :success-in="success"
-                :is-loading-in="isLoading"
+                :error-message="errorMessage"
+                :success-message="success"
+                :is-loading="isLoading"
+                @formSubmit="editDj"
             />
         </div>
     </section>
 </template>
 
-<script>
+<script setup lang="ts">
 /**
  * TBD
  * - try to handle genres so there is no new dj_genre creation for each DJ update
@@ -39,130 +42,143 @@
 // import _ from 'lodash'
 import DjForm from '~/components/form/DjForm.vue'
 import ConfirmModal from '~/components/form/ConfirmModal.vue'
+import useDirectus, { useAuth } from '~/composables/directus'
 
-export default {
-    name: 'DjEditPage',
-    components: {
-        DjForm
-    },
-    middleware: 'authenticated',
-    data() {
+const { $i18n, $api, $oruga } = useNuxtApp()
+const directus = useDirectus()
+const auth = useAuth()
+const router = useRouter()
+
+// TODO - find out why definePageMeta is not working
+// definePageMeta({
+//     middleware: 'authorized'
+// })
+
+const error = ref(null)
+const success = ref(null)
+const isLoading = ref(false)
+
+const errorMessage = computed(() => {
+    const errorMessage = $api.tools.parseErrorMessage(error.value)
+    return errorMessage
+})
+
+const {
+    data: initialData,
+    pending: fetchPending,
+    refresh,
+    error: fetchError
+} = useLazyAsyncData(
+    'djFormQuery',
+    async function () {
+        // // PROMISE TO SET TIMEOUT FOR TESTING (TODO - REMOVE)
+        // await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        // TODO - put it some error handling (nuxt at the moment doesnt return response body so its a bit hard)
+        const data = await directus
+            .items('dj')
+            .readOne(auth.user.value.djs[0].id, {
+                fields: $api.collection
+                    .getCollectionFields('dj', 'form')
+                    .join(',')
+            })
         return {
-            error: null,
-            success: null,
-            isLoading: false,
-            initialData: null
+            ...data,
+            genres: data.genres.map((genre) => genre.genre_id)
         }
     },
-    async fetch() {
-        try {
-            const data = await this.$axios.$get(`items/dj/${this.$auth.user.djs[0].id}`, {
-                params: {
-                    fields: this.$api.collection.getCollectionFields('dj', 'form').join(',')
-                }
-            })
+    // There must be no server side data load - otherwise it is not working
+    // TODO: Maybe remove when we get to NUXT 3
+    { server: false, initialCache: false }
+)
 
-            if (data.data) {
-                this.initialData = {
-                    ...data.data,
-                    genres: data.data.genres.map((genre) => genre.genre_id)
-                }
-            } else {
-                throw new Error('DJ not found')
-            }
-        } catch (e) {
-            this.$fetchState.error = e
-            if (e.statusCode && e.statusCode === 404) {
-                return this.$nuxt.error({ statusCode: 404, message: e.message })
-            }
+async function editDj({ formData }) {
+    try {
+        isLoading.value = true
+        error.value = null
+
+        // // // PROMISE TO SET TIMEOUT FOR TESTING (TODO - REMOVE)
+        // await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        // #1 Handle photo update || delete
+        const photo = await editPhoto(formData, initialData.value.photo)
+        delete formData.photo
+        delete formData.id
+
+        const djData = {
+            ...formData,
+            genres: formData.genres
+                ? formData.genres.map((genre) => ({
+                      genre_id: parseInt(genre.id)
+                  }))
+                : null
         }
-    },
-    methods: {
-        async editDj(formDataObj) {
-            try {
-                this.isLoading = true
 
-                // #1 Handle photo update || delete
-                const photo = await this.editPhoto(formDataObj, this.initialData.photo)
-                delete formDataObj.photo
-                delete formDataObj.id
-
-                const djData = {
-                    ...formDataObj,
-                    genres: formDataObj.genres
-                        ? formDataObj.genres.map((genre) => ({ genre_id: parseInt(genre.id) }))
-                        : null
-                }
-
-                if (photo !== 'keep-current') {
-                    djData.photo = photo
-                }
-
-                const updatedDj = await this.$axios.patch(
-                    `items/dj/${this.$auth.user.djs[0].id}`,
-                    djData
-                )
-                await this.$auth.fetchUser()
-
-                this.$router.push(`/djs/${updatedDj.data.data.slug}`)
-
-                this.$oruga.notification.open({
-                    message: this.$t('dj.updated_successfully'),
-                    variant: 'success',
-                    duration: 7000
-                })
-            } catch (e) {
-                this.error = e
-            } finally {
-                this.isLoading = false
-            }
-        },
-        async editPhoto(formDataObj, prevPhoto) {
-            const newPhoto = formDataObj.photo
-            const newPhotoMeta = {
-                title: `dj_${formDataObj.slug}_photo`,
-                filename_download: `dj_${formDataObj.slug}_photo`
-                // folder: 'TBD - ADD FOLDER LATER'
-            }
-            const photoResult = await this.$api.file.handleCoverPhotoUpdate(
-                newPhoto,
-                prevPhoto,
-                newPhotoMeta
-            )
-            return photoResult
-        },
-        onDeleteDj() {
-            this.$oruga.modal.open({
-                active: true,
-                component: ConfirmModal,
-                props: {
-                    title: this.$t('dj.delete_profile'),
-                    message: this.$t('dj.delete_profile_confirm_message'),
-                    confirmText: this.$t('dj.delete_profile'),
-                    cancelText: this.$t('form.cancel'),
-                    onConfirm: () => this.deleteDj()
-                }
-            })
-        },
-        async deleteDj() {
-            try {
-                this.isLoading = true
-                await this.$axios.delete(`items/dj/${this.$auth.user.djs[0].id}`)
-                await this.$auth.fetchUser()
-
-                this.$router.push(`/`)
-
-                this.$oruga.notification.open({
-                    message: this.$t('dj.deleted_successfully'),
-                    variant: 'success',
-                    duration: 7000
-                })
-            } catch (e) {
-                this.error = e
-            } finally {
-                this.isLoading = false
-            }
+        if (photo !== 'keep-current') {
+            djData.photo = photo
         }
+
+        const updatedDj = await directus
+            .items('dj')
+            .updateOne(auth.user.value.djs[0].id, djData)
+        await auth.fetchUser()
+        router.push(`/djs/${updatedDj.slug}`)
+
+        $oruga.notification.open({
+            message: $i18n.t('dj.updated_successfully'),
+            variant: 'success',
+            duration: 7000
+        })
+    } catch (e) {
+        error.value = e
+    } finally {
+        isLoading.value = false
+    }
+}
+async function editPhoto(formData, prevPhoto) {
+    const newPhoto = formData.photo
+    const newPhotoMeta = {
+        title: `dj_${formData.slug}_photo`,
+        filename_download: `dj_${formData.slug}_photo`
+        // folder: 'TODO - ADD FOLDER LATER'
+    }
+    const photoResult = await $api.file.handleCoverPhotoUpdate(
+        newPhoto,
+        prevPhoto,
+        newPhotoMeta
+    )
+    return photoResult
+}
+function onDeleteDj() {
+    $oruga.modal.open({
+        active: true,
+        component: ConfirmModal,
+        props: {
+            title: $i18n.t('dj.delete_profile'),
+            message: $i18n.t('dj.delete_profile_confirm_message'),
+            confirmText: $i18n.t('dj.delete_profile'),
+            cancelText: $i18n.t('form.cancel'),
+            onConfirm: () => deleteDj()
+        }
+    })
+}
+async function deleteDj() {
+    try {
+        isLoading.value = true
+        await directus.items('dj').deleteOne(auth.user.value.djs[0].id)
+        await auth.fetchUser()
+
+        router.push(`/`)
+
+        $oruga.notification.open({
+            message: $i18n.t('dj.deleted_successfully'),
+            variant: 'success',
+            duration: 7000
+        })
+    } catch (e) {
+        error.value = e
+    } finally {
+        isLoading.value = false
     }
 }
 </script>

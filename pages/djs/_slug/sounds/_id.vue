@@ -210,7 +210,7 @@ const {
     },
     // There must be no server side data load - otherwise it is not working
     // TODO: Maybe remove when we get to NUXT 3
-    { server: false, initialCache: false, watch: auth.loggedIn.value }
+    { server: false, initialCache: false, watch: auth.loggedIn }
 )
 
 const likeButtonVariant = computed(() => {
