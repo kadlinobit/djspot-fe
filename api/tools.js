@@ -1,4 +1,4 @@
-export const parseResponseErrorMessage = function (e) {
+export const parseErrorMessage = function (e) {
     let errorMessage
 
     if (e.response && e.response.data && e.response.data.message) {

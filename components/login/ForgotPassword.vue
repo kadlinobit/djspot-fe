@@ -55,9 +55,11 @@ import {
 } from 'vee-validate/dist/rules'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import { useMainStore } from '~/stores'
-const mainStore = useMainStore()
-
+import useDirectus from '~/composables/directus'
 const { $i18n } = useNuxtApp()
+
+const directus = useDirectus()
+const mainStore = useMainStore()
 
 extend('email', ruleEmail)
 extend('required', ruleRequired)
@@ -89,9 +91,7 @@ async function forgotPassword() {
     try {
         isLoading.value = true
 
-        await this.$axios.post('auth/forgot-password', {
-            email: email.value
-        })
+        await directus.auth.password.request(email.value)
 
         error.value = null
         success.value = 'user.password_reset_link_sent'

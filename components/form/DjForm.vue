@@ -1,16 +1,23 @@
 <template>
     <client-only>
         <div class="form dj-form">
-            <o-notification v-if="success" type="success" :closable="false">
-                {{ $i18n.t(success) }}
+            <o-notification
+                v-if="props.successMessage"
+                variant="success"
+                :closable="false"
+            >
+                {{ $i18n.t(props.successMessage) }}
             </o-notification>
-
-            <o-notification v-if="error" type="danger" :closable="false">
-                {{ $i18n.t(error) }}
+            <o-notification
+                v-if="props.errorMessage"
+                variant="danger"
+                :closable="false"
+            >
+                {{ $i18n.t(props.errorMessage) }}
             </o-notification>
 
             <ValidationObserver ref="observer" slim>
-                <form v-if="!success" method="post" @submit.prevent>
+                <form v-if="!successMessage" method="post" @submit.prevent>
                     <div class="columns is-tablet">
                         <div
                             class="column is-half-tablet is-three-fifths-desktop"
@@ -83,11 +90,15 @@
 
                     <div class="field is-grouped is-grouped-right">
                         <div class="control">
-                            <o-button variant="light" @click="onCancel">
+                            <o-button
+                                :disabled="props.isLoading"
+                                variant="light"
+                                @click="onCancel"
+                            >
                                 {{ $i18n.t('form.cancel') }}
                             </o-button>
                             <o-button
-                                :disabled="isLoading"
+                                :disabled="props.isLoading"
                                 variant="dark"
                                 @click="onSubmit"
                             >
@@ -119,6 +130,12 @@ import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUpload.vue'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
+import useDirectus from '~/composables/directus'
+
+const { $i18n, $oruga } = useNuxtApp()
+const formStore = useFormStore()
+const router = useRouter()
+const directus = useDirectus()
 
 extend('email', ruleEmail)
 extend('required', ruleRequired)
@@ -148,14 +165,19 @@ extend('image_type', (file) => {
     return 'validation.image_type'
 })
 
-const formStore = useFormStore()
-
 // TODO - find out why definePageMeta is not working
 // definePageMeta({
 //     middleware: 'authorized'
 // })
 
-const { $axios, $i18n, $router, $oruga } = useNuxtApp()
+type FormSubmitData = {
+    formData: Object
+    successMessage?: string
+}
+
+const emit = defineEmits<{
+    (e: 'formSubmit', formSubmitData: FormSubmitData): void
+}>()
 
 interface InitialData {
     name?: string
@@ -169,17 +191,17 @@ interface InitialData {
 
 interface Props {
     initialData?: InitialData
-    errorIn?: [Error, string]
-    successIn?: string
-    isLoadingIn?: boolean
-    onFormSubmit: Function
+    errorMessage?: string
+    successMessage?: string
+    isLoading?: boolean
     mode?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
     initialData: null,
-    errorIn: null,
-    successIn: null,
+    errorMessage: null,
+    successMessage: null,
+    isLoading: false,
     mode: 'new'
 })
 
@@ -195,9 +217,6 @@ const formData = ref({
 
 const availableGenres = ref(null)
 const currentPhoto = ref(null)
-const success = ref(null)
-const error = ref(null)
-const isLoading = ref(false)
 const observer = ref(null)
 
 watch(
@@ -205,21 +224,6 @@ watch(
     (val) => {
         formData.value.slug = createSlug(val)
     }
-)
-
-watch(
-    () => props.errorIn,
-    (val) => (error.value = val)
-)
-
-watch(
-    () => props.successIn,
-    (val) => (success.value = val)
-)
-
-watch(
-    () => props.isLoadingIn,
-    (val) => (isLoading.value = val)
 )
 
 onMounted(async () => {
@@ -234,14 +238,13 @@ onMounted(async () => {
         currentPhoto.value = props.initialData.photo
     }
 
-    const genreTagsAll = await $axios.$get('items/genre')
+    const genreTagsAll = await directus.items('genre').readByQuery()
     availableGenres.value = genreTagsAll.data
 })
 
 function onSubmit() {
-    error.value = null
-    observer.value.validate().then((success) => {
-        if (!success) {
+    observer.value.validate().then((isValid) => {
+        if (!isValid) {
             $oruga.notification.open({
                 message: $i18n.t('validation.form_validation_error'),
                 variant: 'danger'
@@ -249,11 +252,13 @@ function onSubmit() {
             return
         }
 
-        props.onFormSubmit(formData.value)
+        emit('formSubmit', {
+            formData: formData.value
+        })
     })
 }
 function onCancel() {
-    $router.back()
+    router.back()
 }
 function createSlug(val) {
     if (!val) return ''

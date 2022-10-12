@@ -121,7 +121,6 @@ function updateCurrentSeconds() {
 function onError() {
     playerStore.setIsLoading(false)
     playerStore.setIsError(true)
-    // $emit('audio-load-error')
 }
 function playNext() {
     if (canPlayNext)

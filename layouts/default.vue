@@ -22,7 +22,7 @@
             </template>
         </o-modal>
         <o-sidebar
-            v-if="$auth.user"
+            v-if="auth.user"
             variant="light"
             :fullheight="true"
             :fullwidth="false"
@@ -49,15 +49,18 @@ import Playlist from '~/components/audio/Playlist.vue'
 import LoginModal from '~/components/login/LoginModal.vue'
 
 import { useMainStore } from '~/stores'
+import { useAuth } from '~/composables/directus'
 const mainStore = useMainStore()
-const { $auth } = useNuxtApp()
+const auth = useAuth()
 
 // TODO - Rewrite to new useHead composable (but there is a problem with @vueuse/head)
 function head() {
     return {
         htmlAttrs: {
             class:
-                this.isPlaylistOpen || this.isLoginOpen || this.isSidebarOpen
+                mainStore.isPlaylistOpen ||
+                mainStore.isLoginOpen ||
+                mainStore.isSidebarOpen
                     ? 'is-clipped'
                     : ''
         }

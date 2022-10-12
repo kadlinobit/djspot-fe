@@ -1,9 +1,7 @@
 <template>
     <section class="section">
         <div class="container">
-            <h1 class="title">
-                Sounds {{ soundsData?.meta?.filter_count || 0 }}
-            </h1>
+            <h1 class="title">Sounds {{ sounds?.meta?.filter_count || 0 }}</h1>
             <o-field>
                 <o-input
                     v-model="name"
@@ -57,14 +55,39 @@
                 </client-only>
             </o-field>
 
-            <p v-if="pending">Loading ...</p>
-            <p v-else-if="error">{{ error.message }}</p>
-            <div v-else-if="!pending && soundsData?.meta?.filter_count > 0">
-                <sounds-page-list :sounds="soundsData.data" />
+            <o-loading
+                v-if="fetchPending"
+                :full-page="false"
+                :active="fetchPending"
+                :can-cancel="true"
+            />
+            <div v-else-if="fetchError">
+                {{ fetchError }}
+            </div>
+            <div v-else-if="!fetchPending && sounds?.meta?.filter_count === 0">
+                <section class="hero is-secondary is-medium">
+                    <div class="hero-body">
+                        <p class="title">
+                            {{ $i18n.t('sound.no_sounds_found') }}
+                        </p>
+                        <p class="subtitle">
+                            <a @click="resetSearch">{{
+                                $i18n.t('form.reset_search')
+                            }}</a>
+                        </p>
+                    </div>
+                </section>
+            </div>
+            <div
+                v-else-if="
+                    !fetchPending.value && sounds?.meta?.filter_count > 0
+                "
+            >
+                <sounds-page-list :sounds="sounds.data" />
 
                 <o-pagination
                     :current="page"
-                    :total="soundsData?.meta?.filter_count"
+                    :total="sounds?.meta?.filter_count"
                     :range-before="1"
                     :range-after="1"
                     order="centered"
@@ -87,11 +110,14 @@ import _ from 'lodash'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import SoundsPageList from '~/components/sound/SoundsPageList.vue'
 import { useFormStore } from '~/stores'
+import useDirectus, { useAuth } from '~/composables/directus'
 
-const { $i18n, $api, $auth } = useNuxtApp()
+const { $i18n, $api } = useNuxtApp()
 const route = useRoute()
 const router = useRouter()
 const formStore = useFormStore()
+const directus = useDirectus()
+const auth = useAuth()
 
 const name = ref(route.query.name ? route.query.name : '')
 const type = ref(route.query.type ? route.query.type : '')
@@ -122,7 +148,7 @@ const urlQuery = computed(() => {
 const requestQuery = computed(() => {
     let fields = $api.collection.getCollectionFields('sound', 'default')
 
-    if ($auth.loggedIn) {
+    if (auth.loggedIn.value) {
         fields = fields.filter((field) => field !== 'likes')
     }
 
@@ -170,23 +196,21 @@ const requestFilter = computed(() => {
 })
 
 const {
-    data: soundsData,
-    pending,
+    data: sounds,
+    pending: fetchPending,
     refresh,
-    error
-} = useLazyAsyncData('soundsPageQuery   ', () => {
-    const soundsData = $fetch('http://localhost:8055/items/sound', {
-        method: 'SEARCH',
-        body: JSON.stringify({
-            query: requestQuery.value
-        }),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
+    error: fetchError
+} = useLazyAsyncData(
+    'soundsPageQuery   ',
+    async function () {
+        const sounds = await directus
+            .items('sound')
+            .readByQuery({ ...requestQuery.value })
 
-    return soundsData
-})
+        return sounds
+    },
+    { server: false }
+)
 
 function pushRouterQuery() {
     router.push({
@@ -208,10 +232,8 @@ function onPageChange(pageNumber) {
 
 onMounted(async () => {
     if (_.isEmpty(formStore.genresOptions)) {
-        const { data: genresData } = await $fetch(
-            'http://localhost:8055/items/genre'
-        )
-        formStore.setGenres(genresData)
+        const { data } = await directus.items('genre').readByQuery()
+        formStore.setGenres(data)
     }
 
     // Fill in genres

@@ -11,8 +11,8 @@
         "lint": "npm run lint:js"
     },
     "dependencies": {
+        "@directus/sdk": "^10.1.4",
         "@mdi/font": "^5.9.55",
-        "@nuxtjs/auth-next": "5.0.0-1641536721.10cfcc9",
         "@nuxtjs/axios": "^5.13.6",
         "@nuxtjs/i18n": "^7.2.3",
         "@oruga-ui/oruga": "^0.5.5",
@@ -29,7 +29,7 @@
         "js-cookie": "^3.0.1",
         "lodash": "^4.17.21",
         "marked": "^4.0.4",
-        "nuxt-directus": "^2.1.0",
+        "nuxt-directus": "^3.0.3",
         "nuxt-edge": "latest",
         "pinia": "^2.0.14",
         "url-parse": "^1.5.3",

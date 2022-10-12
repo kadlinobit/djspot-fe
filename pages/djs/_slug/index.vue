@@ -1,11 +1,13 @@
 <template>
     <o-loading
-        v-if="$fetchState.pending"
+        v-if="fetchPending"
         :full-page="false"
-        :active.sync="$fetchState.pending"
+        :active="fetchPending"
         :can-cancel="true"
     />
-    <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
+    <div v-else-if="fetchError">
+        {{ fetchError }}
+    </div>
     <div v-else>
         <section class="hero is-secondary">
             <div class="hero-body">
@@ -94,130 +96,135 @@
     </div>
 </template>
 
-<script>
+<script setup lang="ts">
 /**
- * TBD
+ * TODO
  * - error handling
  * - better handling of toggleFollow ? (fetch DJ again after toggle?)
+ * - handle refresh on login - when logged out, refresh does not happen (and directus throws an error on manual refresh)
  */
 
 import _ from 'lodash'
 import CoverImage from '~/components/media/CoverImage.vue'
 import SoundList from '~/components/audio/SoundList.vue'
 import DjControlBox from '~/components/dj/DjControlBox.vue'
+import { useMainStore } from '~/stores'
+import useDirectus, { useAuth } from '~/composables/directus'
 
-export default {
-    name: 'DjProfilePage',
-    components: {
-        SoundList,
-        CoverImage,
-        DjControlBox
-    },
-    data() {
-        return {
-            dj: null,
-            activeTab: 1,
-            isToggleFollowLoading: false
+const { $marked, $api, $oruga } = useNuxtApp()
+const mainStore = useMainStore()
+const directus = useDirectus()
+const auth = useAuth()
+const route = useRoute()
+
+const activeTab = ref(1)
+const isToggleFollowLoading = ref(false)
+
+const {
+    data: dj,
+    pending: fetchPending,
+    refresh: fetchRefresh,
+    error: fetchError
+} = useLazyAsyncData(
+    'djProfilePageQuery',
+    async function () {
+        // // PROMISE TO SET TIMEOUT FOR TESTING (TODO - REMOVE)
+        // await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        const slug = route.params.slug
+
+        let fields = $api.collection.getCollectionFields('dj', 'withSounds')
+        if (!auth.loggedIn) {
+            fields = fields.filter((field) => field !== 'follows')
         }
-    },
-    async fetch() {
-        try {
-            const slug = this.$nuxt.context.params.slug
-            let fields = this.$api.collection.getCollectionFields(
-                'dj',
-                'withSounds'
-            )
-
-            if (!this.$auth.loggedIn) {
-                fields = fields.filter((field) => field !== 'follows')
-            }
-
-            const { data } = await this.$axios.$request('items/dj', {
-                method: 'search',
-                data: {
-                    query: {
-                        filter: { slug: { _eq: slug } },
-                        fields,
-                        deep: this.$auth.user
-                            ? {
-                                  follows: {
-                                      _filter: {
-                                          user_created: {
-                                              _eq: this.$auth?.user?.id || null
-                                          }
-                                      }
-                                  }
+        const djs = await directus.items('dj').readByQuery({
+            filter: { slug: { _eq: slug } },
+            fields,
+            deep: auth.loggedIn.value
+                ? {
+                      follows: {
+                          _filter: {
+                              user_created: {
+                                  _eq: auth?.user?.value?.id || null
                               }
-                            : null
-                    }
-                }
-            })
-
-            if (data && data.length > 0) {
-                this.dj = data[0]
-            } else {
-                this.$fetchState.error = 'DJ not found'
-                return this.$nuxt.error({
-                    statusCode: 404,
-                    message: 'DJ not found'
-                })
-            }
-        } catch (e) {
-            this.$fetchState.error = e
-            if (e.statusCode && e.statusCode === 404) {
-                return this.$nuxt.error({ statusCode: 404, message: e.message })
-            }
+                          }
+                      }
+                  }
+                : null
+        })
+        if (djs.data && djs.data.length > 0) {
+            return djs.data[0]
+        } else {
+            throw new Error('DJ not found')
         }
     },
-    computed: {
-        mixes() {
-            if (!this.dj.sounds) return []
-            return this.dj.sounds.filter((sound) => sound.type === 'mix') || []
-        },
-        tracks() {
-            if (!this.dj.sounds) return []
-            return (
-                this.dj.sounds.filter((sound) => sound.type === 'track') || []
-            )
-        }
-    },
-    methods: {
-        async onToggleFollow() {
-            this.isToggleFollowLoading = true
-            try {
-                _.isEmpty(this.dj.follows)
-                    ? await this.createFollow()
-                    : await this.deleteFollow()
-            } catch (e) {
-                throw new Error(e)
-            } finally {
-                this.isToggleFollowLoading = false
-            }
-        },
-        async createFollow() {
-            const result = await this.$axios.post('items/user_dj_follow', {
-                dj: this.dj.id
-            })
+    // There must be no server side data load - otherwise it is not working
+    // TODO: Maybe remove when we get to NUXT 3
+    { server: false, initialCache: false, watch: auth.loggedIn }
+)
 
-            if (result.status === 200) {
-                this.dj.follows = [result.data.data.id]
-                this.dj.follow_count++
-            } else {
-                throw new Error('Could not toggle follow')
-            }
-        },
-        async deleteFollow() {
-            const result = await this.$axios.delete(
-                `items/user_dj_follow/${this.dj.follows[0]}`
-            )
+const mixes = computed(() => {
+    if (!dj.value.sounds) return []
+    return dj.value.sounds.filter((sound) => sound.type === 'mix') || []
+})
+const tracks = computed(() => {
+    if (!dj.value.sounds) return []
+    return dj.value.sounds.filter((sound) => sound.type === 'track') || []
+})
+async function onToggleFollow() {
+    if (!auth.loggedIn.value) {
+        mainStore.setLoginActiveComponent('login')
+        mainStore.setIsLoginOpen(true)
+        return
+    }
+    isToggleFollowLoading.value = true
+    try {
+        _.isEmpty(dj.value.follows)
+            ? await createFollow()
+            : await deleteFollow()
+    } catch (e) {
+        throw new Error(e)
+    } finally {
+        isToggleFollowLoading.value = false
+    }
+}
+async function createFollow() {
+    // AXIOS WAX
+    // const result = await this.$axios.post('items/user_dj_follow', {
+    //     dj: this.dj.id
+    // })
+    try {
+        const result = await directus.items('user_dj_follow').createOne({
+            dj: dj.value.id
+        })
 
-            if (result.status === 204) {
-                this.dj.follows = []
-                this.dj.follow_count--
-            } else {
-                throw new Error('Could not toggle follow')
-            }
+        if (result?.id) {
+            dj.value.follows = [result.id]
+            dj.value.follow_count++
         }
+    } catch (e) {
+        $oruga.notification.open({
+            message: e,
+            variant: 'danger',
+            duration: 7000
+        })
+    }
+}
+async function deleteFollow() {
+    // // AXIOS WAY
+    // const result = await this.$axios.delete(
+    //     `items/user_dj_follow/${this.dj.follows[0]}`
+    // )
+    try {
+        await directus.items('user_dj_follow').deleteOne(dj.value.follows[0])
+        dj.value.follows = []
+        dj.value.follow_count--
+    } catch (e) {
+        $oruga.notification.open({
+            message: e,
+            variant: 'danger',
+            duration: 7000
+        })
     }
 }
 </script>

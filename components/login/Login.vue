@@ -75,14 +75,13 @@ import {
 } from 'vee-validate/dist/rules'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import { useMainStore } from '~/stores'
+import { useAuth } from '~/composables/directus'
 
 extend('email', ruleEmail)
 extend('required', ruleRequired)
 
-const { $auth, $oruga, $i18n } = useNuxtApp()
+const { $oruga, $i18n } = useNuxtApp()
 const mainStore = useMainStore()
-
-// const { login } = useDirectusAuth()
 
 interface Props {
     displayType?: string
@@ -91,6 +90,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     displayType: 'page'
 })
+
+const auth = useAuth()
 
 const emit = defineEmits(['loginSuccess'])
 
@@ -125,13 +126,21 @@ async function onLogin() {
     try {
         isLoading.value = true
 
-        await $auth.loginWith('local', {
-            data: {
-                email: email.value,
-                password: password.value
-            }
+        // directus SDK method
+        await auth.login({
+            email: email.value,
+            password: password.value
         })
 
+        // *** nuxt-auth method ***
+        // await $auth.loginWith('local', {
+        //     data: {
+        //         email: email.value,
+        //         password: password.value
+        //     }
+        // })
+
+        // *** nuxt-directus method ***
         // await login({
         //     email: email.value,
         //     password: password.value
@@ -140,6 +149,7 @@ async function onLogin() {
     } catch (e) {
         error.value =
             e.response?.data?.errors[0]?.message ||
+            e.message ||
             'Something went wrong and there is no data'
     } finally {
         isLoading.value = false

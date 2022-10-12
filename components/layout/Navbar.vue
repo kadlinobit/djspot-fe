@@ -13,7 +13,7 @@
                 />
             </nuxt-link>
             <a
-                v-if="$auth.loggedIn"
+                v-if="auth.loggedIn.value"
                 class="navbar-item"
                 @click="() => (mainStore.isSidebarOpen = true)"
             >
@@ -49,7 +49,7 @@
             </div>
             <div class="navbar-end">
                 <language-selection />
-                <div v-if="!$auth.loggedIn" class="navbar-item">
+                <div v-if="!auth.loggedIn.value" class="navbar-item">
                     <div class="buttons">
                         <a
                             class="button is-light"
@@ -67,8 +67,10 @@
 <script setup lang="ts">
 import LanguageSelection from '~/components/layout/LanguageSelection.vue'
 import { useMainStore } from '~/stores'
+import { useAuth } from '~/composables/directus'
 
-const { $auth, $i18n } = useNuxtApp()
+const { $i18n } = useNuxtApp()
+const auth = useAuth()
 
 const mainStore = useMainStore()
 const isMenuExpanded = ref(false)

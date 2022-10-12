@@ -1,19 +1,30 @@
 import _ from 'lodash'
+import useDirectus from '~/composables/directus'
+const directus = useDirectus()
 
 const file = ($axios) => {
     const getCroppedImageBlob = async (imageObj) => {
         if (!imageObj.croppedImage)
-            throw new Error('Cropped image not present in provided image object.')
+            throw new Error(
+                'Cropped image not present in provided image object.'
+            )
 
         const { canvas } = imageObj.croppedImage
-        if (!canvas) throw new Error('Canvas object not present in provided image object.')
+        if (!canvas)
+            throw new Error(
+                'Canvas object not present in provided image object.'
+            )
 
         const blob = await new Promise((resolve) => canvas.toBlob(resolve))
 
         return blob
     }
 
-    const handleCoverPhotoUpdate = async (newPhoto, prevPhoto, newPhotoMeta) => {
+    const handleCoverPhotoUpdate = async (
+        newPhoto,
+        prevPhoto,
+        newPhotoMeta
+    ) => {
         // # Case 1 - keeping original photo
         if (newPhoto === 'keep-current') {
             return 'keep-current'
@@ -35,19 +46,22 @@ const file = ($axios) => {
                 }
                 uploadedPhoto = await uploadFile(photoBlob, newPhotoMeta)
             }
-
-            return uploadedPhoto?.data?.data?.id ? uploadedPhoto.data.data.id : null
+            return uploadedPhoto?.id ? uploadedPhoto.id : null
         }
     }
 
     const uploadFile = async (file, fileMeta) => {
         if (_.isNil(file)) {
-            throw new TypeError('Binary file content is missing - cannot upload file.')
+            throw new TypeError(
+                'Binary file content is missing - cannot upload file.'
+            )
         }
 
         const formData = buildFormData(file, fileMeta)
-        const response = await $axios.post('files', formData)
+        // // AXIOS WAY
+        // const response = await $axios.post('files', formData)
 
+        const response = await directus.files.createOne(formData)
         return response
     }
 
@@ -56,7 +70,9 @@ const file = ($axios) => {
             throw new TypeError('File ID is missing - cannot update file')
         }
         const formData = buildFormData(file, fileMeta)
-        const response = await $axios.patch(`files/${fileId}`, formData)
+        // // AXIOS WAY
+        // const response = await $axios.patch(`files/${fileId}`, formData)
+        const response = await directus.files.updateOne(id, formData)
 
         return response
     }
@@ -66,16 +82,22 @@ const file = ($axios) => {
             throw new TypeError('File ID is missing - cannot delete file')
         }
 
-        const response = await $axios.delete(`files/${fileId}`)
-
-        return response
+        // TODO - handle error somehow
+        // because when error happens here, nothing happens in the browser
+        // also directus returns just "undefined" when file is succesfully deleted, that is shit
+        await directus.files.deleteOne(fileId)
+        return { status: 204 }
+        // // AXIOS WAY
+        // const response = await $axios.delete(`files/${fileId}`)
     }
 
     const buildFormData = (file, fileMeta) => {
         const formData = new FormData()
 
         if (!_.isNil(fileMeta) && !_.isEmpty(fileMeta)) {
-            Object.entries(fileMeta).forEach(([key, value]) => formData.append(key, value))
+            Object.entries(fileMeta).forEach(([key, value]) =>
+                formData.append(key, value)
+            )
         }
 
         if (!_.isNil(file)) {

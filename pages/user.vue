@@ -1,41 +1,40 @@
 <template>
     <section class="section">
         <o-loading
-            v-if="$fetchState.pending"
+            v-if="pending"
             :full-page="false"
-            :active.sync="$fetchState.pending"
+            :active.sync="pending"
             :can-cancel="true"
         />
-        <p v-else-if="$fetchState.error">{{ $fetchState.error.message }}</p>
-        <div v-else class="container is-max-desktop">
+        <div class="container is-max-desktop">
             <div class="columns is-gapless is-vcentered">
                 <div class="column">
                     <h1 class="title">
-                        {{ $t('user.my_account') }}
+                        {{ $i18n.t('user.my_account') }}
                     </h1>
                 </div>
                 <div class="column is-narrow">
                     <o-button variant="danger" @click="onDeleteDj()">
-                        {{ $t('dj.delete_profile') }}
+                        {{ $i18n.t('dj.delete_profile') }}
                     </o-button>
                 </div>
             </div>
             <o-tabs v-model="activeTab" :expanded="true" :animated="true">
-                <o-tab-item :label="$t('user.profile')">
+                <o-tab-item :label="$i18n.t('user.profile')">
                     <user-form
                         :initial-data="initialData"
-                        :on-form-submit="editUser"
-                        :error-in="error"
-                        :success-in="success"
-                        :is-loading-in="isLoading"
+                        :error="error"
+                        :success="success"
+                        :is-loading="isLoading"
+                        @formSubmit="editUser"
                     />
                 </o-tab-item>
-                <o-tab-item :label="$t('user.change_password')">
+                <o-tab-item :label="$i18n.t('user.change_password')">
                     <user-new-password-form
-                        :on-form-submit="editUser"
                         :error-in="error"
                         :success-in="success"
                         :is-loading-in="isLoading"
+                        @formSubmit="editUser"
                     />
                 </o-tab-item>
             </o-tabs>
@@ -43,65 +42,99 @@
     </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import UserForm from '~/components/form/UserForm.vue'
 import UserNewPasswordForm from '~/components/form/UserNewPasswordForm.vue'
-export default {
-    name: 'UserProfilePage',
-    components: {
-        UserForm,
-        UserNewPasswordForm
-    },
-    middleware: 'authenticated',
-    data() {
-        return {
-            error: null,
-            success: null,
-            isLoading: false,
-            initialData: null,
-            activeTab: 1
-        }
-    },
-    async fetch() {
-        try {
-            const data = await this.$axios.$get('users/me', {
-                params: {
-                    fields: this.$api.collection.getCollectionFields('user', 'form').join(',')
-                }
-            })
-            if (data.data) {
-                this.initialData = data.data
-            } else {
-                throw new Error('Cannot get user data')
-            }
-        } catch (e) {
-            this.$fetchState.error = e
-            if (e.statusCode && e.statusCode === 404) {
-                return this.$nuxt.error({ statusCode: 404, message: e.message })
-            }
-        }
-    },
-    methods: {
-        async editUser(formDataObj, successMessage) {
-            try {
-                this.error = null
-                this.success = null
-                this.isLoading = true
+import useDirectus, { useAuth } from '~/composables/directus'
+const directus = useDirectus()
+const auth = useAuth()
 
-                await this.$axios.patch(`users/me`, formDataObj)
-                this.$oruga.notification.open({
-                    message: this.$t(successMessage),
-                    variant: 'success'
-                })
-                await this.$fetch()
-                await this.$auth.fetchUser()
-            } catch (e) {
-                this.error = this.$api.tools.parseResponseErrorMessage(e)
-            } finally {
-                this.isLoading = false
-                this.initialData.password_check = null
-            }
-        }
+const { $i18n, $api, $oruga } = useNuxtApp()
+
+// TODO - find out why definePageMeta is not working
+// definePageMeta({
+//     middleware: 'authorized'
+// })
+
+const success = ref(null)
+const isLoading = ref(false)
+const activeTab = ref(1)
+
+const {
+    data: initialData,
+    pending,
+    refresh,
+    error
+} = useLazyAsyncData(
+    'userFormQuery',
+    async function () {
+        // PROMISE TO SET TIMEOUT FOR TESTING
+        // await new Promise((resolve) => setTimeout(resolve, 2000))
+        const data = await directus.users.me.read({
+            fields: $api.collection.getCollectionFields('user', 'form')
+        })
+        return data
+    },
+    // There must be no server side data load - otherwise it is not working
+    // TODO: Maybe remove when we get to NUXT 3
+    { server: false }
+)
+
+watch(
+    () => pending,
+    (val) => (isLoading.value = pending)
+)
+
+// async function fetch() {
+//     try {
+//         // // AXIOS WAY
+//         // const data = await this.$axios.$get('users/me', {
+//         //     params: {
+//         //         fields: this.$api.collection
+//         //             .getCollectionFields('user', 'form')
+//         //             .join(',')
+//         //     }
+//         // })
+
+//         // DIRECTUS WAY
+//         const data = await directus.users.me.read({
+//             fields: this.$api.collection.getCollectionFields('user', 'form')
+//         })
+//         if (data) {
+//             this.initialData = data
+//         } else {
+//             throw new Error('Cannot get user data')
+//         }
+//     } catch (e) {
+//         this.$fetchState.error = e
+//         if (e.statusCode && e.statusCode === 404) {
+//             return this.$nuxt.error({ statusCode: 404, message: e.message })
+//         }
+//     }
+// }
+
+async function editUser({ formData, successMessage }) {
+    try {
+        error.value = null
+        success.value = null
+        isLoading.value = true
+
+        // AXIOS WAY
+        // await this.$axios.patch(`users/me`, formDataObj)
+
+        // DIRECTUS WAY
+        await directus.users.me.update(formData)
+        refresh()
+        auth.fetchUser()
+        $oruga.notification.open({
+            message: $i18n.t(successMessage),
+            variant: 'success'
+        })
+    } catch (e) {
+        error.value = $api.tools.parseErrorMessage(e)
+    } finally {
+        isLoading.value = false
+        initialData.value.password_check = null
     }
 }
 </script>
