@@ -55,20 +55,7 @@ export default defineNuxtConfig({
     ],
 
     // Modules: https://go.nuxtjs.dev/config-modules
-    modules: [
-        '@nuxtjs/axios',
-        '@nuxtjs/auth-next',
-        '@nuxtjs/i18n'
-        // 'nuxt-directus'
-    ],
-    // TODO - should this be here or in the runtimeConfig????
-    // directus: {
-    //     url: 'http://localhost:8055',
-    //     fetchUserParams: {
-    //         fields: ['*', 'djs.*']
-    //     },
-    //     autoFetch: true
-    // },
+    modules: ['@nuxtjs/axios', '@nuxtjs/i18n'],
     i18n: {
         vueI18nLoader: true,
         strategy: 'no_prefix',
@@ -97,36 +84,36 @@ export default defineNuxtConfig({
      ** See https://auth.nuxtjs.org/schemes/local.html#options
      */
 
-    auth: {
-        strategies: {
-            local: {
-                scheme: 'refresh',
-                token: {
-                    property: 'data.access_token',
-                    maxAge: 900000,
-                    global: true
-                    // type: 'Bearer'
-                },
-                refreshToken: {
-                    property: 'data.refresh_token',
-                    data: 'refresh_token',
-                    maxAge: 60 * 60 * 24 * 7
-                },
-                user: {
-                    property: 'data'
-                    // autoFetch: true
-                },
-                endpoints: {
-                    login: { url: '/auth/login', method: 'post' },
-                    refresh: { url: '/auth/refresh', method: 'post' },
-                    user: { url: '/users/me?fields=*,djs.*', method: 'get' }, // TBD - update fields loaded on user fetch
-                    logout: { url: '/auth/logout', method: 'post' }
-                }
-                // autoLogout: false
-            }
-        },
-        redirect: false
-    },
+    // auth: {
+    //     strategies: {
+    //         local: {
+    //             scheme: 'refresh',
+    //             token: {
+    //                 property: 'data.access_token',
+    //                 maxAge: 900000,
+    //                 global: true
+    //                 // type: 'Bearer'
+    //             },
+    //             refreshToken: {
+    //                 property: 'data.refresh_token',
+    //                 data: 'refresh_token',
+    //                 maxAge: 60 * 60 * 24 * 7
+    //             },
+    //             user: {
+    //                 property: 'data'
+    //                 // autoFetch: true
+    //             },
+    //             endpoints: {
+    //                 login: { url: '/auth/login', method: 'post' },
+    //                 refresh: { url: '/auth/refresh', method: 'post' },
+    //                 user: { url: '/users/me?fields=*,djs.*', method: 'get' }, // TBD - update fields loaded on user fetch
+    //                 logout: { url: '/auth/logout', method: 'post' }
+    //             }
+    //             // autoLogout: false
+    //         }
+    //     },
+    //     redirect: false
+    // },
     // Build Configuration: https://go.nuxtjs.dev/config-build
     build: {
         transpile: ['vee-validate/dist/rules'],
@@ -136,18 +123,6 @@ export default defineNuxtConfig({
                     ? 'source-map'
                     : 'inline-source-map'
             }
-        }
-    },
-    runtimeConfig: {
-        public: {
-            // TODO - should this be here or in the root???
-            // directus: {
-            //     url: 'http://localhost:8055',
-            //     fetchUserParams: {
-            //         fields: ['*', 'djs.*']
-            //     },
-            //     autoFetch: true
-            // }
         }
     },
     publicRuntimeConfig: {
