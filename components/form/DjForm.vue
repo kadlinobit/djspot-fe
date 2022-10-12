@@ -132,7 +132,7 @@ import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
 import useDirectus from '~/composables/directus'
 
-const { $axios, $i18n, $oruga } = useNuxtApp()
+const { $i18n, $oruga } = useNuxtApp()
 const formStore = useFormStore()
 const router = useRouter()
 const directus = useDirectus()
@@ -199,7 +199,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     initialData: null,
-    error: null,
+    errorMessage: null,
     successMessage: null,
     isLoading: false,
     mode: 'new'

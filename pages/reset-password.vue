@@ -5,7 +5,7 @@
                 <div class="columns">
                     <div class="column is-4 is-offset-4">
                         <h2 class="title has-text-centered">
-                            {{ $t('user.reset_password') }}
+                            {{ $i18n.t('user.reset_password') }}
                         </h2>
 
                         <o-notification
@@ -13,14 +13,14 @@
                             variant="success"
                             :closable="false"
                         >
-                            {{ $t(success) }}
+                            {{ $i18n.t(success) }}
                         </o-notification>
                         <o-notification
                             v-if="error"
                             variant="danger"
                             :closable="false"
                         >
-                            {{ $t(error) }}
+                            {{ $i18n.t(error) }}
                         </o-notification>
                         <ValidationObserver ref="observer">
                             <form v-if="!success" method="post" @submit.prevent>
@@ -29,7 +29,7 @@
                                     vid="password1"
                                     name="password1"
                                     type="password"
-                                    :label="$t('user.new_password')"
+                                    :label="$i18n.t('user.new_password')"
                                     rules="required"
                                 />
 
@@ -37,7 +37,7 @@
                                     v-model="password2"
                                     name="password2"
                                     type="password"
-                                    :label="$t('user.password_again')"
+                                    :label="$i18n.t('user.password_again')"
                                     rules="required|confirmed:password1"
                                 />
                                 <div class="field">
@@ -47,7 +47,11 @@
                                             variant="dark is-fullwidth"
                                             @click="onSubmit"
                                         >
-                                            {{ $t('user.do_reset_password') }}
+                                            {{
+                                                $i18n.t(
+                                                    'user.do_reset_password'
+                                                )
+                                            }}
                                         </o-button>
                                     </div>
                                 </div>
@@ -60,7 +64,7 @@
                         >
                             <p>
                                 <nuxt-link :to="{ path: '/login' }">
-                                    {{ $t('user.go_to_login_page') }}
+                                    {{ $i18n.t('user.go_to_login_page') }}
                                 </nuxt-link>
                             </p>
                         </div>
@@ -71,68 +75,74 @@
     </client-only>
 </template>
 
-<script>
+<script setup lang="ts">
 import { extend, ValidationObserver } from 'vee-validate'
-import { required, confirmed } from 'vee-validate/dist/rules'
+import {
+    required as ruleRequired,
+    confirmed as ruleConfirmed
+} from 'vee-validate/dist/rules'
+import { onMounted } from 'vue'
 import OValidatedField from '~/components/form/OValidatedField.vue'
+import useDirectus from '~/composables/directus'
 
-extend('required', required)
-extend('confirmed', confirmed)
+const { $oruga, $i18n, $api } = useNuxtApp()
+const route = useRoute()
+const router = useRouter()
+const directus = useDirectus()
 
-export default {
-    components: {
-        ValidationObserver,
-        OValidatedField
-    },
-    plugins: ['vee-validate'],
-    middleware: 'guest',
-    data() {
-        return {
-            password1: '',
-            password2: '',
-            success: null,
-            error: null,
-            isLoading: false,
-            token: null
-        }
-    },
-    fetch() {
-        if (!this.$nuxt.context.route.query.token) {
-            this.$router.push('/forgot-password')
-        } else {
-            this.token = this.$nuxt.context.route.query.token
-        }
-    },
-    methods: {
-        onSubmit() {
-            this.$refs.observer.validate().then((success) => {
-                if (!success) {
-                    this.$oruga.notification.open({
-                        message: this.$t('validation.form_validation_error'),
-                        variant: 'danger'
-                    })
-                    return
-                }
-                this.resetPassword()
+extend('required', ruleRequired)
+extend('confirmed', ruleConfirmed)
+
+const password1 = ref('')
+const password2 = ref('')
+const success = ref(null)
+const error = ref(null)
+const isLoading = ref(false)
+const token = ref(null)
+const observer = ref(null)
+
+const errorMessage = computed(() => {
+    const errorMessage = $api.tools.parseErrorMessage(error.value)
+    return errorMessage
+})
+
+onMounted(() => {
+    // TODO - different handling of missing token
+    if (!route.query.token) {
+        router.push('/forgot-password')
+    } else {
+        token.value = route.query.token
+    }
+})
+
+function onSubmit() {
+    observer.value.validate().then((isValid) => {
+        if (!isValid) {
+            $oruga.notification.open({
+                message: $i18n.t('validation.form_validation_error'),
+                variant: 'danger'
             })
-        },
-        async resetPassword() {
-            this.error = null
-            try {
-                this.isLoading = true
-
-                await this.$axios.post('auth/password/reset', {
-                    token: this.token,
-                    password: this.password1
-                })
-
-                this.success = 'user.password_reset_success'
-            } catch (e) {
-                this.error = this.$api.tools.parseErrorMessage(e)
-            } finally {
-                this.isLoading = false
-            }
+            return
         }
+        resetPassword()
+    })
+}
+async function resetPassword() {
+    error.value = null
+    try {
+        isLoading.value = true
+
+        await directus.auth.password.reset(token.value, password1.value)
+        // await $axios.post('auth/password/reset', {
+        //     token: token.value,
+        //     password: password1.value
+        // })
+
+        success.value = 'user.password_reset_success'
+    } catch (e) {
+        error.value = e
+    } finally {
+        isLoading.value = false
     }
 }
 </script>

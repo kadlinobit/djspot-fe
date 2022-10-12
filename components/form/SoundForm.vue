@@ -148,7 +148,7 @@ import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUpload.vue'
 import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
 
-const { $i18n, $oruga, $axios, $audio } = useNuxtApp()
+const { $i18n, $oruga, $audio } = useNuxtApp()
 const directus = useDirectus()
 const auth = useAuth()
 const router = useRouter()

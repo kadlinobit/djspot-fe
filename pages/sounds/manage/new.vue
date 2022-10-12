@@ -64,7 +64,7 @@ async function createSound({ formData }) {
             )
 
             $oruga.notification.open({
-                message: this.$i18n.t(`${formData.type}.add_success`, [
+                message: $i18n.t(`${formData.type}.add_success`, [
                     formData.name
                 ]),
                 variant: 'success',

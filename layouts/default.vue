@@ -58,7 +58,9 @@ function head() {
     return {
         htmlAttrs: {
             class:
-                this.isPlaylistOpen || this.isLoginOpen || this.isSidebarOpen
+                mainStore.isPlaylistOpen ||
+                mainStore.isLoginOpen ||
+                mainStore.isSidebarOpen
                     ? 'is-clipped'
                     : ''
         }

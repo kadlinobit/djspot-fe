@@ -1,6 +1,10 @@
 <template>
     <div class="o-player-preview" style="position: relative">
-        <o-loading :full-page="false" :active.sync="isLoading" :can-cancel="false"></o-loading>
+        <o-loading
+            :full-page="false"
+            :active="isLoading.value"
+            :can-cancel="false"
+        ></o-loading>
         <div class="columns is-vcentered is-mobile">
             <div class="column is-narrow">
                 <div class="level is-mobile">
@@ -25,8 +29,12 @@
                 </div>
             </div>
             <div v-if="isError" class="column">
-                <o-notification variant="danger pt-3 pb-3" :closable="false" role="alert">
-                    {{ $t('player.error_loading_file') }}
+                <o-notification
+                    variant="danger pt-3 pb-3"
+                    :closable="false"
+                    role="alert"
+                >
+                    {{ $i18n.t('player.error_loading_file') }}
                 </o-notification>
             </div>
             <div v-if="!isError && !showVolume" class="column">
@@ -80,7 +88,7 @@
             </div>
         </div>
         <audio
-            :ref="audioRefName"
+            ref="audioPlayer"
             preload="auto"
             style="display: none"
             :src="file"
@@ -94,101 +102,101 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        autoPlay: {
-            type: Boolean,
-            default: false
-        },
-        file: {
-            type: String,
-            default: null
-        },
-        audioRefName: {
-            type: String,
-            default: 'audio'
-        }
-    },
-    data: () => ({
-        currentSeconds: 0,
-        durationSeconds: 0,
-        loaded: false,
-        playing: false,
-        previousVolume: 35,
-        showVolume: false,
-        volume: 100,
-        isLoading: false,
-        isError: false
-    }),
-    computed: {
-        percentComplete() {
-            return parseInt((this.currentSeconds / this.durationSeconds) * 100)
-        },
-        progressStyle() {
-            return { width: `${this.percentComplete}%` }
-        },
-        volumeTitle() {
-            return `Volume (${this.volume}%)`
-        },
-        volumeIcon() {
-            let volumeIcon = 'volume-off'
-            if (this.volume > 0 && this.volume <= 30) {
-                volumeIcon = 'volume-low'
-            }
-            if (this.volume > 30 && this.volume <= 60) {
-                volumeIcon = 'volume-medium'
-            }
-            if (this.volume > 60) {
-                volumeIcon = 'volume-high'
-            }
-            return volumeIcon
-        }
-    },
-    watch: {
-        playing(value) {
-            if (value) {
-                return this.$refs[this.audioRefName].play()
-            }
-            this.$refs[this.audioRefName].pause()
-        },
-        volume(value) {
-            this.$refs[this.audioRefName].volume = this.volume / 100
-        },
-        file(value) {
-            this.$refs[this.audioRefName].load()
-        }
-    },
-    methods: {
-        load() {
-            this.isLoading = false
-            this.isError = false
+<script setup lang="ts">
+const { $audio, $i18n } = useNuxtApp()
 
-            if (this.$refs[this.audioRefName].readyState >= 2) {
-                this.loaded = true
-                this.durationSeconds = parseInt(this.$refs[this.audioRefName].duration)
-                this.$emit('audio-load-success', { duration: this.durationSeconds })
-                return (this.playing = this.autoPlay)
-            }
+interface Props {
+    autoPlay?: boolean
+    file?: string
+}
 
-            throw new Error('Failed to load sound file.')
-        },
-        seek(value) {
-            if (!this.loaded) return
-            this.$refs[this.audioRefName].currentTime = parseInt(value)
-        },
-        stop() {
-            this.playing = false
-            this.$refs[this.audioRefName].currentTime = 0
-        },
-        update(e) {
-            this.currentSeconds = parseInt(this.$refs[this.audioRefName].currentTime)
-        },
-        onError() {
-            this.isLoading = false
-            this.isError = true
-            this.$emit('audio-load-error')
-        }
+const props = withDefaults(defineProps<Props>(), {
+    autoPlay: false,
+    file: null
+})
+
+const emit = defineEmits(['audio-load-error', 'audio-load-success'])
+
+const currentSeconds = ref(0)
+const durationSeconds = ref(0)
+const loaded = ref(false)
+const playing = ref(false)
+const previousVolume = ref(35)
+const showVolume = ref(false)
+const volume = ref(100)
+const isLoading = ref(false)
+const isError = ref(false)
+const audioPlayer = ref(null)
+
+const percentComplete = computed(() => {
+    return (currentSeconds.value / durationSeconds.value) * 100
+})
+const progressStyle = computed(() => {
+    return { width: `${percentComplete.value}%` }
+})
+const volumeTitle = computed(() => {
+    return `Volume (${volume.value}%)`
+})
+const volumeIcon = computed(() => {
+    let volumeIcon = 'volume-off'
+    if (volume.value > 0 && volume.value <= 30) {
+        volumeIcon = 'volume-low'
     }
+    if (volume.value > 30 && volume.value <= 60) {
+        volumeIcon = 'volume-medium'
+    }
+    if (volume.value > 60) {
+        volumeIcon = 'volume-high'
+    }
+    return volumeIcon
+})
+
+watch(playing, (val) => {
+    if (val) {
+        return audioPlayer.value.play()
+    }
+    audioPlayer.value.pause()
+})
+watch(volume, (val) => {
+    audioPlayer.value.volume = val / 100
+})
+watch(
+    () => props.file,
+    (val) => {
+        audioPlayer.value.load()
+    }
+)
+
+function load() {
+    isLoading.value = false
+    isError.value = false
+
+    if (audioPlayer.value.readyState >= 2) {
+        loaded.value = true
+        durationSeconds.value = parseInt(audioPlayer.value.duration)
+        emit('audio-load-success', {
+            duration: durationSeconds.value
+        })
+        playing.value = props.autoPlay
+        return
+    }
+
+    throw new Error('Failed to load sound file.')
+}
+function seek(val) {
+    if (!loaded.value) return
+    audioPlayer.value.currentTime = parseInt(val)
+}
+function stop() {
+    playing.value = false
+    audioPlayer.value.currentTime = 0
+}
+function update() {
+    currentSeconds.value = parseInt(audioPlayer.value.currentTime)
+}
+function onError() {
+    isLoading.value = false
+    isError.value = true
+    emit('audio-load-error')
 }
 </script>
