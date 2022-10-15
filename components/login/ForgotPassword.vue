@@ -6,28 +6,28 @@
         <o-notification v-if="error" variant="danger" :closable="false">
             {{ $i18n.t('error') }}
         </o-notification>
-        <ValidationObserver ref="observer" slim>
-            <form v-if="!success" method="post" @submit.prevent>
-                <o-validated-field
-                    v-model="email"
-                    name="email"
-                    type="email"
-                    :label="$i18n.t('user.email')"
-                    rules="required|email"
-                />
-                <div class="field">
-                    <div class="control">
-                        <o-button
-                            variant="dark is-fullwidth"
-                            :disabled="isLoading"
-                            @click="onSubmit"
-                        >
-                            {{ $i18n.t('user.email_reset_link') }}
-                        </o-button>
-                    </div>
+
+        <form v-if="!success" method="post" @submit.prevent>
+            <o-validated-field
+                v-model="email"
+                name="email"
+                type="email"
+                :label="$i18n.t('user.email')"
+                rules="required|email"
+            />
+            <div class="field">
+                <div class="control">
+                    <o-button
+                        variant="dark is-fullwidth"
+                        :disabled="isLoading"
+                        @click="onSubmit"
+                    >
+                        {{ $i18n.t('user.email_reset_link') }}
+                    </o-button>
                 </div>
-            </form>
-        </ValidationObserver>
+            </div>
+        </form>
+
         <div class="has-text-centered" style="margin-top: 20px">
             <p>
                 <nuxt-link
@@ -48,11 +48,11 @@
 </template>
 
 <script setup lang="ts">
-import { extend, ValidationObserver } from 'vee-validate'
-import {
-    required as ruleRequired,
-    email as ruleEmail
-} from 'vee-validate/dist/rules'
+// import { extend, ValidationObserver } from 'vee-validate'
+// import {
+//     required as ruleRequired,
+//     email as ruleEmail
+// } from 'vee-validate/dist/rules'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import { useMainStore } from '~/stores'
 import useDirectus from '~/composables/directus'
@@ -61,8 +61,8 @@ const { $i18n } = useNuxtApp()
 const directus = useDirectus()
 const mainStore = useMainStore()
 
-extend('email', ruleEmail)
-extend('required', ruleRequired)
+// extend('email', ruleEmail)
+// extend('required', ruleRequired)
 
 interface Props {
     displayType?: string

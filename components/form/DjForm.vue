@@ -16,102 +16,96 @@
                 {{ $i18n.t(props.errorMessage) }}
             </o-notification>
 
-            <ValidationObserver ref="observer" slim>
-                <form v-if="!successMessage" method="post" @submit.prevent>
-                    <div class="columns is-tablet">
-                        <div
-                            class="column is-half-tablet is-three-fifths-desktop"
-                        >
-                            <o-validated-field
-                                v-model="formData.name"
-                                name="name"
-                                type="text"
-                                :label="$i18n.t('dj.name')"
-                                :placeholder="$i18n.t('dj.dj_name_placeholder')"
-                                rules="required|no_dj_prefix|alpha_num_dash_space"
-                            />
-                            <o-validated-field
-                                v-model="formData.slug"
-                                name="slug"
-                                :disabled="true"
-                                type="text"
-                                :label="$i18n.t('dj.slug')"
-                                rules="required"
-                            />
-                            <o-validated-field
-                                v-model="formData.email"
-                                name="email"
-                                type="email"
-                                :label="$i18n.t('dj.email')"
-                                rules="email"
-                            />
-                            <o-validated-select
-                                v-model="formData.city"
-                                name="city"
-                                :label="$i18n.t('dj.city')"
-                                rules="required"
-                                :options="formStore.citiesOptions"
-                                :expanded="true"
-                                :placeholder="$i18n.t('dj.select_city')"
-                            />
-                            <o-validated-tag-input
-                                v-model="formData.genres"
-                                name="genres"
-                                :label="$i18n.t('dj.genres')"
-                                rules="required"
-                                :tags="availableGenres"
-                                field="name"
-                                maxtags="3"
-                                :placeholder="$i18n.t('dj.select_3_genres')"
-                            />
-                        </div>
-                        <div
-                            class="column is-half-tablet is-two-fifths-desktop"
-                        >
-                            <o-validated-image-crop-upload
-                                v-model="formData.photo"
-                                name="photo"
-                                :label="$i18n.t('dj.photo')"
-                                rules="image_type"
-                                :current-image="
-                                    initialData ? initialData.photo : null
-                                "
-                            />
-                        </div>
+            <form v-if="!successMessage" method="post" @submit.prevent>
+                <div class="columns is-tablet">
+                    <div class="column is-half-tablet is-three-fifths-desktop">
+                        <o-validated-field
+                            v-model="formData.name"
+                            name="name"
+                            type="text"
+                            :label="$i18n.t('dj.name')"
+                            :placeholder="$i18n.t('dj.dj_name_placeholder')"
+                            rules="required|no_dj_prefix|alpha_num_dash_space"
+                        />
+                        <o-validated-field
+                            v-model="formData.slug"
+                            name="slug"
+                            :disabled="true"
+                            type="text"
+                            :label="$i18n.t('dj.slug')"
+                            rules="required"
+                        />
+                        <o-validated-field
+                            v-model="formData.email"
+                            name="email"
+                            type="email"
+                            :label="$i18n.t('dj.email')"
+                            rules="email"
+                        />
+                        <o-validated-select
+                            v-model="formData.city"
+                            name="city"
+                            :label="$i18n.t('dj.city')"
+                            rules="required"
+                            :options="formStore.citiesOptions"
+                            :expanded="true"
+                            :placeholder="$i18n.t('dj.select_city')"
+                        />
+                        <o-validated-tag-input
+                            v-model="formData.genres"
+                            name="genres"
+                            :label="$i18n.t('dj.genres')"
+                            rules="required"
+                            :tags="availableGenres"
+                            field="name"
+                            maxtags="3"
+                            :placeholder="$i18n.t('dj.select_3_genres')"
+                        />
                     </div>
-
-                    <o-validated-bm-editor
-                        v-model="formData.bio"
-                        name="bio"
-                        type="textarea"
-                        rules=""
-                        :label="$i18n.t('dj.bio')"
-                    />
-
-                    <div class="field is-grouped is-grouped-right">
-                        <div class="control">
-                            <o-button
-                                :disabled="props.isLoading"
-                                variant="light"
-                                @click="onCancel"
-                            >
-                                {{ $i18n.t('form.cancel') }}
-                            </o-button>
-                            <o-button
-                                :disabled="props.isLoading"
-                                variant="dark"
-                                @click="onSubmit"
-                            >
-                                {{
-                                    initialData
-                                        ? $i18n.t('dj.save_profile')
-                                        : $i18n.t('dj.do_create_profile')
-                                }}
-                            </o-button>
-                        </div>
+                    <div class="column is-half-tablet is-two-fifths-desktop">
+                        <o-validated-image-crop-upload
+                            v-model="formData.photo"
+                            name="photo"
+                            :label="$i18n.t('dj.photo')"
+                            rules="image_type"
+                            :current-image="
+                                initialData ? initialData.photo : null
+                            "
+                        />
                     </div>
-                </form>
-            </ValidationObserver>
+                </div>
+
+                <o-validated-bm-editor
+                    v-model="formData.bio"
+                    name="bio"
+                    type="textarea"
+                    rules=""
+                    :label="$i18n.t('dj.bio')"
+                />
+
+                <div class="field is-grouped is-grouped-right">
+                    <div class="control">
+                        <o-button
+                            :disabled="props.isLoading"
+                            variant="light"
+                            @click="onCancel"
+                        >
+                            {{ $i18n.t('form.cancel') }}
+                        </o-button>
+                        <o-button
+                            :disabled="props.isLoading"
+                            variant="dark"
+                            @click="onSubmit"
+                        >
+                            {{
+                                initialData
+                                    ? $i18n.t('dj.save_profile')
+                                    : $i18n.t('dj.do_create_profile')
+                            }}
+                        </o-button>
+                    </div>
+                </div>
+            </form>
         </div>
     </client-only>
 </template>
@@ -119,11 +113,11 @@
 <script setup lang="ts">
 // TODO - make slug editable
 // TODO - slug availability check online plus validation in form
-import { extend, ValidationObserver } from 'vee-validate'
-import {
-    required as ruleRequired,
-    email as ruleEmail
-} from 'vee-validate/dist/rules'
+// import { extend, ValidationObserver } from 'vee-validate'
+// import {
+//     required as ruleRequired,
+//     email as ruleEmail
+// } from 'vee-validate/dist/rules'
 import { useFormStore } from '~/stores'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
@@ -136,9 +130,6 @@ const { $i18n, $oruga } = useNuxtApp()
 const formStore = useFormStore()
 const router = useRouter()
 const directus = useDirectus()
-
-extend('email', ruleEmail)
-extend('required', ruleRequired)
 
 extend('alpha_num_dash_space', (value) => {
     if (value.match(/^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi)) {

@@ -60,8 +60,8 @@
                 :active="fetchPending"
                 :can-cancel="true"
             />
-            <div v-else-if="fetchfetchError">
-                {{ fetchfetchError }}
+            <div v-else-if="fetchError">
+                {{ fetchError }}
             </div>
             <div v-else-if="!fetchPending && djs?.meta?.filter_count === 0">
                 <section class="hero is-secondary is-medium">

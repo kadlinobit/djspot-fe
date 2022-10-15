@@ -1,27 +1,28 @@
 <template>
-    <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
-        <o-field :label="label" :variant="getFieldVariant(errors, valid)" :message="$t(errors[0])">
-            <o-select
-                :value="value"
-                :placeholder="placeholder"
-                :expanded="expanded"
-                @input="(value) => $emit('input', value)"
+    <o-field
+        :label="label"
+        :variant="getFieldVariant(errors, valid)"
+        :message="$t(errors[0])"
+    >
+        <o-select
+            :value="value"
+            :placeholder="placeholder"
+            :expanded="expanded"
+            @input="(value) => $emit('input', value)"
+        >
+            <option
+                v-for="option in options"
+                :key="option.value"
+                :value="option.value"
             >
-                <option v-for="option in options" :key="option.value" :value="option.value">
-                    {{ option.label }}
-                </option>
-            </o-select>
-        </o-field>
-    </ValidationProvider>
+                {{ option.label }}
+            </option>
+        </o-select>
+    </o-field>
 </template>
 
 <script>
-import { ValidationProvider } from 'vee-validate'
-
 export default {
-    components: {
-        ValidationProvider
-    },
     props: {
         vid: {
             type: String,

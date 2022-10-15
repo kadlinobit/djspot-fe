@@ -1,42 +1,32 @@
 <template>
-    <ValidationProvider
-        v-slot="{ errors, valid }"
-        :vid="vid"
-        :name="name"
-        :rules="rules"
-        slim
+    <o-field
+        :label="label"
+        :variant="getFieldVariant(errors, valid)"
+        :message="$t(errors[0])"
+        :style="visibilityStyle"
     >
-        <o-field
-            :label="label"
-            :variant="getFieldVariant(errors, valid)"
-            :message="$t(errors[0])"
-            :style="visibilityStyle"
-        >
-            <template v-if="help" #label>
-                {{ label }}
-                <o-tooltip variant="dark" :label="help" multilined>
-                    <o-icon size="small" icon="help-circle-outline"></o-icon>
-                </o-tooltip>
-            </template>
+        <template v-if="help" #label>
+            {{ label }}
+            <o-tooltip variant="dark" :label="help" multilined>
+                <o-icon size="small" icon="help-circle-outline"></o-icon>
+            </o-tooltip>
+        </template>
 
-            <div class="control">
-                <bm-editor
-                    :placeholder="placeholder"
-                    :modelValue="value"
-                    @update:modelValue="$emit('input', $event)"
-                />
-            </div>
-        </o-field>
-    </ValidationProvider>
+        <div class="control">
+            <bm-editor
+                :placeholder="placeholder"
+                :modelValue="value"
+                @update:modelValue="$emit('input', $event)"
+            />
+        </div>
+    </o-field>
 </template>
 
 <script>
-import { ValidationProvider } from 'vee-validate'
 import BmEditor from '~/components/editor/BmEditor.vue'
 
 export default {
     components: {
-        ValidationProvider,
         BmEditor
     },
     props: {

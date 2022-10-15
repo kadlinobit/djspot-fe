@@ -9,89 +9,87 @@
                 {{ $i18n.t(error) }}
             </o-notification>
 
-            <ValidationObserver ref="observer" slim>
-                <form v-if="!success" method="post" @submit.prevent>
-                    <div class="columns">
-                        <div class="column">
-                            <o-validated-field
-                                v-model="formData.first_name"
-                                name="first_name"
-                                type="text"
-                                :label="$i18n.t('user.first_name')"
-                                :placeholder="$i18n.t('user.first_name')"
-                                rules="required|alpha_num_dash_space"
-                            />
-                        </div>
-                        <div class="column">
-                            <o-validated-field
-                                v-model="formData.last_name"
-                                name="last_name"
-                                type="text"
-                                :label="$i18n.t('user.last_name')"
-                                :placeholder="$i18n.t('user.first_name')"
-                                rules="required|alpha_num_dash_space"
-                            />
-                        </div>
+            <form v-if="!success" method="post" @submit.prevent>
+                <div class="columns">
+                    <div class="column">
+                        <o-validated-field
+                            v-model="formData.first_name"
+                            name="first_name"
+                            type="text"
+                            :label="$i18n.t('user.first_name')"
+                            :placeholder="$i18n.t('user.first_name')"
+                            rules="required|alpha_num_dash_space"
+                        />
                     </div>
-                    <o-validated-field
-                        v-model="formData.email"
-                        name="email"
-                        type="email"
-                        :label="$i18n.t('user.email')"
-                        rules="required|email"
-                        :disabled="true"
-                    />
-                    <o-validated-select
-                        v-model="formData.location"
-                        name="city"
-                        :label="$i18n.t('user.location')"
-                        :options="formStore.citiesOptions"
-                        :expanded="true"
-                        :placeholder="$i18n.t('dj.select_city')"
-                    />
+                    <div class="column">
+                        <o-validated-field
+                            v-model="formData.last_name"
+                            name="last_name"
+                            type="text"
+                            :label="$i18n.t('user.last_name')"
+                            :placeholder="$i18n.t('user.first_name')"
+                            rules="required|alpha_num_dash_space"
+                        />
+                    </div>
+                </div>
+                <o-validated-field
+                    v-model="formData.email"
+                    name="email"
+                    type="email"
+                    :label="$i18n.t('user.email')"
+                    rules="required|email"
+                    :disabled="true"
+                />
+                <o-validated-select
+                    v-model="formData.location"
+                    name="city"
+                    :label="$i18n.t('user.location')"
+                    :options="formStore.citiesOptions"
+                    :expanded="true"
+                    :placeholder="$i18n.t('dj.select_city')"
+                />
 
-                    <o-validated-select
-                        v-model="formData.language"
-                        name="city"
-                        :label="$i18n.t('user.preffered_language')"
-                        rules="required"
-                        :options="languagesOptions"
-                        :expanded="true"
-                    />
-                    <o-validated-field
-                        v-model="formData.password_check"
-                        name="password_check"
-                        type="password"
-                        :label="$i18n.t('user.password_check')"
-                        rules="required"
-                    />
-                    <div class="field is-grouped is-grouped-right">
-                        <div class="control">
-                            <o-button
-                                :disabled="isLoading"
-                                variant="dark"
-                                @click="onSubmit"
-                            >
-                                {{ $i18n.t('user.save_profile') }}
-                            </o-button>
-                        </div>
+                <o-validated-select
+                    v-model="formData.language"
+                    name="city"
+                    :label="$i18n.t('user.preffered_language')"
+                    rules="required"
+                    :options="languagesOptions"
+                    :expanded="true"
+                />
+                <o-validated-field
+                    v-model="formData.password_check"
+                    name="password_check"
+                    type="password"
+                    :label="$i18n.t('user.password_check')"
+                    rules="required"
+                />
+                <div class="field is-grouped is-grouped-right">
+                    <div class="control">
+                        <o-button
+                            :disabled="isLoading"
+                            variant="dark"
+                            @click="onSubmit"
+                        >
+                            {{ $i18n.t('user.save_profile') }}
+                        </o-button>
                     </div>
-                </form>
-            </ValidationObserver>
+                </div>
+            </form>
         </div>
     </client-only>
 </template>
 
 <script setup lang="ts">
 // TODO - password check na backendu nefunguje při updateu uživatele
-import { extend, ValidationObserver } from 'vee-validate'
-import { required, email } from 'vee-validate/dist/rules'
+// import { extend, ValidationObserver } from 'vee-validate'
+// import { required, email } from 'vee-validate/dist/rules'
 import { useFormStore } from '~/stores'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 
-extend('email', email)
-extend('required', required)
+// extend('email', email)
+// extend('required', required)
 
 extend('alpha_num_dash_space', (value) => {
     if (value.match(/^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi)) {

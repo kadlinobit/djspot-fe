@@ -22,41 +22,37 @@
                         >
                             {{ $i18n.t(error) }}
                         </o-notification>
-                        <ValidationObserver ref="observer">
-                            <form v-if="!success" method="post" @submit.prevent>
-                                <o-validated-field
-                                    v-model="password1"
-                                    vid="password1"
-                                    name="password1"
-                                    type="password"
-                                    :label="$i18n.t('user.new_password')"
-                                    rules="required"
-                                />
 
-                                <o-validated-field
-                                    v-model="password2"
-                                    name="password2"
-                                    type="password"
-                                    :label="$i18n.t('user.password_again')"
-                                    rules="required|confirmed:password1"
-                                />
-                                <div class="field">
-                                    <div class="control">
-                                        <o-button
-                                            :disabled="isLoading"
-                                            variant="dark is-fullwidth"
-                                            @click="onSubmit"
-                                        >
-                                            {{
-                                                $i18n.t(
-                                                    'user.do_reset_password'
-                                                )
-                                            }}
-                                        </o-button>
-                                    </div>
+                        <form v-if="!success" method="post" @submit.prevent>
+                            <o-validated-field
+                                v-model="password1"
+                                vid="password1"
+                                name="password1"
+                                type="password"
+                                :label="$i18n.t('user.new_password')"
+                                rules="required"
+                            />
+
+                            <o-validated-field
+                                v-model="password2"
+                                name="password2"
+                                type="password"
+                                :label="$i18n.t('user.password_again')"
+                                rules="required|confirmed:password1"
+                            />
+                            <div class="field">
+                                <div class="control">
+                                    <o-button
+                                        :disabled="isLoading"
+                                        variant="dark is-fullwidth"
+                                        @click="onSubmit"
+                                    >
+                                        {{ $i18n.t('user.do_reset_password') }}
+                                    </o-button>
                                 </div>
-                            </form>
-                        </ValidationObserver>
+                            </div>
+                        </form>
+
                         <div
                             v-if="success"
                             class="has-text-centered"
@@ -76,11 +72,11 @@
 </template>
 
 <script setup lang="ts">
-import { extend, ValidationObserver } from 'vee-validate'
-import {
-    required as ruleRequired,
-    confirmed as ruleConfirmed
-} from 'vee-validate/dist/rules'
+// import { extend, ValidationObserver } from 'vee-validate'
+// import {
+//     required as ruleRequired,
+//     confirmed as ruleConfirmed
+// } from 'vee-validate/dist/rules'
 import { onMounted } from 'vue'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import useDirectus from '~/composables/directus'
@@ -90,8 +86,8 @@ const route = useRoute()
 const router = useRouter()
 const directus = useDirectus()
 
-extend('required', ruleRequired)
-extend('confirmed', ruleConfirmed)
+// extend('required', ruleRequired)
+// extend('confirmed', ruleConfirmed)
 
 const password1 = ref('')
 const password2 = ref('')

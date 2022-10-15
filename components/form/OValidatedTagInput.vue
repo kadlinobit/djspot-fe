@@ -1,37 +1,30 @@
 <template>
-    <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
-        <o-field
-            :label="label"
-            :variant="getFieldVariant(errors, valid)"
-            :message="$t(errors[0])"
+    <o-field
+        :label="label"
+        :variant="getFieldVariant(errors, valid)"
+        :message="$t(errors[0])"
+        :expanded="expanded"
+    >
+        <o-inputitems
+            :value="value"
+            :data="filteredTags"
+            :autocomplete="autocomplete"
+            :allow-new="allowNew"
+            :open-on-focus="openOnFocus"
+            :field="field"
+            :icon="icon"
+            :placeholder="placeholder"
+            :maxitems="maxtags"
             :expanded="expanded"
+            @typing="getFilteredTags"
+            @input="(value) => emitInput(value)"
         >
-            <o-inputitems
-                :value="value"
-                :data="filteredTags"
-                :autocomplete="autocomplete"
-                :allow-new="allowNew"
-                :open-on-focus="openOnFocus"
-                :field="field"
-                :icon="icon"
-                :placeholder="placeholder"
-                :maxitems="maxtags"
-                :expanded="expanded"
-                @typing="getFilteredTags"
-                @input="(value) => emitInput(value)"
-            >
-            </o-inputitems>
-        </o-field>
-    </ValidationProvider>
+        </o-inputitems>
+    </o-field>
 </template>
 
 <script>
-import { ValidationProvider } from 'vee-validate'
-
 export default {
-    components: {
-        ValidationProvider
-    },
     props: {
         vid: {
             type: String,
@@ -108,7 +101,10 @@ export default {
         getFilteredTags(text = '') {
             if (this.tags && Array.isArray(this.tags)) {
                 this.filteredTags = this.tags.filter((tag) => {
-                    return tag[this.field].toString().toLowerCase().includes(text.toLowerCase())
+                    return tag[this.field]
+                        .toString()
+                        .toLowerCase()
+                        .includes(text.toLowerCase())
                 })
             }
         },

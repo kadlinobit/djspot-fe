@@ -34,8 +34,7 @@
             :src="playerStore.file"
             @timeupdate="updateCurrentSeconds"
             @loadstart="
-                playerStore.setIsLoading(true)
-                playerStore.setIsPlaying(false)
+                playerStore.setIsLoading(true), playerStore.setIsPlaying(false)
             "
             @loadeddata="onLoadedData"
             @pause="playerStore.setIsPlaying(false)"

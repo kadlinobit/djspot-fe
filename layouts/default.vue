@@ -34,7 +34,7 @@
             <SidebarMenu />
         </o-sidebar>
         <Navbar />
-        <nuxt style="margin-bottom: 100px" />
+        <slot style="margin-bottom: 100px" />
         <client-only>
             <BottomBar />
         </client-only>
