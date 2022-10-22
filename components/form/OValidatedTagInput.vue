@@ -1,124 +1,116 @@
 <template>
     <o-field
-        :label="label"
-        :variant="getFieldVariant(errors, valid)"
-        :message="$t(errors[0])"
-        :expanded="expanded"
+        :label="props.label"
+        :variant="getFieldVariant"
+        :message="errorMessage ? $i18n.t(errorMessage) : null"
+        :style="visibilityStyle"
     >
+        <template v-if="props.help" #label>
+            {{ label }}
+            <o-tooltip variant="dark" :label="props.help" multilined>
+                <o-icon size="small" icon="help-circle-outline"></o-icon>
+            </o-tooltip>
+        </template>
         <o-inputitems
-            :value="value"
+            v-model="fieldValue"
             :data="filteredTags"
-            :autocomplete="autocomplete"
-            :allow-new="allowNew"
-            :open-on-focus="openOnFocus"
-            :field="field"
-            :icon="icon"
-            :placeholder="placeholder"
-            :maxitems="maxtags"
-            :expanded="expanded"
+            :autocomplete="props.autocomplete"
+            :allow-new="props.allowNew"
+            :open-on-focus="props.openOnFocus"
+            :field="props.field"
+            :icon="props.icon"
+            :placeholder="props.placeholder"
+            :maxitems="props.maxTags"
+            :expanded="props.expanded"
             @typing="getFilteredTags"
-            @input="(value) => emitInput(value)"
         >
         </o-inputitems>
     </o-field>
 </template>
 
-<script>
-export default {
-    props: {
-        vid: {
-            type: String,
-            default: ''
-        },
-        value: {
-            type: Array,
-            default: () => []
-        },
-        tags: {
-            type: Array,
-            default: () => []
-        },
-        name: {
-            type: String,
-            default: 'tags'
-        },
-        label: {
-            type: String,
-            default: ''
-        },
-        placeholder: {
-            type: String,
-            default: ''
-        },
-        expanded: {
-            type: Boolean,
-            default: true
-        },
-        icon: {
-            type: String,
-            default: 'tag'
-        },
-        autocomplete: {
-            type: Boolean,
-            default: true
-        },
-        allowNew: {
-            type: Boolean,
-            default: false
-        },
-        openOnFocus: {
-            type: Boolean,
-            default: true
-        },
-        field: {
-            type: String,
-            required: true
-        },
-        maxtags: {
-            type: [String, Number],
-            default: ''
-        },
-        isValidationOn: {
-            type: Boolean,
-            default: true
-        },
-        rules: {
-            type: [Object, String],
-            default: ''
-        }
-    },
-    data() {
-        return {
-            filteredTags: []
-        }
-    },
-    watch: {
-        tags() {
-            this.getFilteredTags('')
-        }
-    },
-    methods: {
-        getFilteredTags(text = '') {
-            if (this.tags && Array.isArray(this.tags)) {
-                this.filteredTags = this.tags.filter((tag) => {
-                    return tag[this.field]
-                        .toString()
-                        .toLowerCase()
-                        .includes(text.toLowerCase())
-                })
-            }
-        },
-        emitInput(value) {
-            this.$emit('input', value)
-            this.getFilteredTags('')
-        },
-        getFieldVariant(errors, valid) {
-            if (this.isValidationOn && !!errors[0]) return 'danger'
-            if (this.isValidationOn && valid) return 'success'
-            return null
-        }
+<script setup lang="ts">
+import _ from 'lodash'
+import { useField } from 'vee-validate'
+const { $i18n } = useNuxtApp()
+
+interface TagItem {
+    value: string
+    label: string
+}
+
+interface Props {
+    modelValue: any
+    name?: string
+    label?: string
+    placeholder?: string
+    expanded?: boolean
+    icon?: string
+    autocomplete?: boolean
+    allowNew?: boolean
+    openOnFocus?: boolean
+    field: string
+    maxTags?: number
+    tags: Array<TagItem>
+    disabled?: boolean
+    hidden?: boolean
+    help?: string
+    isValidationOn?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    modelValue: '',
+    name: 'input',
+    label: '',
+    placeholder: null,
+    expanded: true,
+    icon: 'tag',
+    autocomplete: true,
+    allowNew: false,
+    openOnFocus: true,
+    field: '',
+    maxTags: 0,
+    tags: () => [],
+    disabled: false,
+    hidden: false,
+    help: null,
+    isValidationOn: true
+})
+
+const filteredTags = ref([])
+
+watch(props.tags, () => getFilteredTags(''))
+
+function getFilteredTags(text = '') {
+    if (props.tags && Array.isArray(props.tags)) {
+        filteredTags.value = props.tags.filter((tag) => {
+            return tag[props.field]
+                .toString()
+                .toLowerCase()
+                .includes(text.toLowerCase())
+        })
     }
 }
+
+const nameRef = toRef(props, 'name')
+//TODO - meta touched is not working, find out why
+const { errorMessage, value: fieldValue } = useField(nameRef, undefined, {
+    initialValue: props.modelValue
+})
+
+const visibilityStyle = computed(() => {
+    if (props.hidden) {
+        return { display: 'none' }
+    }
+    return { display: 'default' }
+})
+
+const getFieldVariant = computed(() => {
+    if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger'
+    if (props.isValidationOn && !errorMessage.value) return 'success'
+    return null
+})
+
+watch(fieldValue, (val) => console.log(val))
 </script>
 
 <style lang="scss" scoped>

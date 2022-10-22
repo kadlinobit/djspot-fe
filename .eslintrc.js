@@ -19,9 +19,9 @@ module.exports = {
     },
     plugins: ['vue', '@typescript-eslint'],
     rules: {
-        'prettier/prettier': 'error'
+        'prettier/prettier': 'error',
         // 'max-len': [1, { code: 120, tabWidth: 4, ignoreUrls: true }],
-        // '@typescript-eslint/no-unused-vars': 'off',
-        // 'vue/multi-word-component-names': 'off'
+        '@typescript-eslint/no-unused-vars': 'off',
+        'vue/multi-word-component-names': 'off'
     }
 }

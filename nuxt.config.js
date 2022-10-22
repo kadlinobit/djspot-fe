@@ -1,10 +1,7 @@
 import i18n from './config/i18n'
-// import eslintPlugin from 'vite-plugin-eslint'
+import eslintPlugin from 'vite-plugin-eslint'
 
 export default defineNuxtConfig({
-    // nitro: {
-    //     preset: 'nitro-dev'
-    // },
     // vite: {
     //     plugins: [eslintPlugin()]
     // },
@@ -32,8 +29,8 @@ export default defineNuxtConfig({
 
     // Global CSS: https://go.nuxtjs.dev/config-css
     css: [
-        '~/assets/scss/main.scss'
-        // '@mdi/font/css/materialdesignicons.min.css'
+        '~/assets/scss/main.scss',
+        '@mdi/font/css/materialdesignicons.min.css'
     ],
 
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins

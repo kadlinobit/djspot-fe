@@ -1,8 +1,8 @@
 <template>
     <o-field
-        :label="label"
-        :variant="getFieldVariant(errors, valid)"
-        :message="$t(errors[0])"
+        :label="props.label"
+        :variant="getFieldVariant"
+        :message="errorMessage ? $i18n.t(errorMessage) : null"
         :style="visibilityStyle"
     >
         <template v-if="help" #label>
@@ -13,82 +13,58 @@
         </template>
 
         <div class="control">
-            <bm-editor
-                :placeholder="placeholder"
-                :modelValue="value"
-                @update:modelValue="$emit('input', $event)"
-            />
+            <bm-editor :placeholder="placeholder" v-model="fieldValue" />
         </div>
     </o-field>
 </template>
 
-<script>
+<script setup lang="ts">
+import _ from 'lodash'
+import { useField } from 'vee-validate'
 import BmEditor from '~/components/editor/BmEditor.vue'
 
-export default {
-    components: {
-        BmEditor
-    },
-    props: {
-        vid: {
-            type: String,
-            default: ''
-        },
-        value: {
-            type: String,
-            default: ''
-        },
-        name: {
-            type: String,
-            default: 'input'
-        },
-        type: {
-            type: String,
-            default: 'text'
-        },
-        label: {
-            type: String,
-            default: 'label'
-        },
-        placeholder: {
-            type: String,
-            default: ''
-        },
-        disabled: {
-            type: Boolean,
-            default: false
-        },
-        rules: {
-            type: [Object, String],
-            default: ''
-        },
-        hidden: {
-            type: Boolean,
-            default: false
-        },
-        help: {
-            type: String,
-            default: null
-        },
-        isValidationOn: {
-            type: Boolean,
-            default: true
-        }
-    },
-    computed: {
-        visibilityStyle() {
-            if (this.hidden) {
-                return { display: 'none' }
-            }
-            return { display: 'default' }
-        }
-    },
-    methods: {
-        getFieldVariant(errors, valid) {
-            if (this.isValidationOn && !!errors[0]) return 'danger'
-            if (this.isValidationOn && valid) return 'success'
-            return null
-        }
-    }
+const { $i18n } = useNuxtApp()
+
+interface Props {
+    modelValue: string | null
+    name?: string
+    type?: string
+    label?: string
+    placeholder?: string
+    disabled?: boolean
+    hidden?: boolean
+    help?: string
+    isValidationOn?: boolean
 }
+
+const props = withDefaults(defineProps<Props>(), {
+    modelValue: '',
+    name: 'input',
+    type: 'text',
+    label: 'label',
+    placeholder: null,
+    disabled: false,
+    hidden: false,
+    help: null,
+    isValidationOn: true
+})
+
+const nameRef = toRef(props, 'name')
+//TODO - meta touched is not working, find out why
+const { errorMessage, value: fieldValue } = useField(nameRef, undefined, {
+    initialValue: props.modelValue
+})
+
+const visibilityStyle = computed(() => {
+    if (props.hidden) {
+        return { display: 'none' }
+    }
+    return { display: 'default' }
+})
+
+const getFieldVariant = computed(() => {
+    if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger'
+    if (props.isValidationOn && !errorMessage.value) return 'success'
+    return null
+})
 </script>

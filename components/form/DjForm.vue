@@ -16,7 +16,7 @@
                 {{ $i18n.t(props.errorMessage) }}
             </o-notification>
 
-            <form v-if="!successMessage" method="post" @submit.prevent>
+            <form v-if="!props.successMessage" method="post" @submit.prevent>
                 <div class="columns is-tablet">
                     <div class="column is-half-tablet is-three-fifths-desktop">
                         <o-validated-field
@@ -113,11 +113,9 @@
 <script setup lang="ts">
 // TODO - make slug editable
 // TODO - slug availability check online plus validation in form
-// import { extend, ValidationObserver } from 'vee-validate'
-// import {
-//     required as ruleRequired,
-//     email as ruleEmail
-// } from 'vee-validate/dist/rules'
+import * as yup from 'yup'
+import { useProgrammatic } from '@oruga-ui/oruga'
+import { useForm } from 'vee-validate'
 import { useFormStore } from '~/stores'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
@@ -125,36 +123,38 @@ import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUplo
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
 import useDirectus from '~/composables/directus'
+import { min } from 'lodash'
 
-const { $i18n, $oruga } = useNuxtApp()
+const { $i18n } = useNuxtApp()
+const { oruga: $oruga } = useProgrammatic()
 const formStore = useFormStore()
 const router = useRouter()
 const directus = useDirectus()
 
-extend('alpha_num_dash_space', (value) => {
-    if (value.match(/^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi)) {
-        return true
-    }
-    return 'validation.alpha_num_dash_space'
-})
+// extend('alpha_num_dash_space', (value) => {
+//     if (value.match(/^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi)) {
+//         return true
+//     }
+//     return 'validation.alpha_num_dash_space'
+// })
 
-extend('no_dj_prefix', (value) => {
-    if (value.match(/^(?!(dj |dj_|dj-).*$).*/gi)) {
-        return true
-    }
-    return 'validation.no_dj_prefix'
-})
+// extend('no_dj_prefix', (value) => {
+//     if (value.match(/^(?!(dj |dj_|dj-).*$).*/gi)) {
+//         return true
+//     }
+//     return 'validation.no_dj_prefix'
+// })
 
-extend('image_type', (file) => {
-    if (
-        file === null ||
-        ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)
-    ) {
-        return true
-    }
+// extend('image_type', (file) => {
+//     if (
+//         file === null ||
+//         ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)
+//     ) {
+//         return true
+//     }
 
-    return 'validation.image_type'
-})
+//     return 'validation.image_type'
+// })
 
 // TODO - find out why definePageMeta is not working
 // definePageMeta({
@@ -210,6 +210,22 @@ const availableGenres = ref(null)
 const currentPhoto = ref(null)
 const observer = ref(null)
 
+// Validation
+const nameRegEx = /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi
+const validationSchema = yup.object({
+    name: yup
+        .string()
+        .required('validation.required')
+        .matches(nameRegEx, 'validation.alpha_num_dash_space')
+        .matches(/^(?!(dj |dj_|dj-).*$).*/gi, 'validation.no_dj_prefix'),
+    slug: null,
+    email: yup.string().email('validation.email'),
+    city: yup.string().required('validation.required'),
+    genres: yup.array().min(1).max(3)
+})
+
+const { errors: formErrors, validate } = useForm({ validationSchema })
+
 watch(
     () => formData.value.name,
     (val) => {
@@ -233,16 +249,15 @@ onMounted(async () => {
     availableGenres.value = genreTagsAll.data
 })
 
-function onSubmit() {
-    observer.value.validate().then((isValid) => {
-        if (!isValid) {
+async function onSubmit() {
+    await validate().then((result) => {
+        if (!result.valid) {
             $oruga.notification.open({
                 message: $i18n.t('validation.form_validation_error'),
                 variant: 'danger'
             })
             return
         }
-
         emit('formSubmit', {
             formData: formData.value
         })

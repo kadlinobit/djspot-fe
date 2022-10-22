@@ -163,7 +163,8 @@
         "confirmed": "Hesla se musí shodovat",
         "form_validation_error": "Formulář není úplně v cajku, prosím opravit.",
         "no_dj_prefix": "Jméno nesmí obsahovat titul DJ na začátku",
-        "alpha_num_dash_space": "Pole smí obsahovat jen písmena, čísla, mezeru a pomlčku"
+        "alpha_num_dash_space": "Pole smí obsahovat jen písmena, čísla, mezeru a pomlčku",
+        "unique_email": "Tento email už existuje v naší databázi."
     },
     "Email is already taken.": "Tento email už existuje v naší databázi.",
     "This email does not exist.": "Tento email neexistuje v naší databázi."

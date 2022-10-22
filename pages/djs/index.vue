@@ -46,10 +46,9 @@
                         :tags="formStore.genresOptions"
                         :is-validation-on="false"
                         field="name"
-                        maxtags="3"
+                        :max-tags="3"
                         expanded
                         :placeholder="$i18n.t('dj.select_3_genres')"
-                        @input="onSearch"
                     />
                 </client-only>
             </o-field>
@@ -232,6 +231,15 @@ function onPageChange(pageNumber) {
     refresh()
 }
 
+function resetSearch() {
+    name.value = ''
+    city.value = ''
+    genres.value = []
+    sort.value = 'name'
+
+    onSearch()
+}
+
 onMounted(async () => {
     if (_.isEmpty(formStore.genresOptions)) {
         const { data } = await directus.items('genre').readByQuery()
@@ -252,12 +260,5 @@ onMounted(async () => {
     refresh()
 })
 
-function resetSearch() {
-    name.value = ''
-    city.value = ''
-    genres.value = []
-    sort.value = 'name'
-
-    onSearch()
-}
+watch(genres, onSearch)
 </script>

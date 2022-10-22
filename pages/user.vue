@@ -23,16 +23,16 @@
                 <o-tab-item :label="$i18n.t('user.profile')">
                     <user-form
                         :initial-data="initialData"
-                        :error="error"
-                        :success="success"
+                        :error-message="error"
+                        :success-message="success"
                         :is-loading="isLoading"
                         @formSubmit="editUser"
                     />
                 </o-tab-item>
                 <o-tab-item :label="$i18n.t('user.change_password')">
                     <user-new-password-form
-                        :error-in="error"
-                        :success-in="success"
+                        :errorMessage="error"
+                        :successMessage="success"
                         :is-loading-in="isLoading"
                         @formSubmit="editUser"
                     />
@@ -43,18 +43,19 @@
 </template>
 
 <script setup lang="ts">
+import { useProgrammatic } from '@oruga-ui/oruga'
 import UserForm from '~/components/form/UserForm.vue'
 import UserNewPasswordForm from '~/components/form/UserNewPasswordForm.vue'
 import useDirectus, { useAuth } from '~/composables/directus'
 const directus = useDirectus()
 const auth = useAuth()
 
-const { $i18n, $api, $oruga } = useNuxtApp()
+const { $i18n, $api } = useNuxtApp()
+const { oruga: $oruga } = useProgrammatic()
 
-// TODO - find out why definePageMeta is not working
-// definePageMeta({
-//     middleware: 'authorized'
-// })
+definePageMeta({
+    middleware: ['authenticated']
+})
 
 const success = ref(null)
 const isLoading = ref(false)

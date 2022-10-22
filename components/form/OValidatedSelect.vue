@@ -1,14 +1,22 @@
 <template>
     <o-field
-        :label="label"
-        :variant="getFieldVariant(errors, valid)"
-        :message="$t(errors[0])"
+        :label="props.label"
+        :variant="getFieldVariant"
+        :message="errorMessage ? $i18n.t(errorMessage) : null"
+        :style="visibilityStyle"
     >
+        <template v-if="props.help" #label>
+            {{ label }}
+            <o-tooltip variant="dark" :label="props.help" multilined>
+                <o-icon size="small" icon="help-circle-outline"></o-icon>
+            </o-tooltip>
+        </template>
         <o-select
-            :value="value"
-            :placeholder="placeholder"
-            :expanded="expanded"
-            @input="(value) => $emit('input', value)"
+            v-model="fieldValue"
+            :placeholder="props.placeholder"
+            :expanded="props.expanded"
+            :disabled="props.disabled"
+            :name="props.name"
         >
             <option
                 v-for="option in options"
@@ -21,52 +29,58 @@
     </o-field>
 </template>
 
-<script>
-export default {
-    props: {
-        vid: {
-            type: String,
-            default: ''
-        },
-        value: {
-            type: String,
-            default: ''
-        },
-        name: {
-            type: String,
-            default: 'input'
-        },
-        label: {
-            type: String,
-            required: true
-        },
-        placeholder: {
-            type: String,
-            default: ''
-        },
-        expanded: {
-            type: Boolean,
-            default: true
-        },
-        options: {
-            type: Array,
-            required: true
-        },
-        rules: {
-            type: [Object, String],
-            default: ''
-        },
-        isValidationOn: {
-            type: Boolean,
-            default: true
-        }
-    },
-    methods: {
-        getFieldVariant(errors, valid) {
-            if (this.isValidationOn && !!errors[0]) return 'danger'
-            if (this.isValidationOn && valid) return 'success'
-            return null
-        }
-    }
+<script setup lang="ts">
+import _ from 'lodash'
+import { useField } from 'vee-validate'
+const { $i18n } = useNuxtApp()
+
+interface SelectOptionsItem {
+    value: string
+    label: string
 }
+
+interface Props {
+    modelValue: string | number | null
+    name?: string
+    label?: string
+    placeholder?: string
+    expanded?: boolean
+    options: Array<SelectOptionsItem>
+    disabled?: boolean
+    hidden?: boolean
+    help?: string
+    isValidationOn?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    modelValue: '',
+    name: 'input',
+    label: 'label',
+    placeholder: null,
+    expanded: true,
+    options: () => [],
+    disabled: false,
+    hidden: false,
+    help: null,
+    isValidationOn: true
+})
+
+const nameRef = toRef(props, 'name')
+//TODO - meta touched is not working, find out why
+const { errorMessage, value: fieldValue } = useField(nameRef, undefined, {
+    initialValue: props.modelValue
+})
+
+const visibilityStyle = computed(() => {
+    if (props.hidden) {
+        return { display: 'none' }
+    }
+    return { display: 'default' }
+})
+
+const getFieldVariant = computed(() => {
+    if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger'
+    if (props.isValidationOn && !errorMessage.value) return 'success'
+    return null
+})
 </script>

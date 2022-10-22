@@ -67,12 +67,12 @@
     </div>
 </template>
 <script setup lang="ts">
-import OValidatedField from '~/components/form/OValidatedField.vue'
+import * as yup from 'yup'
 import { useMainStore } from '~/stores'
 import { useAuth } from '~/composables/directus'
 import { useProgrammatic } from '@oruga-ui/oruga'
 import { useForm } from 'vee-validate'
-import * as yup from 'yup'
+import OValidatedField from '~/components/form/OValidatedField.vue'
 
 const { $i18n } = useNuxtApp()
 const { oruga: $oruga } = useProgrammatic()

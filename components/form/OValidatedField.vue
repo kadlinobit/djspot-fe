@@ -1,24 +1,23 @@
 <template>
     <o-field
-        :label="label"
+        :label="props.label"
         :variant="getFieldVariant"
         :message="errorMessage ? $i18n.t(errorMessage) : null"
         :style="visibilityStyle"
     >
-        <template v-if="help" #label>
+        <template v-if="props.help" #label>
             {{ label }}
-            <o-tooltip variant="dark" :label="help" multilined>
+            <o-tooltip variant="dark" :label="props.help" multilined>
                 <o-icon size="small" icon="help-circle-outline"></o-icon>
             </o-tooltip>
         </template>
         <o-input
-            :v-model="value"
+            v-model="fieldValue"
             :placeholder="props.placeholder"
             :type="props.type"
             :use-html5-validation="false"
             :disabled="props.disabled"
             :name="props.name"
-            @input="(val) => emit('update:modelValue', val)"
         />
     </o-field>
 </template>
@@ -26,12 +25,12 @@
 <script setup lang="ts">
 import _ from 'lodash'
 import { useField } from 'vee-validate'
-const { $i18n } = useNuxtApp()
 
-const emit = defineEmits(['update:modelValue'])
+// TODO - emit to update model value is probably not needed, as vee-validate useField does it automatically
+// const emit = defineEmits(['update:modelValue'])
 
 interface Props {
-    modelValue: string
+    modelValue: string | number | null
     name?: string
     type?: string
     label?: string
@@ -55,7 +54,20 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const nameRef = toRef(props, 'name')
-const { errorMessage, value, meta } = useField(nameRef)
+//TODO - meta touched is not working, find out why
+const { errorMessage, value: fieldValue } = useField(nameRef, undefined, {
+    initialValue: props.modelValue
+})
+
+// TODO - we propably dont need onMounted, initialValue in useField is enough
+// onMounted(() => {
+//     fieldValue.value = props.modelValue
+// })
+
+// TODO - do we really need watch to emit update even? Seems like not
+// watch(fieldValue, (val) => {
+//     emit('update:modelValue', val)
+// })
 
 const visibilityStyle = computed(() => {
     if (props.hidden) {

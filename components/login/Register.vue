@@ -14,7 +14,6 @@
                 name="username"
                 type="text"
                 :label="$i18n.t('user.username')"
-                rules="required"
             />
 
             <o-validated-field
@@ -22,7 +21,6 @@
                 name="email"
                 type="email"
                 :label="$i18n.t('user.email')"
-                rules="required|email"
             />
 
             <o-validated-field
@@ -70,15 +68,18 @@
 </template>
 
 <script setup lang="ts">
+// TODO - register function still not working for DIRECTUS
+import * as yup from 'yup'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import { useMainStore } from '~/stores'
 import { useProgrammatic } from '@oruga-ui/oruga'
 import { useForm } from 'vee-validate'
-import * as yup from 'yup'
+import useDirectus from '~/composables/directus'
 
 const { $i18n, $axios } = useNuxtApp()
 const mainStore = useMainStore()
 const { oruga: $oruga } = useProgrammatic()
+const directus = useDirectus()
 
 interface Props {
     displayType?: string
@@ -95,22 +96,26 @@ const password2 = ref('')
 const success = ref(null)
 const error = ref(null)
 const isLoading = ref(false)
-const observer = ref(null)
 
 const validationSchema = yup.object({
     email: yup
         .string()
         .required('validation.required')
         .email('validation.email'),
-    password: yup.string().required('validation.required')
+    password1: yup.string().required('validation.required'),
+    password2: yup
+        .string()
+        .test('passwords-match', 'validation.confirmed', function (val) {
+            return this.parent.password1 === val
+        })
 })
 
 const { errors: formErrors, validate } = useForm({ validationSchema })
 
-function onSubmit() {
+async function onSubmit() {
     error.value = null
-    observer.value.validate().then((success) => {
-        if (!success) {
+    await validate().then((result) => {
+        if (!result.valid) {
             $oruga.notification.open({
                 message: $i18n.t('validation.form_validation_error'),
                 variant: 'danger'

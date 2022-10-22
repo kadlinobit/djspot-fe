@@ -1,15 +1,23 @@
 <template>
     <client-only>
         <div class="form user-form">
-            <o-notification v-if="success" variant="success" :closable="false">
-                {{ $i18n.t(success) }}
+            <o-notification
+                v-if="successMessage"
+                variant="success"
+                :closable="false"
+            >
+                {{ $i18n.t(successMessage) }}
             </o-notification>
 
-            <o-notification v-if="error" variant="danger" :closable="false">
-                {{ $i18n.t(error) }}
+            <o-notification
+                v-if="errorMessage"
+                variant="danger"
+                :closable="false"
+            >
+                {{ $i18n.t(errorMessage) }}
             </o-notification>
 
-            <form v-if="!success" method="post" @submit.prevent>
+            <form v-if="!successMessage" method="post" @submit.prevent>
                 <div class="columns">
                     <div class="column">
                         <o-validated-field
@@ -18,7 +26,6 @@
                             type="text"
                             :label="$i18n.t('user.first_name')"
                             :placeholder="$i18n.t('user.first_name')"
-                            rules="required|alpha_num_dash_space"
                         />
                     </div>
                     <div class="column">
@@ -28,7 +35,6 @@
                             type="text"
                             :label="$i18n.t('user.last_name')"
                             :placeholder="$i18n.t('user.first_name')"
-                            rules="required|alpha_num_dash_space"
                         />
                     </div>
                 </div>
@@ -37,7 +43,6 @@
                     name="email"
                     type="email"
                     :label="$i18n.t('user.email')"
-                    rules="required|email"
                     :disabled="true"
                 />
                 <o-validated-select
@@ -51,9 +56,8 @@
 
                 <o-validated-select
                     v-model="formData.language"
-                    name="city"
+                    name="language"
                     :label="$i18n.t('user.preffered_language')"
-                    rules="required"
                     :options="languagesOptions"
                     :expanded="true"
                 />
@@ -62,7 +66,6 @@
                     name="password_check"
                     type="password"
                     :label="$i18n.t('user.password_check')"
-                    rules="required"
                 />
                 <div class="field is-grouped is-grouped-right">
                     <div class="control">
@@ -82,30 +85,16 @@
 
 <script setup lang="ts">
 // TODO - password check na backendu nefunguje při updateu uživatele
-// import { extend, ValidationObserver } from 'vee-validate'
-// import { required, email } from 'vee-validate/dist/rules'
+import * as yup from 'yup'
+import { useProgrammatic } from '@oruga-ui/oruga'
+import { useForm } from 'vee-validate'
 import { useFormStore } from '~/stores'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 
-// extend('email', email)
-// extend('required', required)
-
-extend('alpha_num_dash_space', (value) => {
-    if (value.match(/^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi)) {
-        return true
-    }
-    return 'validation.alpha_num_dash_space'
-})
-
-const { $i18n, $oruga } = useNuxtApp()
-
+const { $i18n } = useNuxtApp()
+const { oruga: $oruga } = useProgrammatic()
 const formStore = useFormStore()
-
-// TODO - find out why definePageMeta is not working
-// definePageMeta({
-//     middleware: 'authorized'
-// })
 
 type FormSubmitData = {
     formData: Object
@@ -128,15 +117,15 @@ interface InitialData {
 
 interface Props {
     initialData?: InitialData
-    error?: Error | Object | string
-    success?: string
+    errorMessage?: string
+    successMessage?: string
     isLoading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
     initialData: null,
-    error: null,
-    success: null,
+    errorMessage: null,
+    successMessage: null,
     isLoading: false
 })
 
@@ -149,7 +138,25 @@ const formData = ref({
     password_check: null
 })
 
-const observer = ref(null)
+const nameRegEx = /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi
+
+const validationSchema = yup.object({
+    first_name: yup
+        .string()
+        .required('validation.required')
+        .matches(nameRegEx, 'validation.alpha_num_dash_space'),
+    last_name: yup
+        .string()
+        .required('validation.required')
+        .matches(nameRegEx, 'validation.alpha_num_dash_space'),
+    email: yup
+        .string()
+        .required('validation.required')
+        .email('validation.email'),
+    password_check: yup.string().required('validation.required').nullable()
+})
+
+const { errors: formErrors, validate } = useForm({ validationSchema })
 
 const languagesOptions = computed(() => {
     return $i18n.locales
@@ -176,9 +183,9 @@ watch(
     }
 )
 
-function onSubmit() {
-    observer.value.validate().then((success) => {
-        if (!success) {
+async function onSubmit() {
+    await validate().then((result) => {
+        if (!result.valid) {
             $oruga.notification.open({
                 message: $i18n.t('validation.form_validation_error'),
                 variant: 'danger'
@@ -190,7 +197,6 @@ function onSubmit() {
             successMessage: 'user.profile_update_success'
         })
         formData.value.password_check = null
-        observer.value.reset()
     })
 }
 </script>
