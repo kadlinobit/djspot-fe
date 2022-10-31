@@ -56,7 +56,7 @@ const auth = useAuth()
 const { $oruga, $i18n } = useNuxtApp()
 
 interface Props {
-    open?: Boolean
+    open?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {

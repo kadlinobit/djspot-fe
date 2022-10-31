@@ -50,7 +50,7 @@ interface Props {
     openOnFocus?: boolean
     field: string
     maxTags?: number
-    tags: Array<TagItem>
+    tags: Array<TagItem> | null
     disabled?: boolean
     hidden?: boolean
     help?: string
@@ -78,7 +78,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const filteredTags = ref([])
 
-watch(props.tags, () => getFilteredTags(''))
+// Do we need this watch????
+// watch(props.tags, () => getFilteredTags(''))
 
 function getFilteredTags(text = '') {
     if (props.tags && Array.isArray(props.tags)) {
@@ -109,8 +110,6 @@ const getFieldVariant = computed(() => {
     if (props.isValidationOn && !errorMessage.value) return 'success'
     return null
 })
-
-watch(fieldValue, (val) => console.log(val))
 </script>
 
 <style lang="scss" scoped>

@@ -47,10 +47,10 @@
                         :tags="formStore.genresOptions"
                         :is-validation-on="false"
                         field="name"
-                        maxtags="3"
+                        :max-tags="3"
                         expanded
                         :placeholder="$i18n.t('dj.select_3_genres')"
-                        @input="onSearch"
+                        @update:modelValue="onSearch"
                     />
                 </client-only>
             </o-field>
@@ -78,11 +78,7 @@
                     </div>
                 </section>
             </div>
-            <div
-                v-else-if="
-                    !fetchPending.value && sounds?.meta?.filter_count > 0
-                "
-            >
+            <div v-else-if="!fetchPending && sounds?.meta?.filter_count > 0">
                 <sounds-page-list :sounds="sounds.data" />
 
                 <o-pagination
@@ -119,15 +115,22 @@ const formStore = useFormStore()
 const directus = useDirectus()
 const auth = useAuth()
 
-const name = ref(route.query.name ? route.query.name : '')
-const type = ref(route.query.type ? route.query.type : '')
+type UrlFilterObj = {
+    name?: string
+    city?: string
+    type?: string
+    genres?: Array<any>
+}
+
+const name = ref(route.query.name ? String(route.query.name) : '')
+const type = ref(route.query.type ? String(route.query.type) : '')
 const genres = ref([]) // FILLED IN OnMounted
-const sort = ref(route.query.sort ? route.query.sort : 'name')
+const sort = ref(route.query.sort ? String(route.query.sort) : 'name')
 const perPage = ref(4)
-const page = ref(route.query.page ? parseInt(route.query.page) : 1)
+const page = ref(route.query.page ? parseInt(String(route.query.page)) : 1)
 
 const urlFilter = computed(() => {
-    const urlFilterObj = {}
+    const urlFilterObj: UrlFilterObj = {}
     if (name.value) urlFilterObj.name = name.value
     if (type.value) urlFilterObj.type = type.value
     if (!_.isEmpty(genres))
@@ -200,17 +203,13 @@ const {
     pending: fetchPending,
     refresh,
     error: fetchError
-} = useLazyAsyncData(
-    'soundsPageQuery   ',
-    async function () {
-        const sounds = await directus
-            .items('sound')
-            .readByQuery({ ...requestQuery.value })
+} = useLazyAsyncData('soundsPageQuery   ', async function () {
+    const sounds = await directus
+        .items('sound')
+        .readByQuery({ ...requestQuery.value })
 
-        return sounds
-    },
-    { server: false }
-)
+    return sounds
+})
 
 function pushRouterQuery() {
     router.push({

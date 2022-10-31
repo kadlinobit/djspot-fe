@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import LanguageSelection from '~/components/layout/LanguageSelection.vue'
+import LanguageSelection from '~~/components/layout/LanguageSelection.client.vue'
 import { useMainStore } from '~/stores'
 import { useAuth } from '~/composables/directus'
 

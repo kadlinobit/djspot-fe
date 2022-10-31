@@ -1,113 +1,109 @@
 <template>
-    <client-only>
-        <div class="form dj-form">
-            <o-notification
-                v-if="props.successMessage"
-                variant="success"
-                :closable="false"
-            >
-                {{ $i18n.t(props.successMessage) }}
-            </o-notification>
-            <o-notification
-                v-if="props.errorMessage"
-                variant="danger"
-                :closable="false"
-            >
-                {{ $i18n.t(props.errorMessage) }}
-            </o-notification>
+    <div class="form dj-form">
+        <o-notification
+            v-if="props.successMessage"
+            variant="success"
+            :closable="false"
+        >
+            {{ $i18n.t(props.successMessage) }}
+        </o-notification>
+        <o-notification
+            v-if="props.errorMessage"
+            variant="danger"
+            :closable="false"
+        >
+            {{ $i18n.t(props.errorMessage) }}
+        </o-notification>
 
-            <form v-if="!props.successMessage" method="post" @submit.prevent>
-                <div class="columns is-tablet">
-                    <div class="column is-half-tablet is-three-fifths-desktop">
-                        <o-validated-field
-                            v-model="formData.name"
-                            name="name"
-                            type="text"
-                            :label="$i18n.t('dj.name')"
-                            :placeholder="$i18n.t('dj.dj_name_placeholder')"
-                            rules="required|no_dj_prefix|alpha_num_dash_space"
-                        />
-                        <o-validated-field
-                            v-model="formData.slug"
-                            name="slug"
-                            :disabled="true"
-                            type="text"
-                            :label="$i18n.t('dj.slug')"
-                            rules="required"
-                        />
-                        <o-validated-field
-                            v-model="formData.email"
-                            name="email"
-                            type="email"
-                            :label="$i18n.t('dj.email')"
-                            rules="email"
-                        />
-                        <o-validated-select
-                            v-model="formData.city"
-                            name="city"
-                            :label="$i18n.t('dj.city')"
-                            rules="required"
-                            :options="formStore.citiesOptions"
-                            :expanded="true"
-                            :placeholder="$i18n.t('dj.select_city')"
-                        />
-                        <o-validated-tag-input
-                            v-model="formData.genres"
-                            name="genres"
-                            :label="$i18n.t('dj.genres')"
-                            rules="required"
-                            :tags="availableGenres"
-                            field="name"
-                            maxtags="3"
-                            :placeholder="$i18n.t('dj.select_3_genres')"
-                        />
-                    </div>
-                    <div class="column is-half-tablet is-two-fifths-desktop">
-                        <o-validated-image-crop-upload
-                            v-model="formData.photo"
-                            name="photo"
-                            :label="$i18n.t('dj.photo')"
-                            rules="image_type"
-                            :current-image="
-                                initialData ? initialData.photo : null
-                            "
-                        />
-                    </div>
+        <form v-if="!props.successMessage" method="post" @submit.prevent>
+            <div class="columns is-tablet">
+                <div class="column is-half-tablet is-three-fifths-desktop">
+                    <o-validated-field
+                        v-model="formData.name"
+                        name="name"
+                        type="text"
+                        :label="$i18n.t('dj.name')"
+                        :placeholder="$i18n.t('dj.dj_name_placeholder')"
+                        rules="required|no_dj_prefix|alpha_num_dash_space"
+                    />
+                    <o-validated-field
+                        v-model="formData.slug"
+                        name="slug"
+                        :disabled="true"
+                        type="text"
+                        :label="$i18n.t('dj.slug')"
+                        rules="required"
+                    />
+                    <o-validated-field
+                        v-model="formData.email"
+                        name="email"
+                        type="email"
+                        :label="$i18n.t('dj.email')"
+                        rules="email"
+                    />
+                    <o-validated-select
+                        v-model="formData.city"
+                        name="city"
+                        :label="$i18n.t('dj.city')"
+                        rules="required"
+                        :options="formStore.citiesOptions"
+                        :expanded="true"
+                        :placeholder="$i18n.t('dj.select_city')"
+                    />
+                    <o-validated-tag-input
+                        v-model="formData.genres"
+                        name="genres"
+                        :label="$i18n.t('dj.genres')"
+                        rules="required"
+                        :tags="availableGenres"
+                        field="name"
+                        :max-tags="3"
+                        :placeholder="$i18n.t('dj.select_3_genres')"
+                    />
                 </div>
-
-                <o-validated-bm-editor
-                    v-model="formData.bio"
-                    name="bio"
-                    type="textarea"
-                    rules=""
-                    :label="$i18n.t('dj.bio')"
-                />
-
-                <div class="field is-grouped is-grouped-right">
-                    <div class="control">
-                        <o-button
-                            :disabled="props.isLoading"
-                            variant="light"
-                            @click="onCancel"
-                        >
-                            {{ $i18n.t('form.cancel') }}
-                        </o-button>
-                        <o-button
-                            :disabled="props.isLoading"
-                            variant="dark"
-                            @click="onSubmit"
-                        >
-                            {{
-                                initialData
-                                    ? $i18n.t('dj.save_profile')
-                                    : $i18n.t('dj.do_create_profile')
-                            }}
-                        </o-button>
-                    </div>
+                <div class="column is-half-tablet is-two-fifths-desktop">
+                    <o-validated-image-crop-upload
+                        v-model="formData.photo"
+                        name="photo"
+                        :label="$i18n.t('dj.photo')"
+                        rules="image_type"
+                        :current-image="initialData ? initialData.photo : null"
+                    />
                 </div>
-            </form>
-        </div>
-    </client-only>
+            </div>
+
+            <o-validated-bm-editor
+                v-model="formData.bio"
+                name="bio"
+                type="textarea"
+                rules=""
+                :label="$i18n.t('dj.bio')"
+            />
+
+            <div class="field is-grouped is-grouped-right">
+                <div class="control">
+                    <o-button
+                        :disabled="props.isLoading"
+                        variant="light"
+                        @click="onCancel"
+                    >
+                        {{ $i18n.t('form.cancel') }}
+                    </o-button>
+                    <o-button
+                        :disabled="props.isLoading"
+                        variant="dark"
+                        @click="onSubmit"
+                    >
+                        {{
+                            initialData
+                                ? $i18n.t('dj.save_profile')
+                                : $i18n.t('dj.do_create_profile')
+                        }}
+                    </o-button>
+                </div>
+            </div>
+        </form>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -123,7 +119,6 @@ import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUplo
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
 import useDirectus from '~/composables/directus'
-import { min } from 'lodash'
 
 const { $i18n } = useNuxtApp()
 const { oruga: $oruga } = useProgrammatic()
@@ -131,61 +126,12 @@ const formStore = useFormStore()
 const router = useRouter()
 const directus = useDirectus()
 
-// extend('alpha_num_dash_space', (value) => {
-//     if (value.match(/^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi)) {
-//         return true
-//     }
-//     return 'validation.alpha_num_dash_space'
-// })
-
-// extend('no_dj_prefix', (value) => {
-//     if (value.match(/^(?!(dj |dj_|dj-).*$).*/gi)) {
-//         return true
-//     }
-//     return 'validation.no_dj_prefix'
-// })
-
-// extend('image_type', (file) => {
-//     if (
-//         file === null ||
-//         ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)
-//     ) {
-//         return true
-//     }
-
-//     return 'validation.image_type'
-// })
-
-// TODO - find out why definePageMeta is not working
-// definePageMeta({
-//     middleware: 'authorized'
-// })
-
-type FormSubmitData = {
-    formData: Object
-    successMessage?: string
-}
-
 const emit = defineEmits<{
     (e: 'formSubmit', formSubmitData: FormSubmitData): void
 }>()
 
-interface InitialData {
-    name?: string
-    slug?: string
-    email?: string
-    bio?: string
-    photo?: string
-    city?: string
-    genres?: Array<string>
-}
-
-interface Props {
-    initialData?: InitialData
-    errorMessage?: string
-    successMessage?: string
-    isLoading?: boolean
-    mode?: string
+interface Props extends FormProps {
+    initialData?: DjFormData
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -196,7 +142,7 @@ const props = withDefaults(defineProps<Props>(), {
     mode: 'new'
 })
 
-const formData = ref({
+const formData = ref<DjFormData>({
     name: null,
     slug: null,
     email: null,
@@ -208,7 +154,6 @@ const formData = ref({
 
 const availableGenres = ref(null)
 const currentPhoto = ref(null)
-const observer = ref(null)
 
 // Validation
 const nameRegEx = /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi
@@ -221,6 +166,16 @@ const validationSchema = yup.object({
     slug: null,
     email: yup.string().email('validation.email'),
     city: yup.string().required('validation.required'),
+    photo: yup
+        .mixed()
+        .test('photo', 'validation.image_type', (val) => {
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+            if (val === null) return true
+            if (typeof val === 'string' && val === 'keep-current') return true
+            if (val?.file && allowedTypes.includes(val?.file?.type)) return true
+            return false
+        })
+        .nullable(),
     genres: yup.array().min(1).max(3)
 })
 
@@ -266,7 +221,7 @@ async function onSubmit() {
 function onCancel() {
     router.back()
 }
-function createSlug(val) {
+function createSlug(val: string) {
     if (!val) return ''
     return val
         .toLowerCase()

@@ -111,15 +111,21 @@ const formStore = useFormStore()
 const auth = useAuth()
 const directus = useDirectus()
 
-const name = ref(route.query.name ? route.query.name : '')
-const city = ref(route.query.city ? route.query.city : '')
+type UrlFilterObj = {
+    name?: string
+    city?: string
+    genres?: Array<any>
+}
+
+const name = ref(route.query.name ? String(route.query.name) : '')
+const city = ref(route.query.city ? String(route.query.city) : '')
 const genres = ref([]) // FILLED IN OnMounted
-const sort = ref(route.query.sort ? route.query.sort : 'name')
+const sort = ref(route.query.sort ? String(route.query.sort) : 'name')
 const perPage = ref(4)
-const page = ref(route.query.page ? parseInt(route.query.page) : 1)
+const page = ref(route.query.page ? parseInt(String(route.query.page)) : 1)
 
 const urlFilter = computed(() => {
-    const urlFilterObj = {}
+    const urlFilterObj: UrlFilterObj = {}
     if (name.value) urlFilterObj.name = name.value.toLowerCase()
     if (city.value) urlFilterObj.city = city.value
     if (!_.isEmpty(genres))
@@ -161,14 +167,14 @@ const requestFilter = computed(() => {
     if (name.value) {
         requestFilterObj._and.push({
             name: {
-                _contains: name.value.toLowerCase().trim()
+                _contains: String(name.value).toLowerCase().trim()
             }
         })
     }
     if (city.value) {
         requestFilterObj._and.push({
             city: {
-                _eq: city.value.toLowerCase().trim()
+                _eq: String(city.value).toLowerCase().trim()
             }
         })
     }
@@ -191,27 +197,23 @@ const {
     pending: fetchPending,
     refresh,
     error: fetchError
-} = useLazyAsyncData(
-    'djsPageQuery',
-    async function () {
-        // FETCH WAY
-        // TODO -REMOVE
-        // const djs = $fetch('http://localhost:8055/items/dj', {
-        //     method: 'SEARCH',
-        //     body: JSON.stringify({
-        //         query: requestQuery.value
-        //     }),
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     }
-        // })
-        const djs = await directus.items('dj').readByQuery({
-            ...requestQuery.value
-        })
-        return djs
-    },
-    { server: false }
-)
+} = useLazyAsyncData('djsPageQuery', async function () {
+    // FETCH WAY
+    // TODO -REMOVE
+    // const djs = $fetch('http://localhost:8055/items/dj', {
+    //     method: 'SEARCH',
+    //     body: JSON.stringify({
+    //         query: requestQuery.value
+    //     }),
+    //     headers: {
+    //         'Content-Type': 'application/json'
+    //     }
+    // })
+    const djs = await directus.items('dj').readByQuery({
+        ...requestQuery.value
+    })
+    return djs
+})
 
 function pushRouterQuery() {
     router.push({

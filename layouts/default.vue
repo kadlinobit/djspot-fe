@@ -21,31 +21,31 @@
                 </div>
             </template>
         </o-modal>
-        <o-sidebar
-            v-if="auth.user"
-            variant="light"
-            :fullheight="true"
-            :fullwidth="false"
-            :overlay="true"
-            :right="false"
-            :open="mainStore.isSidebarOpen"
-            @close="() => (mainStore.isSidebarOpen = false)"
-        >
-            <SidebarMenu />
-        </o-sidebar>
+        <client-only>
+            <o-sidebar
+                v-if="auth.user"
+                variant="light"
+                :fullheight="true"
+                :fullwidth="false"
+                :overlay="true"
+                :right="false"
+                :open="mainStore.isSidebarOpen"
+                @close="() => (mainStore.isSidebarOpen = false)"
+            >
+                <SidebarMenu />
+            </o-sidebar>
+        </client-only>
         <Navbar />
         <slot style="margin-bottom: 100px" />
-        <client-only>
-            <BottomBar />
-        </client-only>
+        <BottomBar />
     </div>
 </template>
 
 <script setup lang="ts">
-import Navbar from '~/components/layout/Navbar.vue'
-import SidebarMenu from '~/components/layout/SidebarMenu.vue'
-import BottomBar from '~/components/layout/BottomBar.vue'
-import Playlist from '~/components/audio/Playlist.vue'
+import Navbar from '~~/components/layout/Navbar.client.vue'
+import SidebarMenu from '~~/components/layout/SidebarMenu.client.vue'
+import BottomBar from '~~/components/layout/BottomBar.client.vue'
+import Playlist from '~~/components/audio/Playlist.client.vue'
 import LoginModal from '~/components/login/LoginModal.vue'
 
 import { useMainStore } from '~/stores'

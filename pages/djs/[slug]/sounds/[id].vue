@@ -153,7 +153,7 @@ import _ from 'lodash'
 import DjInfoBox from '~/components/dj/DjInfoBox.vue'
 import CoverImage from '~/components/media/CoverImage.vue'
 import OResponsiveButton from '~/components/form/OResponsiveButton.vue'
-import ButtonPlayPause from '~/components/audio/ButtonPlayPause.vue'
+import ButtonPlayPause from '~~/components/audio/ButtonPlayPause.client.vue'
 import { useMainStore, usePlaylistStore } from '~/stores'
 import useDirectus, { useAuth } from '~/composables/directus'
 

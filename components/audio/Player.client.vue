@@ -2,7 +2,7 @@
     <div class="o-player-preview" style="position: relative">
         <o-loading
             :full-page="false"
-            :active="isLoading.value"
+            :active="isLoading"
             :can-cancel="false"
         ></o-loading>
         <div class="columns is-vcentered is-mobile">
@@ -40,7 +40,7 @@
             <div v-if="!isError && !showVolume" class="column">
                 <o-slider
                     :tooltip="false"
-                    :value="currentSeconds"
+                    :modelValue="currentSeconds"
                     :max="durationSeconds"
                     :disabled="!loaded || isError"
                     variant="primary mb-2 mt-2"

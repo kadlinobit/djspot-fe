@@ -14,7 +14,7 @@
                     </h1>
                 </div>
                 <div class="column is-narrow">
-                    <o-button variant="danger" @click="onDeleteDj()">
+                    <o-button variant="danger" @click="deleteUser">
                         {{ $i18n.t('dj.delete_profile') }}
                     </o-button>
                 </div>
@@ -23,7 +23,7 @@
                 <o-tab-item :label="$i18n.t('user.profile')">
                     <user-form
                         :initial-data="initialData"
-                        :error-message="error"
+                        :error-message="errorMessage"
                         :success-message="success"
                         :is-loading="isLoading"
                         @formSubmit="editUser"
@@ -31,7 +31,7 @@
                 </o-tab-item>
                 <o-tab-item :label="$i18n.t('user.change_password')">
                     <user-new-password-form
-                        :errorMessage="error"
+                        :error-message="errorMessage"
                         :successMessage="success"
                         :is-loading-in="isLoading"
                         @formSubmit="editUser"
@@ -61,6 +61,11 @@ const success = ref(null)
 const isLoading = ref(false)
 const activeTab = ref(1)
 
+const errorMessage = computed(() => {
+    const errorMessage = $api.tools.parseErrorMessage(error.value)
+    return errorMessage
+})
+
 const {
     data: initialData,
     pending,
@@ -83,7 +88,7 @@ const {
 
 watch(
     () => pending,
-    (val) => (isLoading.value = pending)
+    (val) => (isLoading.value = pending.value)
 )
 
 // async function fetch() {
@@ -138,4 +143,6 @@ async function editUser({ formData, successMessage }) {
         initialData.value.password_check = null
     }
 }
+
+function deleteUser() {}
 </script>

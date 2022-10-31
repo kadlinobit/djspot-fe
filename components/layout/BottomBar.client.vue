@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import PlayerGlobal from '~/components/audio/PlayerGlobal/PlayerGlobal.vue'
+import PlayerGlobal from '~/components/audio/PlayerGlobal/PlayerGlobal.client.vue'
 
 import { useMainStore } from '~/stores'
 const mainStore = useMainStore()

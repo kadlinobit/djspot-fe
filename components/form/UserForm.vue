@@ -1,86 +1,80 @@
 <template>
-    <client-only>
-        <div class="form user-form">
-            <o-notification
-                v-if="successMessage"
-                variant="success"
-                :closable="false"
-            >
-                {{ $i18n.t(successMessage) }}
-            </o-notification>
+    <div class="form user-form">
+        <o-notification
+            v-if="successMessage"
+            variant="success"
+            :closable="false"
+        >
+            {{ $i18n.t(successMessage) }}
+        </o-notification>
 
-            <o-notification
-                v-if="errorMessage"
-                variant="danger"
-                :closable="false"
-            >
-                {{ $i18n.t(errorMessage) }}
-            </o-notification>
+        <o-notification v-if="errorMessage" variant="danger" :closable="false">
+            {{ $i18n.t(errorMessage) }}
+        </o-notification>
 
-            <form v-if="!successMessage" method="post" @submit.prevent>
-                <div class="columns">
-                    <div class="column">
-                        <o-validated-field
-                            v-model="formData.first_name"
-                            name="first_name"
-                            type="text"
-                            :label="$i18n.t('user.first_name')"
-                            :placeholder="$i18n.t('user.first_name')"
-                        />
-                    </div>
-                    <div class="column">
-                        <o-validated-field
-                            v-model="formData.last_name"
-                            name="last_name"
-                            type="text"
-                            :label="$i18n.t('user.last_name')"
-                            :placeholder="$i18n.t('user.first_name')"
-                        />
-                    </div>
+        <form v-if="!successMessage" method="post" @submit.prevent>
+            <div class="columns">
+                <div class="column">
+                    <o-validated-field
+                        v-model="formData.first_name"
+                        name="first_name"
+                        type="text"
+                        :label="$i18n.t('user.first_name')"
+                        :placeholder="$i18n.t('user.first_name')"
+                    />
                 </div>
-                <o-validated-field
-                    v-model="formData.email"
-                    name="email"
-                    type="email"
-                    :label="$i18n.t('user.email')"
-                    :disabled="true"
-                />
-                <o-validated-select
-                    v-model="formData.location"
-                    name="city"
-                    :label="$i18n.t('user.location')"
-                    :options="formStore.citiesOptions"
-                    :expanded="true"
-                    :placeholder="$i18n.t('dj.select_city')"
-                />
-
-                <o-validated-select
-                    v-model="formData.language"
-                    name="language"
-                    :label="$i18n.t('user.preffered_language')"
-                    :options="languagesOptions"
-                    :expanded="true"
-                />
-                <o-validated-field
-                    v-model="formData.password_check"
-                    name="password_check"
-                    type="password"
-                    :label="$i18n.t('user.password_check')"
-                />
-                <div class="field is-grouped is-grouped-right">
-                    <div class="control">
-                        <o-button
-                            :disabled="isLoading"
-                            variant="dark"
-                            @click="onSubmit"
-                        >
-                            {{ $i18n.t('user.save_profile') }}
-                        </o-button>
-                    </div>
+                <div class="column">
+                    <o-validated-field
+                        v-model="formData.last_name"
+                        name="last_name"
+                        type="text"
+                        :label="$i18n.t('user.last_name')"
+                        :placeholder="$i18n.t('user.first_name')"
+                    />
                 </div>
-            </form>
-        </div>
-    </client-only>
+            </div>
+            <o-validated-field
+                v-model="formData.email"
+                name="email"
+                type="email"
+                :label="$i18n.t('user.email')"
+                :disabled="true"
+            />
+            <o-validated-select
+                v-model="formData.location"
+                name="city"
+                :label="$i18n.t('user.location')"
+                :options="formStore.citiesOptions"
+                :expanded="true"
+                :placeholder="$i18n.t('dj.select_city')"
+            />
+
+            <o-validated-select
+                v-model="formData.language"
+                name="language"
+                :label="$i18n.t('user.preffered_language')"
+                :options="languagesOptions"
+                :expanded="true"
+            />
+            <o-validated-field
+                v-model="formData.password_check"
+                name="password_check"
+                type="password"
+                :label="$i18n.t('user.password_check')"
+            />
+            <div class="field is-grouped is-grouped-right">
+                <div class="control">
+                    <o-button
+                        :disabled="isLoading"
+                        variant="dark"
+                        @click="onSubmit"
+                    >
+                        {{ $i18n.t('user.save_profile') }}
+                    </o-button>
+                </div>
+            </div>
+        </form>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -95,11 +89,6 @@ import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 const { $i18n } = useNuxtApp()
 const { oruga: $oruga } = useProgrammatic()
 const formStore = useFormStore()
-
-type FormSubmitData = {
-    formData: Object
-    successMessage?: string
-}
 
 const emit = defineEmits<{
     (e: 'formSubmit', formSubmitData: FormSubmitData): void

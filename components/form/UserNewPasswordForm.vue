@@ -56,11 +56,6 @@ import OValidatedField from '~/components/form/OValidatedField.vue'
 const { $i18n } = useNuxtApp()
 const { oruga: $oruga } = useProgrammatic()
 
-type FormSubmitData = {
-    formData: Object
-    successMessage?: string
-}
-
 const emit = defineEmits<{
     (e: 'formSubmit', formSubmitData: FormSubmitData): void
 }>()

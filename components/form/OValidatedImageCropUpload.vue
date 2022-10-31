@@ -123,12 +123,15 @@ const { errorMessage, value: fieldValue } = useField(nameRef, undefined, {
 })
 
 watch(file, (val) => {
+    fieldValue.value = { file: file.value }
     if (!val || val === 'keep-current') {
         photoUrl.value = null
         return
     }
     try {
-        photoUrl.value = URL.createObjectURL(file.value)
+        if (file?.value?.type && file.value.type.split('/')[0] === 'image') {
+            photoUrl.value = URL.createObjectURL(file.value)
+        }
     } catch (e) {
         console.error(e)
         photoUrl.value = null

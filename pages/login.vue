@@ -4,7 +4,7 @@
             <div class="columns">
                 <div class="column is-4 is-offset-4">
                     <h2 class="title has-text-centered">
-                        {{ $t('user.login') }}
+                        {{ $i18n.t('user.login') }}
                     </h2>
                     <login display-type="page" />
                 </div>
@@ -13,13 +13,12 @@
     </section>
 </template>
 
-<script>
+<script setup lang="ts">
 import Login from '~/components/login/Login.vue'
 
-export default {
-    components: {
-        Login
-    },
+const { $i18n } = useNuxtApp()
+
+definePageMeta({
     middleware: ['guest']
-}
+})
 </script>
