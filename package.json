@@ -18,6 +18,7 @@
         "@oruga-ui/oruga": "npm:@oruga-ui/oruga-next@latest",
         "@oruga-ui/theme-bulma": "^0.2.6",
         "@pinia/nuxt": "^0.4.3",
+        "@turf/circle": "^6.5.0",
         "base-64": "^1.0.0",
         "bulma": "^0.9.4",
         "core-js": "^3.15.1",

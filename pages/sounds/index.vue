@@ -230,10 +230,8 @@ function onPageChange(pageNumber) {
 }
 
 onMounted(async () => {
-    if (_.isEmpty(formStore.genresOptions)) {
-        const { data } = await directus.items('genre').readByQuery()
-        formStore.setGenres(data)
-    }
+    formStore.fetchCities()
+    formStore.fetchGenres()
 
     // Fill in genres
     if (route.query.genres) {

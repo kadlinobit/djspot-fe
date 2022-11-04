@@ -48,12 +48,14 @@
 
 <script setup lang="ts">
 import _ from 'lodash'
+import { useProgrammatic } from '@oruga-ui/oruga'
 import { useMainStore } from '~/stores'
 import { useAuth } from '~/composables/directus'
 const mainStore = useMainStore()
 const auth = useAuth()
 
-const { $oruga, $i18n } = useNuxtApp()
+const { $i18n } = useNuxtApp()
+const { oruga: $oruga } = useProgrammatic()
 
 interface Props {
     open?: boolean

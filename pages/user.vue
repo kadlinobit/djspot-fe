@@ -71,20 +71,14 @@ const {
     pending,
     refresh,
     error
-} = useLazyAsyncData(
-    'userFormQuery',
-    async function () {
-        // PROMISE TO SET TIMEOUT FOR TESTING
-        // await new Promise((resolve) => setTimeout(resolve, 2000))
-        const data = await directus.users.me.read({
-            fields: $api.collection.getCollectionFields('user', 'form')
-        })
-        return data
-    },
-    // There must be no server side data load - otherwise it is not working
-    // TODO: Maybe remove when we get to NUXT 3
-    { server: false }
-)
+} = useLazyAsyncData('userFormQuery', async function () {
+    // PROMISE TO SET TIMEOUT FOR TESTING
+    // await new Promise((resolve) => setTimeout(resolve, 2000))
+    const data = await directus.users.me.read({
+        fields: $api.collection.getCollectionFields('user', 'form')
+    })
+    return data
+})
 
 watch(
     () => pending,

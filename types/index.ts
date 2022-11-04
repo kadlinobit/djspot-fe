@@ -23,7 +23,7 @@ declare global {
         email?: string
         bio?: string
         photo?: string
-        city?: string
+        city?: number
         genres?: Array<string>
     }
 
@@ -32,7 +32,7 @@ declare global {
         url?: string
         description?: string
         genres?: Array<string>
-        dj?: Object
+        dj?: Dj
         type?: string
         duration?: number
         photo?: Object | string
@@ -46,11 +46,20 @@ declare global {
         bio?: string
         slug?: string
         photo?: string
-        city?: string
+        city?: City
         follow_count?: number
         follows?: Array<number | Follow>
         genres?: Array<Genre | GenreNested>
         sounds?: Array<Sound>
+    }
+
+    interface City {
+        id?: number
+        name?: string
+        gps?: any
+        district?: string
+        region?: string
+        zip?: number
     }
 
     interface Genre {

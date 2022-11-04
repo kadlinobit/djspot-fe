@@ -1,7 +1,7 @@
 <template>
     <section class="section">
         <div class="container">
-            <h1 class="title">DJs {{ djs?.meta?.filter_count || 0 }}</h1>
+            <h1 class="title">DJs{{ djs?.meta?.filter_count || 0 }}</h1>
             <o-field>
                 <o-input
                     v-model="name"
@@ -11,14 +11,14 @@
                 ></o-input>
                 <p class="control">
                     <o-button
-                        type="is-primary"
-                        label="Search"
+                        variant="primary"
+                        :label="$i18n.t('form.search')"
                         @click="onSearch"
                     />
                 </p>
             </o-field>
-            <o-field class="no-label" horizontal>
-                <o-select v-model="sort" expanded @input="onSearch">
+            <o-field horizontal grouped class="no-label">
+                <o-select v-model="sort" expanded @update:modelValue="onSearch">
                     <option
                         v-for="option in formStore.djsPageSortOptions"
                         :key="option.value"
@@ -27,18 +27,38 @@
                         {{ $i18n.t(option.label) }}
                     </option>
                 </o-select>
-                <o-select v-model="city" expanded @input="onSearch">
-                    <option value="">
-                        {{ `Celá ČR` }}
-                    </option>
-                    <option
-                        v-for="option in formStore.citiesOptions"
-                        :key="option.value"
-                        :value="option.value"
+                <o-field>
+                    <o-select
+                        v-model="city"
+                        expanded
+                        @update:modelValue="onSearch"
                     >
-                        {{ option.label }}
-                    </option>
-                </o-select>
+                        <option :value="null">
+                            {{ $i18n.t('dj.whole_czechia') }}
+                        </option>
+                        <option
+                            v-for="option in formStore.citiesOptions"
+                            :key="option.value"
+                            :value="option.value"
+                        >
+                            {{ option.label }}
+                        </option>
+                    </o-select>
+                    <o-select
+                        v-if="city"
+                        v-model="radius"
+                        @update:modelValue="onSearch"
+                    >
+                        <option
+                            v-for="option in formStore.radiusOptions"
+                            :key="option.value"
+                            :value="option.value"
+                        >
+                            {{ $i18n.t(option.label) }}
+                        </option>
+                    </o-select>
+                </o-field>
+
                 <client-only>
                     <o-validated-tag-input
                         v-model="genres"
@@ -49,6 +69,7 @@
                         :max-tags="3"
                         expanded
                         :placeholder="$i18n.t('dj.select_3_genres')"
+                        @update:modelValue="onSearch"
                     />
                 </client-only>
             </o-field>
@@ -83,12 +104,15 @@
                     :range-before="1"
                     :range-after="1"
                     order="centered"
-                    size="small"
                     :per-page="perPage"
-                    aria-next-label="Next page"
-                    aria-previous-label="Previous page"
-                    aria-page-label="Page"
-                    aria-current-label="Current page"
+                    :aria-next-label="$i18n.t('form.pagination.next_page')"
+                    :aria-previous-label="
+                        $i18n.t('form.pagination.previous_page')
+                    "
+                    :aria-page-label="$i18n.t('form.pagination.page')"
+                    :aria-current-label="
+                        $i18n.t('form.pagination.current_page')
+                    "
                     @change="onPageChange"
                 >
                 </o-pagination>
@@ -104,7 +128,7 @@ import DjList from '~/components/dj/DjList.vue'
 import { useFormStore } from '~/stores'
 import useDirectus, { useAuth } from '~/composables/directus'
 
-const { $i18n, $api } = useNuxtApp()
+const { $i18n, $api, $geo } = useNuxtApp()
 const route = useRoute()
 const router = useRouter()
 const formStore = useFormStore()
@@ -113,12 +137,16 @@ const directus = useDirectus()
 
 type UrlFilterObj = {
     name?: string
-    city?: string
+    city?: number
+    radius?: number
     genres?: Array<any>
 }
 
 const name = ref(route.query.name ? String(route.query.name) : '')
-const city = ref(route.query.city ? String(route.query.city) : '')
+const city = ref(route.query.city ? parseInt(String(route.query.city)) : null)
+const radius = ref(
+    route.query.radius ? parseInt(String(route.query.radius)) : 0
+)
 const genres = ref([]) // FILLED IN OnMounted
 const sort = ref(route.query.sort ? String(route.query.sort) : 'name')
 const perPage = ref(4)
@@ -128,6 +156,7 @@ const urlFilter = computed(() => {
     const urlFilterObj: UrlFilterObj = {}
     if (name.value) urlFilterObj.name = name.value.toLowerCase()
     if (city.value) urlFilterObj.city = city.value
+    if (city.value && radius.value) urlFilterObj.radius = radius.value
     if (!_.isEmpty(genres))
         urlFilterObj.genres = genres.value.map((genre) => genre.id)
 
@@ -172,11 +201,36 @@ const requestFilter = computed(() => {
         })
     }
     if (city.value) {
-        requestFilterObj._and.push({
+        let cityFilter
+        const cityDirectFilter = {
             city: {
-                _eq: String(city.value).toLowerCase().trim()
+                id: {
+                    _eq: city.value
+                }
             }
-        })
+        }
+
+        if (radius.value === 0) {
+            cityFilter = cityDirectFilter
+        } else {
+            cityFilter = {
+                _or: [
+                    cityDirectFilter,
+                    {
+                        city: {
+                            gps: {
+                                _intersects: $geo.getPointRadius(
+                                    formStore.getCityCoordinates(city.value),
+                                    radius.value
+                                )
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+
+        requestFilterObj._and.push(cityFilter)
     }
 
     if (!_.isEmpty(genres.value)) {
@@ -209,9 +263,7 @@ const {
     //         'Content-Type': 'application/json'
     //     }
     // })
-    const djs = await directus.items('dj').readByQuery({
-        ...requestQuery.value
-    })
+    const djs = await directus.items('dj').readByQuery(requestQuery.value)
     return djs
 })
 
@@ -235,18 +287,17 @@ function onPageChange(pageNumber) {
 
 function resetSearch() {
     name.value = ''
-    city.value = ''
+    city.value = null
+    radius.value = 0
     genres.value = []
     sort.value = 'name'
 
     onSearch()
 }
 
-onMounted(async () => {
-    if (_.isEmpty(formStore.genresOptions)) {
-        const { data } = await directus.items('genre').readByQuery()
-        formStore.setGenres(data)
-    }
+onMounted(() => {
+    formStore.fetchCities()
+    formStore.fetchGenres()
 
     // Fill in genres
     if (route.query.genres) {

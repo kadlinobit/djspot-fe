@@ -85,23 +85,25 @@
                 <div class="level is-mobile sound-controls">
                     <div class="level-left">
                         <div class="level-item">
-                            <o-responsive-button
+                            <o-button
                                 :variant="likeButtonVariant"
                                 icon-left="heart"
                                 :disabled="isToggleLikeLoading"
+                                size="responsive"
                                 @click="onToggleLike"
                             >
                                 {{ sound.like_count || 'Like' }}
-                            </o-responsive-button>
+                            </o-button>
                         </div>
                         <div class="level-item">
-                            <o-responsive-button
+                            <o-button
                                 :variant="
                                     playlistStore.isSoundInPlaylist(sound)
                                         ? 'dark'
                                         : 'light'
                                 "
                                 icon-left="playlist-play"
+                                size="responsive"
                                 @click="
                                     playlistStore.handleAddOrRemovePlaylistSound(
                                         sound
@@ -109,21 +111,22 @@
                                 "
                             >
                                 Playlist
-                            </o-responsive-button>
+                            </o-button>
                         </div>
                     </div>
                     <div class="level-right">
                         <div class="level-item">
-                            <o-responsive-button
+                            <o-button
                                 variant="dark"
                                 tag="nuxt-link"
                                 icon-left="pencil"
+                                size="responsive"
                                 :to="{
                                     path: `/sounds/manage/edit/${sound.id}`
                                 }"
                             >
                                 {{ $i18n.t('form.edit') }}
-                            </o-responsive-button>
+                            </o-button>
                         </div>
                     </div>
                 </div>

@@ -4,8 +4,8 @@
             {{ $i18n.t(success) }}
         </o-notification>
 
-        <o-notification v-if="error" variant="danger" :closable="false">
-            {{ $i18n.t(error) }}
+        <o-notification v-if="errorMessage" variant="danger" :closable="false">
+            {{ $i18n.t(errorMessage) }}
         </o-notification>
 
         <form @submit.prevent>
@@ -14,21 +14,19 @@
                 name="email"
                 type="email"
                 :label="$i18n.t('user.email')"
-                rules="required|email"
             />
             <o-validated-field
                 v-model="password"
                 name="password"
                 type="password"
                 :label="$i18n.t('user.password')"
-                rules="required"
             />
             <div class="field">
                 <div class="control">
                     <o-button
                         :disabled="isLoading"
                         variant="dark is-fullwidth"
-                        @click="() => onSubmit()"
+                        @click="onSubmit"
                     >
                         {{ $i18n.t('user.do_login') }}
                     </o-button>
@@ -74,7 +72,7 @@ import { useProgrammatic } from '@oruga-ui/oruga'
 import { useForm } from 'vee-validate'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 
-const { $i18n } = useNuxtApp()
+const { $i18n, $api } = useNuxtApp()
 const { oruga: $oruga } = useProgrammatic()
 const mainStore = useMainStore()
 const auth = useAuth()
@@ -149,12 +147,14 @@ async function onLogin() {
         // })
         emit('loginSuccess')
     } catch (e) {
-        error.value =
-            e.response?.data?.errors[0]?.message ||
-            e.message ||
-            'Something went wrong and there is no data'
+        error.value = e
     } finally {
         isLoading.value = false
     }
 }
+
+const errorMessage = computed(() => {
+    const errorMessage = $api.tools.parseErrorMessage(error.value)
+    return errorMessage
+})
 </script>

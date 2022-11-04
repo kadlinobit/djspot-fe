@@ -16,7 +16,7 @@
                     </nuxt-link>
                 </p>
                 <p class="subtitle is-6">
-                    {{ dj.city }}
+                    {{ dj?.city?.name }}
                 </p>
             </div>
         </div>

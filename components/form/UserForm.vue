@@ -145,7 +145,11 @@ const validationSchema = yup.object({
     password_check: yup.string().required('validation.required').nullable()
 })
 
-const { errors: formErrors, validate } = useForm({ validationSchema })
+const {
+    errors: formErrors,
+    validate,
+    resetForm
+} = useForm({ validationSchema })
 
 const languagesOptions = computed(() => {
     return $i18n.locales
@@ -186,6 +190,7 @@ async function onSubmit() {
             successMessage: 'user.profile_update_success'
         })
         formData.value.password_check = null
+        resetForm()
     })
 }
 </script>

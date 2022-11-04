@@ -1,10 +1,10 @@
 <template>
     <div class="form-login page-forgot-password">
         <o-notification v-if="success" variant="success" :closable="false">
-            {{ $i18n.t('success') }}
+            {{ $i18n.t(success) }}
         </o-notification>
-        <o-notification v-if="error" variant="danger" :closable="false">
-            {{ $i18n.t('error') }}
+        <o-notification v-if="errorMessage" variant="danger" :closable="false">
+            {{ $i18n.t(errorMessage) }}
         </o-notification>
 
         <form v-if="!success" method="post" @submit.prevent>
@@ -13,7 +13,6 @@
                 name="email"
                 type="email"
                 :label="$i18n.t('user.email')"
-                rules="required|email"
             />
             <div class="field">
                 <div class="control">
@@ -48,21 +47,13 @@
 </template>
 
 <script setup lang="ts">
-// import { extend, ValidationObserver } from 'vee-validate'
-// import {
-//     required as ruleRequired,
-//     email as ruleEmail
-// } from 'vee-validate/dist/rules'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import { useMainStore } from '~/stores'
 import useDirectus from '~/composables/directus'
-const { $i18n } = useNuxtApp()
+const { $i18n, $api } = useNuxtApp()
 
 const directus = useDirectus()
 const mainStore = useMainStore()
-
-// extend('email', ruleEmail)
-// extend('required', ruleRequired)
 
 interface Props {
     displayType?: string
@@ -96,13 +87,14 @@ async function forgotPassword() {
         error.value = null
         success.value = 'user.password_reset_link_sent'
     } catch (e) {
-        if (e.response && e.response.data) {
-            error.value = e.response.data.message[0].messages[0].message
-        } else {
-            error.value = e
-        }
+        error.value = e
     } finally {
         isLoading.value = false
     }
 }
+
+const errorMessage = computed(() => {
+    const errorMessage = $api.tools.parseErrorMessage(error.value)
+    return errorMessage
+})
 </script>

@@ -10,7 +10,11 @@ export default defineNuxtPlugin((nuxtApp) => {
      * @param {string} quality - desired photo quality - 'large', 'medium', 'small', 'thumbnail' or empty
      * @param {string} baseUrl - baseUrl for absolute path - default 'http://localhost:8055/assets'
      */
-    function getImageUrl(imageId, quality, baseUrl = 'http://localhost:8055/assets') {
+    function getImageUrl(
+        imageId,
+        quality,
+        baseUrl = 'http://localhost:8055/assets'
+    ) {
         // const qualities = ['large', 'medium', 'small', 'thumbnail']
 
         if (!imageId) return null
@@ -18,12 +22,22 @@ export default defineNuxtPlugin((nuxtApp) => {
         return `${baseUrl}/${imageId}`
     }
 
+    /**
+     * Gets cropped image data and returns a cropped canvas to a blob
+     * @param {Object} imageObj - { file, croppedImage }
+     * @returns {Blob} - cropped image converted to Blob
+     */
     async function getCroppedImageBlob(imageObj) {
         if (!imageObj.croppedImage)
-            throw new Error('Cropped image not present in provided image object.')
+            throw new Error(
+                'Cropped image not present in provided image object.'
+            )
 
         const { canvas } = imageObj.croppedImage
-        if (!canvas) throw new Error('Canvas object not present in provided image object.')
+        if (!canvas)
+            throw new Error(
+                'Canvas object not present in provided image object.'
+            )
 
         const blob = await new Promise((resolve) => canvas.toBlob(resolve))
 

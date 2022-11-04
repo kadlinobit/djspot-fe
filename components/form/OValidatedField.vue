@@ -17,7 +17,6 @@
             :type="props.type"
             :use-html5-validation="false"
             :disabled="props.disabled"
-            :name="props.name"
         />
     </o-field>
 </template>
@@ -25,6 +24,8 @@
 <script setup lang="ts">
 import _ from 'lodash'
 import { useField } from 'vee-validate'
+
+const { $i18n } = useNuxtApp()
 
 // TODO - emit to update model value is probably not needed, as vee-validate useField does it automatically
 // const emit = defineEmits(['update:modelValue'])
@@ -55,7 +56,11 @@ const props = withDefaults(defineProps<Props>(), {
 
 const nameRef = toRef(props, 'name')
 //TODO - meta touched is not working, find out why
-const { errorMessage, value: fieldValue } = useField(nameRef, undefined, {
+const {
+    errorMessage,
+    value: fieldValue,
+    meta: fieldMeta
+} = useField(nameRef, undefined, {
     initialValue: props.modelValue
 })
 
@@ -77,8 +82,9 @@ const visibilityStyle = computed(() => {
 })
 
 const getFieldVariant = computed(() => {
+    if (props.isValidationOn && !fieldMeta.validated) return null
     if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger'
-    if (props.isValidationOn && !errorMessage.value) return 'success'
+    if (props.isValidationOn && fieldMeta.valid) return 'success'
     return null
 })
 </script>

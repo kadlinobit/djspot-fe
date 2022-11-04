@@ -63,7 +63,6 @@ TODO:
 <script setup lang="ts">
 import SoundForm from '~/components/form/SoundForm.vue'
 import ConfirmModal from '~/components/form/ConfirmModal.vue'
-import { parseErrorMessage } from '~/api/tools'
 import useDirectus, { useAuth } from '~/composables/directus'
 
 const directus = useDirectus()
@@ -72,10 +71,9 @@ const { $i18n, $axios, $oruga, $api } = useNuxtApp()
 const router = useRouter()
 const route = useRoute()
 
-// TODO - find out why definePageMeta is not working
-// definePageMeta({
-//     middleware: 'authorized'
-// })
+definePageMeta({
+    middleware: 'authenticated'
+})
 
 const error = ref(null)
 const success = ref(null)

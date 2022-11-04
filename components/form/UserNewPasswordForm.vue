@@ -90,7 +90,11 @@ const validationSchema = yup.object({
     password_check: yup.string().required('validation.required').nullable()
 })
 
-const { errors: formErrors, validate } = useForm({ validationSchema })
+const {
+    errors: formErrors,
+    validate,
+    resetForm
+} = useForm({ validationSchema })
 
 function onSubmit() {
     validate().then((result) => {
@@ -106,6 +110,7 @@ function onSubmit() {
             successMessage: 'user.password_change_success'
         })
         formData.value.password_check = null
+        resetForm()
     })
 }
 </script>

@@ -4,40 +4,44 @@
             {{ $i18n.t(success) }}
         </o-notification>
 
-        <o-notification v-if="error" variant="danger" :closable="false">
-            {{ $i18n.t(error) }}
+        <o-notification v-if="errorMessage" variant="danger" :closable="false">
+            {{ $i18n.t(errorMessage) }}
         </o-notification>
 
         <form v-if="!success" method="post" @submit.prevent>
             <o-validated-field
-                v-model="username"
-                name="username"
+                v-model="formData.first_name"
+                name="first_name"
                 type="text"
-                :label="$i18n.t('user.username')"
+                :label="$i18n.t('user.first_name')"
             />
 
             <o-validated-field
-                v-model="email"
+                v-model="formData.last_name"
+                name="last_name"
+                type="text"
+                :label="$i18n.t('user.last_name')"
+            />
+
+            <o-validated-field
+                v-model="formData.email"
                 name="email"
                 type="email"
                 :label="$i18n.t('user.email')"
             />
 
             <o-validated-field
-                v-model="password1"
-                vid="password1"
-                name="password1"
+                v-model="formData.password"
+                name="password"
                 type="password"
                 :label="$i18n.t('user.password')"
-                rules="required"
             />
 
             <o-validated-field
-                v-model="password2"
-                name="password2"
+                v-model="password_check"
+                name="password_check"
                 type="password"
                 :label="$i18n.t('user.password_again')"
-                rules="required|confirmed:password1"
             />
             <div class="field">
                 <div class="control">
@@ -70,13 +74,13 @@
 <script setup lang="ts">
 // TODO - register function still not working for DIRECTUS
 import * as yup from 'yup'
+import useDirectus from '~/composables/directus'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import { useMainStore } from '~/stores'
 import { useProgrammatic } from '@oruga-ui/oruga'
 import { useForm } from 'vee-validate'
-import useDirectus from '~/composables/directus'
 
-const { $i18n, $axios } = useNuxtApp()
+const { $i18n, $axios, $api } = useNuxtApp()
 const mainStore = useMainStore()
 const { oruga: $oruga } = useProgrammatic()
 const directus = useDirectus()
@@ -88,25 +92,38 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     displayType: 'page'
 })
+const formData = ref({
+    first_name: '',
+    last_name: '',
+    email: '',
+    password: ''
+})
 
-const username = ref('')
-const email = ref('')
-const password1 = ref('')
-const password2 = ref('')
+const password_check = ref('')
 const success = ref(null)
 const error = ref(null)
 const isLoading = ref(false)
 
+const nameRegEx = /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi
+
 const validationSchema = yup.object({
+    first_name: yup
+        .string()
+        .required('validation.required')
+        .matches(nameRegEx, 'validation.alpha_num_dash_space'),
+    last_name: yup
+        .string()
+        .required('validation.required')
+        .matches(nameRegEx, 'validation.alpha_num_dash_space'),
     email: yup
         .string()
         .required('validation.required')
         .email('validation.email'),
-    password1: yup.string().required('validation.required'),
-    password2: yup
+    password: yup.string().required('validation.required'),
+    password_check: yup
         .string()
         .test('passwords-match', 'validation.confirmed', function (val) {
-            return this.parent.password1 === val
+            return this.parent.password === val
         })
 })
 
@@ -129,22 +146,24 @@ async function register() {
     try {
         isLoading.value = true
 
-        $axios.setToken(false)
-        await $axios.post('auth/local/register', {
-            username,
-            email,
-            password: password1
-        })
+        // $axios.setToken(false)
+        // await $axios.post('auth/local/register', {
+        //     username,
+        //     email,
+        //     password: password1
+        // })
 
+        await directus.users.createOne({ ...formData.value })
         success.value = 'user.register_success_message'
     } catch (e) {
-        if (e.response && e.response.data) {
-            error.value = e.response.data.message[0].messages[0].message
-        } else {
-            error.value = e
-        }
+        error.value = e
     } finally {
         isLoading.value = false
     }
 }
+
+const errorMessage = computed(() => {
+    const errorMessage = $api.tools.parseErrorMessage(error.value)
+    return errorMessage
+})
 </script>
