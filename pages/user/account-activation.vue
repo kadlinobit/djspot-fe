@@ -38,6 +38,7 @@
 const { $i18n, $api } = useNuxtApp()
 const router = useRouter()
 const route = useRoute()
+const { apiBaseURL } = useRuntimeConfig().public
 
 const error = ref(null)
 const successMessage = ref(null)
@@ -66,7 +67,7 @@ onMounted(() => {
 async function activateAccount() {
     error.value = null
     try {
-        const result = await $fetch('http://localhost:8055/users/activate', {
+        const result = await $fetch(`${apiBaseURL}/users/activate`, {
             method: 'POST',
             body: { token: token.value }
         })

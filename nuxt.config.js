@@ -121,9 +121,10 @@ export default defineNuxtConfig({
             }
         }
     },
-    publicRuntimeConfig: {
-        API_AUTH_URL: 'http://localhost:1337', // TBD - probably remove
-        DOMAIN: 'http://localhost:1337'
-    },
-    privateRuntimeConfig: {}
+    runtimeConfig: {
+        public: {
+            baseURL: process.env.BASE_URL || 'http://localhost:3000',
+            apiBaseURL: 'http://localhost:8055'
+        }
+    }
 })

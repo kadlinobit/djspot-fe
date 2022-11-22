@@ -58,7 +58,7 @@
 
         <div class="has-text-centered" style="margin-top: 20px">
             {{ $i18n.t('user.already_got_an_account') }}
-            <nuxt-link v-if="displayType === 'page'" to="/login">
+            <nuxt-link v-if="displayType === 'page'" to="/user/login">
                 {{ $i18n.t('user.do_login') }}
             </nuxt-link>
             <a

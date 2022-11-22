@@ -37,7 +37,7 @@
         <div class="has-text-centered" style="margin-top: 20px">
             <p>
                 {{ $i18n.t('user.dont_have_an_account') }}
-                <nuxt-link v-if="displayType === 'page'" to="/register">
+                <nuxt-link v-if="displayType === 'page'" to="/user/register">
                     {{ $i18n.t('user.do_register') }}
                 </nuxt-link>
                 <a
@@ -48,7 +48,10 @@
                 </a>
             </p>
             <p>
-                <nuxt-link v-if="displayType === 'page'" to="/forgot-password">
+                <nuxt-link
+                    v-if="displayType === 'page'"
+                    to="/user/forgot-password"
+                >
                     {{ $i18n.t('user.forgot_password') }}?
                 </nuxt-link>
                 <a

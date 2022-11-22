@@ -4,7 +4,7 @@
             <p class="menu-label">Menu</p>
             <ul class="menu-list">
                 <li @click="closeSidebar">
-                    <nuxt-link to="/user">
+                    <nuxt-link to="/user/account">
                         <o-icon icon="account" size="small" />
                         <span>User</span>
                     </nuxt-link>

@@ -31,7 +31,7 @@
             <p>
                 <nuxt-link
                     v-if="displayType === 'page'"
-                    :to="{ path: '/login' }"
+                    :to="{ path: '/user/login' }"
                 >
                     {{ $i18n.t('user.go_to_login_page') }}
                 </nuxt-link>
@@ -47,9 +47,13 @@
 </template>
 
 <script setup lang="ts">
-import OValidatedField from '~/components/form/OValidatedField.vue'
+import * as yup from 'yup'
+import { useForm } from 'vee-validate'
 import { useMainStore } from '~/stores'
 import useDirectus from '~/composables/directus'
+import OValidatedField from '~/components/form/OValidatedField.vue'
+
+const { baseURL } = useRuntimeConfig().public
 const { $i18n, $api } = useNuxtApp()
 
 const directus = useDirectus()
@@ -67,11 +71,19 @@ const email = ref('')
 const success = ref(null)
 const error = ref(null)
 const isLoading = ref(false)
-const observer = ref(null)
+
+const validationSchema = yup.object({
+    email: yup
+        .string()
+        .required('validation.required')
+        .email('validation.email')
+})
+
+const { errors: formErrors, validate } = useForm({ validationSchema })
 
 function onSubmit() {
-    observer.value.validate().then((success) => {
-        if (!success) {
+    validate().then((result) => {
+        if (!result.valid) {
             return
         }
         forgotPassword()
@@ -82,7 +94,10 @@ async function forgotPassword() {
     try {
         isLoading.value = true
 
-        await directus.auth.password.request(email.value)
+        await directus.auth.password.request(
+            email.value,
+            `${baseURL}/user/reset-password`
+        )
 
         error.value = null
         success.value = 'user.password_reset_link_sent'

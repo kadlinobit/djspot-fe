@@ -2,6 +2,8 @@
 import { defineNuxtPlugin } from '#app'
 
 export default defineNuxtPlugin((nuxtApp) => {
+    const { apiBaseURL } = useRuntimeConfig().public
+
     /**
      * Returns image URL in selected quality. If selected quality is not available, function returns
      * the highest possible quality below the selected one. If quality is not specified, original image
@@ -10,11 +12,7 @@ export default defineNuxtPlugin((nuxtApp) => {
      * @param {string} quality - desired photo quality - 'large', 'medium', 'small', 'thumbnail' or empty
      * @param {string} baseUrl - baseUrl for absolute path - default 'http://localhost:8055/assets'
      */
-    function getImageUrl(
-        imageId,
-        quality,
-        baseUrl = 'http://localhost:8055/assets'
-    ) {
+    function getImageUrl(imageId, quality, baseUrl = `${apiBaseURL}/assets`) {
         // const qualities = ['large', 'medium', 'small', 'thumbnail']
 
         if (!imageId) return null

@@ -4,6 +4,6 @@ const router = useRouter()
 
 export default function ({ redirect }) {
     if (!auth.loggedIn.value) {
-        return router.push('/login')
+        return router.push('/user/login')
     }
 }

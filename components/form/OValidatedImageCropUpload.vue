@@ -8,7 +8,7 @@
             :class="{ 'has-name': !!fieldValue }"
         >
             <div v-if="currentImage && fieldValue === 'keep-current'">
-                <img :src="`http://localhost:8055/assets/${currentImage}`" />
+                <img :src="`${apiBaseURL}/assets/${currentImage}`" />
             </div>
             <o-upload
                 v-else-if="!file || (file && errorMessage)"
@@ -79,13 +79,14 @@
 <script setup lang="ts">
 /**
  * TODO
- * - remove hardcoded URL http://localhost:8055/assets
  * - put canvas size somwehre to config
  */
 import _ from 'lodash'
 import { useField } from 'vee-validate'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
+
+const { apiBaseURL } = useRuntimeConfig().public
 
 interface Props {
     modelValue: object | string | null
