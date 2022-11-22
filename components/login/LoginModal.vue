@@ -62,9 +62,6 @@ const router = useRouter()
 const route = useRoute()
 
 function afterLoginSuccess() {
-    // if (route.path === '/login') {
-    //     router.push('/')
-    // }
     mainStore.setIsLoginOpen(false)
     $oruga.notification.open({
         message: $i18n.t('user.login_success'),

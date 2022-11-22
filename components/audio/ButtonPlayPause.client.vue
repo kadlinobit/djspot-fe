@@ -1,6 +1,6 @@
 <template>
     <client-only>
-        <div class="button-playlist-add-remove">
+        <div class="button-play-pause">
             <o-button
                 v-if="
                     !playerStore.currentSound ||
@@ -9,21 +9,21 @@
                 :disabled="playerStore.isLoading"
                 :variant="variant"
                 :size="size"
-                :icon-left="
-                    playlistStore.isSoundInPlaylist(sound)
-                        ? 'delete-sweep'
-                        : 'playlist-plus'
-                "
-                @click="
-                    () => playlistStore.handleAddOrRemovePlaylistSound(sound)
-                "
+                icon-left="play"
+                @click.prevent="() => onPlayNewSound(sound)"
             />
-            <o-icon
-                v-else
-                custom-class="level-item"
-                icon="checkbox-blank-circle"
-                variant="success m-3"
-                size="small"
+            <o-button
+                v-if="
+                    playerStore.currentSound &&
+                    playerStore.currentSound.id === sound.id
+                "
+                :disabled="playerStore.isLoading"
+                :variant="variant"
+                :size="size"
+                :icon-left="playerStore.isPlaying ? 'pause' : 'play'"
+                @click.prevent="
+                    () => playerStore.setIsPlaying(!playerStore.isPlaying)
+                "
             />
         </div>
     </client-only>
@@ -35,7 +35,7 @@ const playerStore = usePlayerStore()
 const playlistStore = usePlaylistStore()
 
 interface Props {
-    sound: object
+    sound: Sound
     size?: string
     variant?: string
 }
@@ -45,4 +45,9 @@ const props = withDefaults(defineProps<Props>(), {
     size: null,
     variant: 'text'
 })
+
+function onPlayNewSound(sound) {
+    playlistStore.handlePlaySound(sound)
+    playerStore.loadNewAudio(sound)
+}
 </script>

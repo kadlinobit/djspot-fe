@@ -14,7 +14,7 @@
                     </h1>
                 </div>
                 <div class="column is-narrow">
-                    <o-button variant="danger" @click="onDeleteDj()">
+                    <o-button variant="danger" @click="deleteUser">
                         {{ $i18n.t('dj.delete_profile') }}
                     </o-button>
                 </div>
@@ -23,16 +23,16 @@
                 <o-tab-item :label="$i18n.t('user.profile')">
                     <user-form
                         :initial-data="initialData"
-                        :error="error"
-                        :success="success"
+                        :error-message="errorMessage"
+                        :success-message="success"
                         :is-loading="isLoading"
                         @formSubmit="editUser"
                     />
                 </o-tab-item>
                 <o-tab-item :label="$i18n.t('user.change_password')">
                     <user-new-password-form
-                        :error-in="error"
-                        :success-in="success"
+                        :error-message="errorMessage"
+                        :successMessage="success"
                         :is-loading-in="isLoading"
                         @formSubmit="editUser"
                     />
@@ -43,46 +43,46 @@
 </template>
 
 <script setup lang="ts">
+import { useProgrammatic } from '@oruga-ui/oruga'
 import UserForm from '~/components/form/UserForm.vue'
 import UserNewPasswordForm from '~/components/form/UserNewPasswordForm.vue'
 import useDirectus, { useAuth } from '~/composables/directus'
 const directus = useDirectus()
 const auth = useAuth()
 
-const { $i18n, $api, $oruga } = useNuxtApp()
+const { $i18n, $api } = useNuxtApp()
+const { oruga: $oruga } = useProgrammatic()
 
-// TODO - find out why definePageMeta is not working
-// definePageMeta({
-//     middleware: 'authorized'
-// })
+definePageMeta({
+    middleware: ['authenticated']
+})
 
 const success = ref(null)
 const isLoading = ref(false)
 const activeTab = ref(1)
+
+const errorMessage = computed(() => {
+    const errorMessage = $api.tools.parseErrorMessage(error.value)
+    return errorMessage
+})
 
 const {
     data: initialData,
     pending,
     refresh,
     error
-} = useLazyAsyncData(
-    'userFormQuery',
-    async function () {
-        // PROMISE TO SET TIMEOUT FOR TESTING
-        // await new Promise((resolve) => setTimeout(resolve, 2000))
-        const data = await directus.users.me.read({
-            fields: $api.collection.getCollectionFields('user', 'form')
-        })
-        return data
-    },
-    // There must be no server side data load - otherwise it is not working
-    // TODO: Maybe remove when we get to NUXT 3
-    { server: false }
-)
+} = useLazyAsyncData('userFormQuery', async function () {
+    // PROMISE TO SET TIMEOUT FOR TESTING
+    // await new Promise((resolve) => setTimeout(resolve, 2000))
+    const data = await directus.users.me.read({
+        fields: $api.collection.getCollectionFields('user', 'form')
+    })
+    return data
+})
 
 watch(
     () => pending,
-    (val) => (isLoading.value = pending)
+    (val) => (isLoading.value = pending.value)
 )
 
 // async function fetch() {
@@ -137,4 +137,6 @@ async function editUser({ formData, successMessage }) {
         initialData.value.password_check = null
     }
 }
+
+function deleteUser() {}
 </script>

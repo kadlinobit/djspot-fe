@@ -2,7 +2,7 @@
     <div class="o-player is-relative">
         <o-slider
             :tooltip="false"
-            :value="playerStore.currentSeconds"
+            :modelValue="playerStore.currentSeconds"
             :max="playerStore.durationSeconds"
             :disabled="!playerStore.isLoaded || playerStore.isError"
             variant="secondary mb-0 mt-0"
@@ -34,8 +34,7 @@
             :src="playerStore.file"
             @timeupdate="updateCurrentSeconds"
             @loadstart="
-                playerStore.setIsLoading(true)
-                playerStore.setIsPlaying(false)
+                playerStore.setIsLoading(true), playerStore.setIsPlaying(false)
             "
             @loadeddata="onLoadedData"
             @pause="playerStore.setIsPlaying(false)"

@@ -1,5 +1,8 @@
 import { Directus } from '@directus/sdk'
 import _ from 'lodash'
+
+const apiBaseURL = 'http://localhost:8055'
+
 const directus = new Directus('http://localhost:8055')
 
 const user = ref(JSON.parse(directus.storage.get('directus-user')) || {})

@@ -1,217 +1,179 @@
 <template>
-    <client-only>
-        <section class="section">
-            <o-loading :active="isLoading" />
-            <o-notification v-if="successMessage" variant="success">
-                {{ $i18n.t(successMessage) }}
-            </o-notification>
+    <section class="section">
+        <o-loading :active="isLoading" />
+        <o-notification v-if="successMessage" variant="success">
+            {{ $i18n.t(successMessage) }}
+        </o-notification>
 
-            <o-notification v-if="errorMessage" type="danger">
-                {{ $i18n.t(errorMessage) }}
-            </o-notification>
+        <o-notification v-if="errorMessage" type="danger">
+            {{ $i18n.t(errorMessage) }}
+        </o-notification>
 
-            <ValidationObserver ref="observer" slim>
-                <form v-if="!successMessage" method="post" @submit.prevent>
-                    <div class="columns is-tablet">
-                        <div
-                            class="column is-half-tablet is-three-fifths-desktop"
-                        >
-                            <o-validated-select
-                                v-model="formData.type"
-                                name="type"
-                                :label="$i18n.t('sound.type')"
-                                rules="required"
-                                :options="soundTypeOptions"
-                                :expanded="true"
-                                :placeholder="
-                                    $i18n.t('sound.select_sound_type')
-                                "
-                            />
-                            <o-validated-field
-                                v-model="formData.name"
-                                name="name"
-                                type="text"
-                                :label="$i18n.t(`${formData.type}.name`)"
-                                :placeholder="$i18n.t(`${formData.type}.name`)"
-                                rules="required|alpha_num_dash_space"
-                            />
-                            <o-validated-field
-                                v-model="formData.url"
-                                name="url"
-                                type="url"
-                                :label="$i18n.t('sound.url')"
-                                :placeholder="$i18n.t('sound.url_placeholder')"
-                                rules="required|audio_load_state:@audioLoadState"
-                                :help="$i18n.t('sound.url_help')"
-                            />
-                            <o-validated-field
-                                v-model="audioLoadState"
-                                vid="audioLoadState"
-                                name="audioLoadState"
-                                :hidden="true"
-                            />
-                            <div class="field">
-                                <Player
-                                    v-if="audioUrl"
-                                    :file="audioUrl"
-                                    @audio-load-error="onAudioLoadError"
-                                    @audio-load-success="
-                                        (data) => onAudioLoadSuccess(data)
-                                    "
-                                />
-                            </div>
-
-                            <o-validated-tag-input
-                                v-model="formData.genres"
-                                name="genres"
-                                :label="$i18n.t('dj.genres')"
-                                rules="required"
-                                :tags="availableGenres"
-                                field="name"
-                                maxtags="3"
-                                :placeholder="$i18n.t('dj.select_3_genres')"
-                            />
-                        </div>
-                        <div
-                            class="column is-half-tablet is-two-fifths-desktop"
-                        >
-                            <o-validated-image-crop-upload
-                                v-model="formData.photo"
-                                name="photo"
-                                :label="$i18n.t('dj.photo')"
-                                rules="image_type"
-                                :current-image="
-                                    initialData ? initialData.photo : null
-                                "
-                            />
-                        </div>
-                    </div>
-
-                    <o-validated-bm-editor
-                        v-model="formData.description"
-                        name="description"
-                        :label="$i18n.t(`${formData.type}.description`)"
-                        :placeholder="
-                            $i18n.t(`${formData.type}.description_placeholder`)
-                        "
+        <form v-if="!successMessage" method="post" @submit.prevent>
+            <div class="columns is-tablet">
+                <div class="column is-half-tablet is-three-fifths-desktop">
+                    <o-validated-select
+                        v-model="formData.type"
+                        name="type"
+                        :label="$i18n.t('sound.type')"
+                        rules="required"
+                        :options="soundTypeOptions"
+                        :expanded="true"
+                        :placeholder="$i18n.t('sound.select_sound_type')"
                     />
-
-                    <div class="field is-grouped is-grouped-right">
-                        <div class="control">
-                            <o-button variant="light" @click="onCancel">
-                                {{ $i18n.t('form.cancel') }}
-                            </o-button>
-                        </div>
-                        <div class="control">
-                            <o-button
-                                :disabled="isLoading"
-                                variant="dark"
-                                @click="onSave"
-                            >
-                                {{
-                                    initialData
-                                        ? $i18n.t(`${formData.type}.save`)
-                                        : $i18n.t(`${formData.type}.add`)
-                                }}
-                            </o-button>
-                        </div>
-                        <div
-                            v-if="initialData && initialData.status === 'draft'"
-                            class="control"
-                        >
-                            <o-button
-                                :disabled="isLoading"
-                                variant="primary"
-                                @click="onSaveAndPublish"
-                            >
-                                {{
-                                    $i18n.t(`${formData.type}.save_and_publish`)
-                                }}
-                            </o-button>
-                        </div>
+                    <o-validated-field
+                        v-model="formData.name"
+                        name="name"
+                        type="text"
+                        :label="$i18n.t(`${formData.type}.name`)"
+                        :placeholder="$i18n.t(`${formData.type}.name`)"
+                        rules="required|alpha_num_dash_space"
+                    />
+                    <o-validated-field
+                        v-model="formData.url"
+                        name="url"
+                        type="url"
+                        :label="$i18n.t('sound.url')"
+                        :placeholder="$i18n.t('sound.url_placeholder')"
+                        rules="required|audio_load_state:@audioLoadState"
+                        :help="$i18n.t('sound.url_help')"
+                    />
+                    <o-validated-field
+                        v-model="audioLoadState"
+                        vid="audioLoadState"
+                        name="audioLoadState"
+                        :hidden="true"
+                    />
+                    <div class="field">
+                        <Player
+                            v-if="audioUrl"
+                            :file="audioUrl"
+                            @audio-load-error="onAudioLoadError"
+                            @audio-load-success="
+                                (data) => onAudioLoadSuccess(data)
+                            "
+                        />
                     </div>
-                </form>
-            </ValidationObserver>
-        </section>
-    </client-only>
+                    <o-validated-tag-input
+                        v-model="formData.genres"
+                        name="genres"
+                        :label="$i18n.t('dj.genres')"
+                        :tags="availableGenres"
+                        field="name"
+                        :max-tags="3"
+                        expanded
+                        :placeholder="$i18n.t('dj.select_3_genres')"
+                    />
+                </div>
+                <div class="column is-half-tablet is-two-fifths-desktop">
+                    <o-validated-image-crop-upload
+                        v-model="formData.photo"
+                        name="photo"
+                        :label="$i18n.t('dj.photo')"
+                        rules="image_type"
+                        :current-image="initialData ? initialData.photo : null"
+                    />
+                </div>
+            </div>
+
+            <o-validated-bm-editor
+                v-model="formData.description"
+                name="description"
+                :label="$i18n.t(`${formData.type}.description`)"
+                :placeholder="
+                    $i18n.t(`${formData.type}.description_placeholder`)
+                "
+            />
+
+            <div class="field is-grouped is-grouped-right">
+                <div class="control">
+                    <o-button variant="light" @click="onCancel">
+                        {{ $i18n.t('form.cancel') }}
+                    </o-button>
+                </div>
+                <div class="control">
+                    <o-button
+                        :disabled="isLoading"
+                        variant="dark"
+                        @click="onSave"
+                    >
+                        {{
+                            initialData
+                                ? $i18n.t(`${formData.type}.save`)
+                                : $i18n.t(`${formData.type}.add`)
+                        }}
+                    </o-button>
+                </div>
+                <div
+                    v-if="initialData && initialData.status === 'draft'"
+                    class="control"
+                >
+                    <o-button
+                        :disabled="isLoading"
+                        variant="primary"
+                        @click="onSaveAndPublish"
+                    >
+                        {{ $i18n.t(`${formData.type}.save_and_publish`) }}
+                    </o-button>
+                </div>
+            </div>
+        </form>
+    </section>
 </template>
 
 <script setup lang="ts">
 import _ from 'lodash'
-import { extend, ValidationObserver } from 'vee-validate'
-import { required } from 'vee-validate/dist/rules'
+import * as yup from 'yup'
+import { useProgrammatic } from '@oruga-ui/oruga'
+import { useForm } from 'vee-validate'
 import useDirectus, { useAuth } from '~/composables/directus'
-import Player from '~/components/audio/Player.vue'
+import Player from '~~/components/audio/Player.client.vue'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUpload.vue'
 import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
 
-const { $i18n, $oruga, $audio } = useNuxtApp()
+const { $i18n, $audio } = useNuxtApp()
+const { oruga: $oruga } = useProgrammatic()
 const directus = useDirectus()
 const auth = useAuth()
 const router = useRouter()
 
-extend('required', required)
+// extend('required', required)
 
-extend('alpha_num_dash_space', (value) => {
-    if (value.match(/^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi)) {
-        return true
-    }
-    return 'validation.alpha_num_dash_space'
-})
-
-extend('audio_load_state', {
-    params: ['audioLoadState'],
-    validate(value, { audioLoadState }) {
-        return audioLoadState !== 'error'
-    },
-    message: 'player.error_loading_file_message'
-})
-
-extend('image_type', (file) => {
-    if (
-        file === null ||
-        ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)
-    ) {
-        return true
-    }
-
-    return 'validation.image_type'
-})
-
-// TODO - find out why definePageMeta is not working
-// definePageMeta({
-//     middleware: 'authorized'
+// extend('alpha_num_dash_space', (value) => {
+//     if (value.match(/^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi)) {
+//         return true
+//     }
+//     return 'validation.alpha_num_dash_space'
 // })
 
-type FormSubmitData = {
-    formData: Object
-    successMessage?: string
-}
+// extend('audio_load_state', {
+//     params: ['audioLoadState'],
+//     validate(value, { audioLoadState }) {
+//         return audioLoadState !== 'error'
+//     },
+//     message: 'player.error_loading_file_message'
+// })
+
+// extend('image_type', (file) => {
+//     if (
+//         file === null ||
+//         ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)
+//     ) {
+//         return true
+//     }
+
+//     return 'validation.image_type'
+// })
 
 const emit = defineEmits<{
     (e: 'formSubmit', formSubmitData: FormSubmitData): void
 }>()
 
-interface InitialData {
-    name?: string
-    url?: string
-    description?: string
-    genres?: Array<string>
-    dj?: Object
-    type: string
-    duration: number
-    photo: Object | string
-    status?: string
-}
-
-interface Props {
-    initialData?: InitialData
-    errorMessage?: string
-    successMessage?: string
-    isLoading?: boolean
+interface Props extends FormProps {
+    initialData?: SoundFormData
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -221,7 +183,7 @@ const props = withDefaults(defineProps<Props>(), {
     isLoading: false
 })
 
-const formData = ref({
+const formData = ref<SoundFormData>({
     name: null,
     url: null,
     description: null,
@@ -236,7 +198,30 @@ const availableGenres = ref(null)
 const audioUrl = ref(null)
 const audioLoadState = ref(null)
 const currentPhoto = ref(null)
-const observer = ref(null)
+
+const validationSchema = yup.object({
+    type: yup.string().required(),
+    name: yup
+        .string()
+        .required('validation.required')
+        .matches(
+            /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi,
+            'validation.alpha_num_dash_space'
+        ),
+    photo: yup
+        .mixed()
+        .test('photo', 'validation.image_type', (val) => {
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+            if (val === null) return true
+            if (typeof val === 'string' && val === 'keep-current') return true
+            if (val?.file && allowedTypes.includes(val?.file?.type)) return true
+            return false
+        })
+        .nullable(),
+    genres: yup.array().min(1).max(3)
+})
+
+const { errors: formErrors, validate } = useForm({ validationSchema })
 
 const soundTypeOptions = computed(() => {
     return [
@@ -283,14 +268,12 @@ function onSaveAndPublish() {
         `${formData.value.type}.save_and_publish_success`
     )
 }
-function onSubmit(formDataObj, successMessage) {
-    observer.value.validate().then((isValid) => {
-        if (!isValid) {
+async function onSubmit(formDataObj, successMessage) {
+    await validate().then((result) => {
+        if (!result.valid) {
             $oruga.notification.open({
                 message: $i18n.t('validation.form_validation_error'),
-                rootClass: 'toast',
-                variant: 'danger',
-                duration: 7000
+                variant: 'danger'
             })
             return
         }

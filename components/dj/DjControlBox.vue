@@ -2,10 +2,11 @@
     <div class="dj-control-box level is-mobile">
         <div class="level-left">
             <div class="level-item">
-                <o-responsive-button
+                <o-button
                     icon-left="eye"
                     :variant="followButtonVariant"
                     :disabled="isToggleFollowLoading"
+                    size="responsive"
                     @click="$emit('toggleFollow')"
                 >
                     {{
@@ -13,24 +14,24 @@
                             ? `${dj.follow_count} ${$i18n.t('dj.followers')}`
                             : $i18n.t('dj.follow')
                     }}
-                </o-responsive-button>
+                </o-button>
             </div>
         </div>
         <div class="level-right">
-            <o-responsive-button
+            <o-button
                 variant="light"
                 icon-left="pencil"
                 tag="nuxt-link"
+                size="responsive"
                 :to="{ path: `/djs/manage/edit/` }"
             >
                 {{ $i18n.t('form.edit') }}
-            </o-responsive-button>
+            </o-button>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import OResponsiveButton from '~/components/form/OResponsiveButton.vue'
 import { useAuth } from '~/composables/directus'
 
 const { $i18n } = useNuxtApp()

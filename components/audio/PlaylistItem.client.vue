@@ -29,8 +29,8 @@
 
 <script setup lang="ts">
 import { useMainStore } from '~/stores'
-import ButtonPlayPause from '~/components/audio/ButtonPlayPause.vue'
-import ButtonPlaylistAddRemove from '~/components/audio/ButtonPlaylistAddRemove.vue'
+import ButtonPlayPause from '~~/components/audio/ButtonPlayPause.client.vue'
+import ButtonPlaylistAddRemove from '~~/components/audio/ButtonPlaylistAddRemove.client.vue'
 
 const { $i18n } = useNuxtApp()
 const mainStore = useMainStore()

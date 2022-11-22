@@ -8,7 +8,7 @@ const collectionsConfig = {
                 'bio',
                 'slug',
                 'photo',
-                'city',
+                'city.*',
                 'follow_count',
                 'follows',
                 'genres.genre_id.*'
@@ -20,7 +20,7 @@ const collectionsConfig = {
                 'bio',
                 'slug',
                 'photo',
-                'city',
+                'city.*',
                 'follow_count',
                 'follows',
                 'genres.genre_id.*',
@@ -28,7 +28,16 @@ const collectionsConfig = {
                 'sounds.dj.name',
                 'sounds.dj.slug'
             ],
-            form: ['id', 'name', 'email', 'bio', 'slug', 'photo', 'city', 'genres.genre_id.*']
+            form: [
+                'id',
+                'name',
+                'email',
+                'bio',
+                'slug',
+                'photo',
+                'city.id',
+                'genres.genre_id.*'
+            ]
         }
     },
     sound: {
@@ -83,7 +92,13 @@ const collectionsConfig = {
     },
     user: {
         fieldSets: {
-            default: ['first_name', 'last_name', 'email', 'location', 'language'],
+            default: [
+                'first_name',
+                'last_name',
+                'email',
+                'location',
+                'language'
+            ],
             form: ['first_name', 'last_name', 'email', 'location', 'language']
         }
     }

@@ -7,6 +7,8 @@ import { useMediaStore } from '~/stores'
 const mediaStore = useMediaStore()
 const { $media } = useNuxtApp()
 
+const { apiBaseURL } = useRuntimeConfig().public
+
 interface Props {
     coverImage?: string
     coverType?: string
@@ -25,7 +27,7 @@ const coverImageUrl = computed(() => {
     if (props.coverImage) {
         return $media.getImageUrl(props.coverImage, props.quality)
     } else {
-        return `http://localhost:3000${mediaStore.getDefaultCoverImage(
+        return `${apiBaseURL}${mediaStore.getDefaultCoverImage(
             props.coverType
         )}`
     }

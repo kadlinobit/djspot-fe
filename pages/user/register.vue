@@ -4,22 +4,21 @@
             <div class="columns">
                 <div class="column is-4 is-offset-4">
                     <h2 class="title has-text-centered">
-                        {{ $t('user.login') }}
+                        {{ $i18n.t('user.register') }}
                     </h2>
-                    <login display-type="page" />
+                    <register display-type="page" />
                 </div>
             </div>
         </div>
     </section>
 </template>
 
-<script>
-import Login from '~/components/login/Login.vue'
+<script setup lang="ts">
+import Register from '~/components/login/Register.vue'
 
-export default {
-    components: {
-        Login
-    },
+const { $i18n } = useNuxtApp()
+
+definePageMeta({
     middleware: ['guest']
-}
+})
 </script>

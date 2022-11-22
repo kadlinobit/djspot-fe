@@ -2,6 +2,7 @@ import _ from 'lodash'
 import useDirectus from '~/composables/directus'
 const directus = useDirectus()
 
+//TODO - remove axios
 const file = ($axios) => {
     const getCroppedImageBlob = async (imageObj) => {
         if (!imageObj.croppedImage)

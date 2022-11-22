@@ -1,6 +1,6 @@
 @import './variables';
-@import '~bulma/bulma.sass';
-@import '~@oruga-ui/theme-bulma/dist/scss/bulma';
+@import 'bulma/bulma.sass';
+@import '@oruga-ui/theme-bulma/dist/scss/bulma';
 
 .is-text-ellipsis {
     white-space: nowrap;

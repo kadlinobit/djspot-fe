@@ -51,10 +51,7 @@
                 <language-selection />
                 <div v-if="!auth.loggedIn.value" class="navbar-item">
                     <div class="buttons">
-                        <a
-                            class="button is-light"
-                            @click="() => (mainStore.isLoginOpen = true)"
-                        >
+                        <a class="button is-light" @click="openLoginModal">
                             {{ $i18n.t('user.login') }}
                         </a>
                     </div>
@@ -65,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import LanguageSelection from '~/components/layout/LanguageSelection.vue'
+import LanguageSelection from '~~/components/layout/LanguageSelection.client.vue'
 import { useMainStore } from '~/stores'
 import { useAuth } from '~/composables/directus'
 
@@ -74,6 +71,11 @@ const auth = useAuth()
 
 const mainStore = useMainStore()
 const isMenuExpanded = ref(false)
+
+function openLoginModal() {
+    mainStore.setIsLoginOpen(true)
+    mainStore.setLoginActiveComponent('login')
+}
 
 function toggleIsMenuExpanded() {
     isMenuExpanded.value = !isMenuExpanded.value

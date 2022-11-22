@@ -28,19 +28,16 @@
     </li>
 </template>
 
-<script>
+<script setup lang="ts">
 import CoverImage from '~/components/media/CoverImage.vue'
-import ButtonPlayPause from '~/components/audio/ButtonPlayPause.vue'
-export default {
-    components: {
-        CoverImage,
-        ButtonPlayPause
-    },
-    props: {
-        sound: {
-            type: Object,
-            default: null
-        }
-    }
+import ButtonPlayPause from '~~/components/audio/ButtonPlayPause.client.vue'
+import { object } from 'yup'
+
+interface Props {
+    sound: object | null
 }
+
+const props = withDefaults(defineProps<Props>(), {
+    sound: null
+})
 </script>

@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 import { usePlayerStore } from './player'
+import { useProgrammatic } from '@oruga-ui/oruga'
 
 export const usePlaylistStore = defineStore('playlist', () => {
-    const { $audio, $oruga, $i18n } = useNuxtApp()
+    const { $audio, $i18n } = useNuxtApp()
+    const { oruga: $oruga } = useProgrammatic()
     const playerStore = usePlayerStore()
 
     const playlist = ref([])

@@ -16,54 +16,50 @@
                             {{ $i18n.t(success) }}
                         </o-notification>
                         <o-notification
-                            v-if="error"
+                            v-if="errorMessage"
                             variant="danger"
                             :closable="false"
                         >
-                            {{ $i18n.t(error) }}
+                            {{ $i18n.t(errorMessage) }}
                         </o-notification>
-                        <ValidationObserver ref="observer">
-                            <form v-if="!success" method="post" @submit.prevent>
-                                <o-validated-field
-                                    v-model="password1"
-                                    vid="password1"
-                                    name="password1"
-                                    type="password"
-                                    :label="$i18n.t('user.new_password')"
-                                    rules="required"
-                                />
 
-                                <o-validated-field
-                                    v-model="password2"
-                                    name="password2"
-                                    type="password"
-                                    :label="$i18n.t('user.password_again')"
-                                    rules="required|confirmed:password1"
-                                />
-                                <div class="field">
-                                    <div class="control">
-                                        <o-button
-                                            :disabled="isLoading"
-                                            variant="dark is-fullwidth"
-                                            @click="onSubmit"
-                                        >
-                                            {{
-                                                $i18n.t(
-                                                    'user.do_reset_password'
-                                                )
-                                            }}
-                                        </o-button>
-                                    </div>
+                        <form v-if="!success" method="post" @submit.prevent>
+                            <o-validated-field
+                                v-model="password"
+                                vid="password"
+                                name="password"
+                                type="password"
+                                :label="$i18n.t('user.new_password')"
+                                rules="required"
+                            />
+
+                            <o-validated-field
+                                v-model="password_check"
+                                name="password_check"
+                                type="password"
+                                :label="$i18n.t('user.password_again')"
+                                rules="required|confirmed:password"
+                            />
+                            <div class="field">
+                                <div class="control">
+                                    <o-button
+                                        :disabled="isLoading"
+                                        variant="dark is-fullwidth"
+                                        @click="onSubmit"
+                                    >
+                                        {{ $i18n.t('user.do_reset_password') }}
+                                    </o-button>
                                 </div>
-                            </form>
-                        </ValidationObserver>
+                            </div>
+                        </form>
+
                         <div
                             v-if="success"
                             class="has-text-centered"
                             style="margin-top: 20px"
                         >
                             <p>
-                                <nuxt-link :to="{ path: '/login' }">
+                                <nuxt-link :to="{ path: '/user/login' }">
                                     {{ $i18n.t('user.go_to_login_page') }}
                                 </nuxt-link>
                             </p>
@@ -76,30 +72,34 @@
 </template>
 
 <script setup lang="ts">
-import { extend, ValidationObserver } from 'vee-validate'
-import {
-    required as ruleRequired,
-    confirmed as ruleConfirmed
-} from 'vee-validate/dist/rules'
+import * as yup from 'yup'
 import { onMounted } from 'vue'
-import OValidatedField from '~/components/form/OValidatedField.vue'
+import { useForm } from 'vee-validate'
 import useDirectus from '~/composables/directus'
+import OValidatedField from '~/components/form/OValidatedField.vue'
 
 const { $oruga, $i18n, $api } = useNuxtApp()
 const route = useRoute()
 const router = useRouter()
 const directus = useDirectus()
 
-extend('required', ruleRequired)
-extend('confirmed', ruleConfirmed)
-
-const password1 = ref('')
-const password2 = ref('')
+const password = ref('')
+const password_check = ref('')
 const success = ref(null)
 const error = ref(null)
 const isLoading = ref(false)
 const token = ref(null)
-const observer = ref(null)
+
+const validationSchema = yup.object({
+    password: yup.string().required('validation.required'),
+    password_check: yup
+        .string()
+        .test('passwords-match', 'validation.confirmed', function (val) {
+            return this.parent.password === val
+        })
+})
+
+const { errors: formErrors, validate } = useForm({ validationSchema })
 
 const errorMessage = computed(() => {
     const errorMessage = $api.tools.parseErrorMessage(error.value)
@@ -109,15 +109,15 @@ const errorMessage = computed(() => {
 onMounted(() => {
     // TODO - different handling of missing token
     if (!route.query.token) {
-        router.push('/forgot-password')
+        router.push('/user/forgot-password')
     } else {
         token.value = route.query.token
     }
 })
 
-function onSubmit() {
-    observer.value.validate().then((isValid) => {
-        if (!isValid) {
+async function onSubmit() {
+    await validate().then((result) => {
+        if (!result.valid) {
             $oruga.notification.open({
                 message: $i18n.t('validation.form_validation_error'),
                 variant: 'danger'
@@ -132,10 +132,10 @@ async function resetPassword() {
     try {
         isLoading.value = true
 
-        await directus.auth.password.reset(token.value, password1.value)
+        await directus.auth.password.reset(token.value, password.value)
         // await $axios.post('auth/password/reset', {
         //     token: token.value,
-        //     password: password1.value
+        //     password: password.value
         // })
 
         success.value = 'user.password_reset_success'

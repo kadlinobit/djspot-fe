@@ -21,7 +21,9 @@
                                     >
                                         {{ dj.name }}
                                     </h1>
-                                    <h2 class="subtitle">{{ dj.city }}</h2>
+                                    <h2 class="subtitle">
+                                        {{ dj?.city?.name }}
+                                    </h2>
                                 </div>
                                 <div class="column is-hidden-tablet is-narrow">
                                     <cover-image
@@ -55,7 +57,7 @@
                     <dj-control-box
                         :dj="dj"
                         :is-toggle-follow-loading="isToggleFollowLoading"
-                        @toggleFollow="() => onToggleFollow()"
+                        @toggleFollow="onToggleFollow"
                     />
                 </div>
             </div>
@@ -99,19 +101,22 @@
 <script setup lang="ts">
 /**
  * TODO
+ * - BIO nebo SETY se nenačtou při SSR - proč???
  * - error handling
  * - better handling of toggleFollow ? (fetch DJ again after toggle?)
  * - handle refresh on login - when logged out, refresh does not happen (and directus throws an error on manual refresh)
  */
 
 import _ from 'lodash'
+import { useProgrammatic } from '@oruga-ui/oruga'
 import CoverImage from '~/components/media/CoverImage.vue'
 import SoundList from '~/components/audio/SoundList.vue'
 import DjControlBox from '~/components/dj/DjControlBox.vue'
 import { useMainStore } from '~/stores'
 import useDirectus, { useAuth } from '~/composables/directus'
 
-const { $marked, $api, $oruga } = useNuxtApp()
+const { $marked, $api } = useNuxtApp()
+const { oruga: $oruga } = useProgrammatic()
 const mainStore = useMainStore()
 const directus = useDirectus()
 const auth = useAuth()
@@ -158,9 +163,7 @@ const {
             throw new Error('DJ not found')
         }
     },
-    // There must be no server side data load - otherwise it is not working
-    // TODO: Maybe remove when we get to NUXT 3
-    { server: false, initialCache: false, watch: auth.loggedIn }
+    { initialCache: false, watch: () => auth.loggedIn }
 )
 
 const mixes = computed(() => {

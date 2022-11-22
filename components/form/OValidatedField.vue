@@ -1,96 +1,90 @@
 <template>
-    <ValidationProvider v-slot="{ errors, valid }" :vid="vid" :name="name" :rules="rules" slim>
-        <o-field
-            :label="label"
-            :variant="getFieldVariant(errors, valid)"
-            :message="$t(errors[0])"
-            :style="visibilityStyle"
-        >
-            <template v-if="help" #label>
-                {{ label }}
-                <o-tooltip variant="dark" :label="help" multilined>
-                    <o-icon size="small" icon="help-circle-outline"></o-icon>
-                </o-tooltip>
-            </template>
-            <o-input
-                :value="value"
-                :placeholder="placeholder"
-                :type="type"
-                :use-html5-validation="false"
-                :disabled="disabled"
-                @input="(value) => $emit('input', value)"
-            />
-        </o-field>
-    </ValidationProvider>
+    <o-field
+        :label="props.label"
+        :variant="getFieldVariant"
+        :message="errorMessage ? $i18n.t(errorMessage) : null"
+        :style="visibilityStyle"
+    >
+        <template v-if="props.help" #label>
+            {{ label }}
+            <o-tooltip variant="dark" :label="props.help" multilined>
+                <o-icon size="small" icon="help-circle-outline"></o-icon>
+            </o-tooltip>
+        </template>
+        <o-input
+            v-model="fieldValue"
+            :placeholder="props.placeholder"
+            :type="props.type"
+            :use-html5-validation="false"
+            :disabled="props.disabled"
+        />
+    </o-field>
 </template>
 
-<script>
-import { ValidationProvider } from 'vee-validate'
+<script setup lang="ts">
+import _ from 'lodash'
+import { useField } from 'vee-validate'
 
-export default {
-    components: {
-        ValidationProvider
-    },
-    props: {
-        vid: {
-            type: String,
-            default: ''
-        },
-        value: {
-            type: String,
-            default: ''
-        },
-        name: {
-            type: String,
-            default: 'input'
-        },
-        type: {
-            type: String,
-            default: 'text'
-        },
-        label: {
-            type: String,
-            default: 'label'
-        },
-        placeholder: {
-            type: String,
-            default: ''
-        },
-        disabled: {
-            type: Boolean,
-            default: false
-        },
-        rules: {
-            type: [Object, String],
-            default: ''
-        },
-        hidden: {
-            type: Boolean,
-            default: false
-        },
-        help: {
-            type: String,
-            default: null
-        },
-        isValidationOn: {
-            type: Boolean,
-            default: true
-        }
-    },
-    computed: {
-        visibilityStyle() {
-            if (this.hidden) {
-                return { display: 'none' }
-            }
-            return { display: 'default' }
-        }
-    },
-    methods: {
-        getFieldVariant(errors, valid) {
-            if (this.isValidationOn && !!errors[0]) return 'danger'
-            if (this.isValidationOn && valid) return 'success'
-            return null
-        }
-    }
+const { $i18n } = useNuxtApp()
+
+// TODO - emit to update model value is probably not needed, as vee-validate useField does it automatically
+// const emit = defineEmits(['update:modelValue'])
+
+interface Props {
+    modelValue: string | number | null
+    name?: string
+    type?: string
+    label?: string
+    placeholder?: string
+    disabled?: boolean
+    hidden?: boolean
+    help?: string
+    isValidationOn?: boolean
 }
+
+const props = withDefaults(defineProps<Props>(), {
+    modelValue: '',
+    name: 'input',
+    type: 'text',
+    label: 'label',
+    placeholder: null,
+    disabled: false,
+    hidden: false,
+    help: null,
+    isValidationOn: true
+})
+
+const nameRef = toRef(props, 'name')
+//TODO - meta touched is not working, find out why
+const {
+    errorMessage,
+    value: fieldValue,
+    meta: fieldMeta
+} = useField(nameRef, undefined, {
+    initialValue: props.modelValue
+})
+
+// TODO - we propably dont need onMounted, initialValue in useField is enough
+// onMounted(() => {
+//     fieldValue.value = props.modelValue
+// })
+
+// TODO - do we really need watch to emit update even? Seems like not
+// watch(fieldValue, (val) => {
+//     emit('update:modelValue', val)
+// })
+
+const visibilityStyle = computed(() => {
+    if (props.hidden) {
+        return { display: 'none' }
+    }
+    return { display: 'default' }
+})
+
+const getFieldVariant = computed(() => {
+    if (props.isValidationOn && !fieldMeta.validated) return null
+    if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger'
+    if (props.isValidationOn && fieldMeta.valid) return 'success'
+    return null
+})
 </script>

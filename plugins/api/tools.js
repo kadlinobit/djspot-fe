@@ -4,9 +4,12 @@ const tools = () => {
     const parseErrorMessage = function (e) {
         if (_.isNil(e)) return null
         if (typeof e === 'string') return e
-        if (e?.message) return e.message
 
-        const errorMessage = e?.response?.data?.errors[0]?.message || e
+        const errorMessage =
+            e?.response?.data?.errors[0]?.message ||
+            e?.response?._data?.errors[0]?.message ||
+            e?.message ||
+            e
         return errorMessage
     }
 

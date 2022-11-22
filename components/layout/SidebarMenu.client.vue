@@ -4,7 +4,7 @@
             <p class="menu-label">Menu</p>
             <ul class="menu-list">
                 <li @click="closeSidebar">
-                    <nuxt-link to="/user">
+                    <nuxt-link to="/user/account">
                         <o-icon icon="account" size="small" />
                         <span>User</span>
                     </nuxt-link>
@@ -48,15 +48,17 @@
 
 <script setup lang="ts">
 import _ from 'lodash'
+import { useProgrammatic } from '@oruga-ui/oruga'
 import { useMainStore } from '~/stores'
 import { useAuth } from '~/composables/directus'
 const mainStore = useMainStore()
 const auth = useAuth()
 
-const { $oruga, $i18n } = useNuxtApp()
+const { $i18n } = useNuxtApp()
+const { oruga: $oruga } = useProgrammatic()
 
 interface Props {
-    open?: Boolean
+    open?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {

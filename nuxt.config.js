@@ -1,15 +1,15 @@
-import { defineNuxtConfig } from '@nuxt/bridge'
 import i18n from './config/i18n'
+import eslintPlugin from 'vite-plugin-eslint'
 
 export default defineNuxtConfig({
+    // vite: {
+    //     plugins: [eslintPlugin()]
+    // },
     // Global page headers: https://go.nuxtjs.dev/config-head
     alias: {
         tslib: 'tslib/tslib.es6.js'
     },
     // TODO - Add @vueuse/head to be able to use new useHead composable
-    // bridge: {
-    //     meta: true
-    // },
     head: {
         title: 'djspot-fe',
         htmlAttrs: {
@@ -35,7 +35,6 @@ export default defineNuxtConfig({
 
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
-        { src: '~/plugins/vee-validate.client.js', ssr: false },
         { src: '~/plugins/audio.js' },
         { src: '~/plugins/media.js' },
         { src: '~/plugins/time.js' },
@@ -50,12 +49,10 @@ export default defineNuxtConfig({
     // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
     buildModules: [
         // https://go.nuxtjs.dev/eslint
-        '@nuxtjs/eslint-module',
-        ['@pinia/nuxt', { disableVuex: false }]
     ],
 
     // Modules: https://go.nuxtjs.dev/config-modules
-    modules: ['@nuxtjs/axios', '@nuxtjs/i18n'],
+    modules: ['@nuxtjs/i18n', '@pinia/nuxt'],
     i18n: {
         vueI18nLoader: true,
         strategy: 'no_prefix',
@@ -116,7 +113,6 @@ export default defineNuxtConfig({
     // },
     // Build Configuration: https://go.nuxtjs.dev/config-build
     build: {
-        transpile: ['vee-validate/dist/rules'],
         extend(config, ctx) {
             if (ctx.isDev) {
                 config.devtool = ctx.isClient
@@ -125,9 +121,10 @@ export default defineNuxtConfig({
             }
         }
     },
-    publicRuntimeConfig: {
-        API_AUTH_URL: 'http://localhost:1337', // TBD - probably remove
-        DOMAIN: 'http://localhost:1337'
-    },
-    privateRuntimeConfig: {}
+    runtimeConfig: {
+        public: {
+            baseURL: process.env.BASE_URL || 'http://localhost:3000',
+            apiBaseURL: 'http://localhost:8055'
+        }
+    }
 })

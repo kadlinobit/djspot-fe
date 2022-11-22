@@ -4,6 +4,7 @@
     "form": {
         "cancel": "Zrušit",
         "edit": "Upravit",
+        "search": "Hledat",
         "sort": {
             "a_z": "A > Z",
             "z_a": "Z > A",
@@ -12,7 +13,19 @@
             "most_followed": "Nejsledovanější",
             "most_liked": "Nejoblíbenější"
         },
-        "reset_search": "Resetovat vyhledávání"
+        "reset_search": "Resetovat vyhledávání",
+        "radius": {
+            "0": "+0 km",
+            "25": "+25 km",
+            "50": "+50 km",
+            "100": "+100 km"
+        },
+        "pagination": {
+            "next_page" : "Další stránka",
+            "previous_page": "Předchozí stránka",
+            "page": "Stránka",
+            "current_page": "Aktuální stránka"
+        }
     },
     "user": {
         "user_profile": "Uživatelský profil",
@@ -56,7 +69,11 @@
         "register_success_message": "Odkaz k potvrzení nového účtu byl právě odeslán na tvůj email - klikni na něj k dokončení registrace.",
         "email_confirmed": "Tvůj účet byl potvrzen! Teď se můžeš přihlásit.",
         "logout_success": "Byl jsi úspěšně odhlášen. Naviděnou příště!",
-        "profile_update_success": "Tvůj uživatelský profil byl úspěšně uložen!"
+        "profile_update_success": "Tvůj uživatelský profil byl úspěšně uložen!",
+        "account_activation": "Aktivace účtu",
+        "activation_token_missing": "Aktivační token chybí, zkontroluj prosím, že jsi kliknul na správný link pro aktivaci účtu.",
+        "token_received": "Aktivační token přijat, aktivuji účet...",
+        "activation_success": "Tvůj účet '{0}' byl úspěšně aktivován! Za chvíli budeš přesměrován na přihlašovací stránku."
     },
     "dj": {
         "profile": "Profil DJe",
@@ -86,7 +103,8 @@
         "follow": "Sledovat",
         "followers": "Sledujících",
         "no_djs_found": "Bohužel, nenašli jsme žádné DJs.",
-        "search_dj": "Hledat DJe..."
+        "search_dj": "Hledat DJe...",
+        "whole_czechia": "Celá ČR"
     },
     "mix": {
         "type": "Set",
@@ -163,8 +181,10 @@
         "confirmed": "Hesla se musí shodovat",
         "form_validation_error": "Formulář není úplně v cajku, prosím opravit.",
         "no_dj_prefix": "Jméno nesmí obsahovat titul DJ na začátku",
-        "alpha_num_dash_space": "Pole smí obsahovat jen písmena, čísla, mezeru a pomlčku"
+        "alpha_num_dash_space": "Pole smí obsahovat jen písmena, čísla, mezeru a pomlčku",
+        "unique_email": "Tento email už existuje v naší databázi."
     },
     "Email is already taken.": "Tento email už existuje v naší databázi.",
-    "This email does not exist.": "Tento email neexistuje v naší databázi."
+    "This email does not exist.": "Tento email neexistuje v naší databázi.",
+    "jwt malformed" : "Aktivační token je neplatný."
 }
