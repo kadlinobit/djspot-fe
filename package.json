@@ -28,7 +28,7 @@
         "js-cookie": "^3.0.1",
         "lodash": "^4.17.21",
         "marked": "^4.0.4",
-        "nuxt": "npm:nuxt3@latest",
+        "nuxt": "^3.0.0",
         "pinia": "^2.0.23",
         "url-parse": "^1.5.3",
         "utf8": "^3.0.0",
@@ -39,6 +39,7 @@
         "yup": "^0.32.11"
     },
     "devDependencies": {
+        "@nuxt/content": "^2.3.0",
         "@nuxtjs/eslint-config-typescript": "^11.0.0",
         "@typescript-eslint/eslint-plugin": "^5.40.0",
         "@typescript-eslint/parser": "^5.40.0",

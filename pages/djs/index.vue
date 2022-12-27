@@ -1,7 +1,24 @@
 <template>
     <section class="section">
         <div class="container">
-            <h1 class="title">DJs{{ djs?.meta?.filter_count || 0 }}</h1>
+            <div class="columns is-mobile is-vcentered">
+                <div class="column">
+                    <h1 class="title">
+                        {{ $i18n.t('dj.djs') }}
+                    </h1>
+                </div>
+                <div class="column is-narrow" v-if="auth?.loggedIn">
+                    <o-field>
+                        <o-switch
+                            position="left"
+                            v-model="following"
+                            @update:modelValue="onSearch"
+                            >{{ $i18n.t('dj.followed_by_me') }}</o-switch
+                        >
+                    </o-field>
+                </div>
+            </div>
+
             <o-field>
                 <o-input
                     v-model="name"
@@ -97,7 +114,15 @@
             </div>
             <div v-else>
                 <dj-list :djs="djs?.data" />
-
+                <div class="block">
+                    <div class="tag is-secondary is-medium">
+                        {{
+                            $i18n.t('dj.total_found', [
+                                djs?.meta?.filter_count || 0
+                            ])
+                        }}
+                    </div>
+                </div>
                 <o-pagination
                     :current="page"
                     :total="djs?.meta?.filter_count"
@@ -135,11 +160,16 @@ const formStore = useFormStore()
 const auth = useAuth()
 const directus = useDirectus()
 
-type UrlFilterObj = {
+interface UrlFilterObj {
     name?: string
     city?: number
     radius?: number
     genres?: Array<any>
+    following?: boolean
+}
+
+interface RequestFilterObj {
+    _and: Array<Object>
 }
 
 const name = ref(route.query.name ? String(route.query.name) : '')
@@ -151,6 +181,9 @@ const genres = ref([]) // FILLED IN OnMounted
 const sort = ref(route.query.sort ? String(route.query.sort) : 'name')
 const perPage = ref(4)
 const page = ref(route.query.page ? parseInt(String(route.query.page)) : 1)
+const following = ref(
+    route.query.following === 'true' && auth.loggedIn.value ? true : false
+)
 
 const urlFilter = computed(() => {
     const urlFilterObj: UrlFilterObj = {}
@@ -158,7 +191,8 @@ const urlFilter = computed(() => {
     if (city.value) urlFilterObj.city = city.value
     if (city.value && radius.value) urlFilterObj.radius = radius.value
     if (!_.isEmpty(genres))
-        urlFilterObj.genres = genres.value.map((genre) => genre.id)
+        urlFilterObj.genres = genres.value.map((genre: Genre) => genre.id)
+    if (!_.isNil(following.value)) urlFilterObj.following = following.value
 
     return !_.isEmpty(urlFilterObj) ? urlFilterObj : null
 })
@@ -176,7 +210,7 @@ const requestQuery = computed(() => {
     let fields = $api.collection.getCollectionFields('dj', 'default')
 
     if (auth.loggedIn.value) {
-        fields = fields.filter((field) => field !== 'follows')
+        fields = fields.filter((field: string) => field !== 'follows')
     }
     return {
         meta: '*',
@@ -189,9 +223,15 @@ const requestQuery = computed(() => {
 })
 
 const requestFilter = computed(() => {
-    if (!name.value && !city.value && _.isEmpty(genres.value)) return null
+    if (
+        !name.value &&
+        !city.value &&
+        _.isEmpty(genres.value) &&
+        !following.value
+    )
+        return null
 
-    const requestFilterObj = { _and: [] }
+    const requestFilterObj: RequestFilterObj = { _and: [] }
 
     if (name.value) {
         requestFilterObj._and.push({
@@ -237,7 +277,19 @@ const requestFilter = computed(() => {
         requestFilterObj._and.push({
             genres: {
                 genre_id: {
-                    _in: genres.value.map((genre) => genre.id)
+                    _in: genres.value.map((genre: Genre) => genre.id)
+                }
+            }
+        })
+    }
+
+    if (following.value === true && auth?.user?.value?.email) {
+        requestFilterObj._and.push({
+            follows: {
+                user_created: {
+                    email: {
+                        _contains: auth.user.value.email
+                    }
                 }
             }
         })
@@ -279,7 +331,7 @@ function onSearch() {
     pushRouterQuery()
     refresh()
 }
-function onPageChange(pageNumber) {
+function onPageChange(pageNumber: number) {
     page.value = pageNumber
     pushRouterQuery()
     refresh()
@@ -302,16 +354,14 @@ onMounted(() => {
     // Fill in genres
     if (route.query.genres) {
         const urlGenres = Array.isArray(route.query.genres)
-            ? route.query.genres.map((genreId) => parseInt(genreId))
+            ? route.query.genres.map((genreId) => parseInt(String(genreId)))
             : [parseInt(route.query.genres)]
 
-        genres.value = formStore.genresOptions.filter((genreOption) =>
+        genres.value = formStore.genresOptions.filter((genreOption: Genre) =>
             urlGenres.includes(genreOption.id)
         )
     }
 
     refresh()
 })
-
-watch(genres, onSearch)
 </script>

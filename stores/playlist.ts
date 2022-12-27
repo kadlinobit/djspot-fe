@@ -13,14 +13,14 @@ export const usePlaylistStore = defineStore('playlist', () => {
     const playlistSize = computed(() => {
         return playlist.value.length
     })
-    const isSoundInPlaylist = (sound) => {
+    const isSoundInPlaylist = (sound: Sound) => {
         return playlist.value.some(
-            (playlistSound) => playlistSound.id === sound.id
+            (playlistSound: Sound) => playlistSound.id === sound.id
         )
     }
-    const soundIndexInPlaylist = (sound) => {
+    const soundIndexInPlaylist = (sound: Sound) => {
         return playlist.value.findIndex(
-            (playlistSound) => playlistSound.id === sound.id
+            (playlistSound: Sound) => playlistSound.id === sound.id
         )
     }
 

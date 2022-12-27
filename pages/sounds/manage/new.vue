@@ -60,7 +60,7 @@ async function createSound({ formData }) {
 
         if (newSound) {
             router.push(
-                `/djs/${auth.user.value.djs[0].slug}/sounds/${newSound.id}`
+                `/djs/${auth.user.value.djs[0].slug}/sounds/${newSound.slug}`
             )
 
             $oruga.notification.open({

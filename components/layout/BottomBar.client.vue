@@ -60,7 +60,7 @@ const bottomBarHiddenClass = computed(() => {
             justify-content: center;
             height: 40px;
             width: 40px;
-            background-color: $peach;
+            background-color: $dark;
             right: -40px;
             top: -40px;
 

@@ -1,6 +1,6 @@
 import file from './file.js'
 import collection from './collection.js'
-import tools from './tools.js'
+import tools from './tools.ts'
 import { defineNuxtPlugin } from '#app'
 
 export default defineNuxtPlugin((nuxtApp) => {

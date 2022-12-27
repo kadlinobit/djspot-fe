@@ -5,7 +5,7 @@
         </div>
         <div class="column is-text-ellipsis mr-1">
             <nuxt-link
-                :to="{ path: `/djs/${sound?.dj?.slug}/sounds/${sound.id}` }"
+                :to="{ path: `/djs/${sound?.dj?.slug}/sounds/${sound.slug}` }"
             >
                 {{ `${sound.dj.name} – ${sound.name}` }}
             </nuxt-link>

@@ -10,33 +10,36 @@ declare global {
     type FormInitialData = Object
 
     interface FormProps {
-        initialData?: FormInitialData
-        errorMessage?: string
-        successMessage?: string
-        isLoading?: boolean
+        initialData?: FormInitialData | null
+        errorMessage?: string | null
+        successMessage?: string | null
+        isLoading?: boolean | null
         mode?: 'new' | 'edit'
     }
 
     interface DjFormData {
-        name?: string
-        slug?: string
-        email?: string
-        bio?: string
-        photo?: string
-        city?: number
-        genres?: Array<string>
+        id?: string | null
+        name?: string | null
+        slug?: string | null
+        email?: string | null
+        bio?: string | null
+        photo?: string | null
+        city?: number | City | null
+        genres?: Array<string> | null
     }
 
     interface SoundFormData {
-        name?: string
-        url?: string
-        description?: string
-        genres?: Array<string>
-        dj?: Dj
-        type?: string
-        duration?: number
-        photo?: Object | string
-        status?: string
+        id?: string | null
+        name?: string | null
+        slug?: string | null
+        url?: string | null
+        description?: string | null
+        genres?: Array<string> | null
+        dj?: Dj | null
+        type?: string | null
+        duration?: number | null
+        photo?: Object | string | null
+        status?: string | null
     }
 
     interface Dj {
@@ -63,7 +66,7 @@ declare global {
     }
 
     interface Genre {
-        id?: number
+        id: number
         name?: string
     }
 

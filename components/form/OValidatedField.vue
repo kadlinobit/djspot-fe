@@ -1,8 +1,8 @@
 <template>
     <o-field
         :label="props.label"
-        :variant="getFieldVariant"
-        :message="errorMessage ? $i18n.t(errorMessage) : null"
+        :variant="fieldVariant"
+        :message="fieldMessage"
         :style="visibilityStyle"
     >
         <template v-if="props.help" #label>
@@ -12,12 +12,20 @@
             </o-tooltip>
         </template>
         <o-input
+            expanded
             v-model="fieldValue"
             :placeholder="props.placeholder"
             :type="props.type"
             :use-html5-validation="false"
             :disabled="props.disabled"
         />
+        <p v-if="controlButton" class="control">
+            <o-button
+                :variant="props.controlButtonVariant"
+                :label="$i18n.t(props.controlButtonLabel)"
+                @click="emit('controlButtonClicked')"
+            />
+        </p>
     </o-field>
 </template>
 
@@ -28,18 +36,24 @@ import { useField } from 'vee-validate'
 const { $i18n } = useNuxtApp()
 
 // TODO - emit to update model value is probably not needed, as vee-validate useField does it automatically
-// const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'controlButtonClicked'])
 
 interface Props {
     modelValue: string | number | null
     name?: string
     type?: string
     label?: string
-    placeholder?: string
+    placeholder?: string | null
     disabled?: boolean
     hidden?: boolean
-    help?: string
+    help?: string | null
     isValidationOn?: boolean
+    controlButton?: boolean
+    controlButtonLabel?: string
+    controlButtonVariant?: string
+    customMessage?: string | null
+    customMessageVariant?: string | null
+    validationRules?: Object | undefined | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -51,7 +65,13 @@ const props = withDefaults(defineProps<Props>(), {
     disabled: false,
     hidden: false,
     help: null,
-    isValidationOn: true
+    isValidationOn: true,
+    controlButton: false,
+    controlButtonLabel: 'Do something',
+    controlButtonVariant: 'primary',
+    customMessage: null,
+    customMessageVariant: 'warning',
+    validationRules: undefined
 })
 
 const nameRef = toRef(props, 'name')
@@ -60,7 +80,7 @@ const {
     errorMessage,
     value: fieldValue,
     meta: fieldMeta
-} = useField(nameRef, undefined, {
+} = useField(nameRef, props.validationRules, {
     initialValue: props.modelValue
 })
 
@@ -74,6 +94,14 @@ const {
 //     emit('update:modelValue', val)
 // })
 
+// If there is a custom message via prop, we display it, but only if there is no error message (error has higher priority)
+const fieldMessage = computed(() => {
+    if (!_.isNil(props.customMessage) && _.isNil(errorMessage.value))
+        return $i18n.t(props.customMessage)
+    if (!_.isNil(errorMessage.value)) return $i18n.t(errorMessage.value)
+    return null
+})
+
 const visibilityStyle = computed(() => {
     if (props.hidden) {
         return { display: 'none' }
@@ -81,7 +109,9 @@ const visibilityStyle = computed(() => {
     return { display: 'default' }
 })
 
-const getFieldVariant = computed(() => {
+const fieldVariant = computed(() => {
+    if (!_.isNil(props.customMessage) && _.isNil(errorMessage.value))
+        return props.customMessageVariant
     if (props.isValidationOn && !fieldMeta.validated) return null
     if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger'
     if (props.isValidationOn && fieldMeta.valid) return 'success'

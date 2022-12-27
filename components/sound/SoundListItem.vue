@@ -16,7 +16,7 @@
                 <h3 class="is-text-ellipsis">
                     <nuxt-link
                         class="is-size-5-desktop is-size-6-tablet has-text-weight-medium"
-                        :to="`/djs/${sound?.dj?.slug}/sounds/${sound.id}`"
+                        :to="`/djs/${sound?.dj?.slug}/sounds/${sound.slug}`"
                         >{{ sound.name }}</nuxt-link
                     >
                 </h3>

@@ -1,22 +1,22 @@
 @import 'bulma/sass/utilities/_all.sass';
-// // Set your colors
-$primary: #ffc000;
+
+// Derived colors
+$primary: #EDC139;
 $primary-light: findLightColor($primary);
 $primary-dark: findDarkColor($primary);
 $primary-invert: findColorInvert($primary);
 
-$secondary: #2b3648;
+$secondary: #D02440;
 $secondary-light: findLightColor($secondary);
 $secondary-dark: findDarkColor($secondary);
 $secondary-invert: findColorInvert($secondary);
 
-$light: #fcfaf2;
-$light-invert: findColorInvert($light);
+$link: #3CBEC5;
+$link-light: findLightColor($link);
+$link-dark: findDarkColor($link);
+$link-invert: findColorInvert($link);
 
-$peach: #e7696b;
-$peach-light: findLightColor($peach);
-$peach-dark: findDarkColor($peach);
-$peach-invert: findColorInvert($peach);
+$danger: $secondary;
 
 // Lists and maps
 $custom-colors: null !default;
@@ -53,12 +53,6 @@ $colors: mergeColorMaps(
             $secondary-light,
             $secondary-dark
         ),
-        'peach': (
-            $peach,
-            $peach-invert,
-            $peach-light,
-            $peach-dark
-        ),
         'link': (
             $link,
             $link-invert,
@@ -93,14 +87,41 @@ $colors: mergeColorMaps(
     $custom-colors
 );
 
+// Body global
+$body-background-color: $black-ter;
+
+// Text
+$text: $white;
+$text-strong: $white;
+
 // Links
-$link: $secondary-dark;
-$link-invert: $secondary-invert;
-$link-focus-border: $secondary;
+// $link: $secondary-dark;
+// $link-invert: $secondary-invert;
+// $link-focus-border: $secondary;
+$link-hover: $link-light;
 
 // Box
 $box-background-color: $secondary;
 $box-color: $white;
 
+// Card
+$card-background-color: $grey-dark;
+
+// Dropdown
+$dropdown-content-background-color: $grey-darker;
+
+// Input
+$input-color: $white;
+$input-border-color: $grey-dark;
+$input-background-color: $grey-dark;
+
 //Modal
+$modal-card-head-background-color: $link;
+$modal-card-body-background-color: $grey-darker;
 $modal-card-spacing: 160px;
+$modal-card-head-border-bottom: none;
+$modal-card-foot-border-top: none;
+
+
+//Tag
+$tag-background-color: $grey-darker;

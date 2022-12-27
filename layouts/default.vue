@@ -24,7 +24,7 @@
         <client-only>
             <o-sidebar
                 v-if="auth.user"
-                variant="light"
+                variant="dark"
                 :fullheight="true"
                 :fullwidth="false"
                 :overlay="true"
@@ -36,7 +36,7 @@
             </o-sidebar>
         </client-only>
         <Navbar />
-        <slot style="margin-bottom: 100px" />
+        <slot style="margin-bottom: 100px"></slot>
         <BottomBar />
     </div>
 </template>
@@ -69,8 +69,8 @@ function head() {
 </script>
 
 <style lang="scss">
-@import '~/assets/scss/_variables';
-html {
-    background-color: $light;
-}
+// @import '~/assets/scss/_variables';
+// html {
+//     background-color: $dark;
+// }
 </style>

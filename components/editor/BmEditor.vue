@@ -132,7 +132,6 @@ function handleMouseOver(type) {
                 width: 100%;
                 resize: none;
                 border: none;
-                background: #eee;
                 box-shadow: none;
                 border-top-right-radius: 0;
                 border-bottom-right-radius: 0;

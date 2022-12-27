@@ -2,6 +2,11 @@
 @import 'bulma/bulma.sass';
 @import '@oruga-ui/theme-bulma/dist/scss/bulma';
 
+ 
+// html {
+//     background-color: $fresh;
+// }
+
 .is-text-ellipsis {
     white-space: nowrap;
     overflow: hidden;

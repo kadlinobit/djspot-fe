@@ -40,20 +40,21 @@ interface SelectOptionsItem {
 }
 
 interface Props {
-    modelValue: string | number | null
+    modelValue: string | number | object | null
     name?: string
     label?: string
-    placeholder?: string
+    placeholder?: string | null
     expanded?: boolean
     options: Array<SelectOptionsItem>
     disabled?: boolean
     hidden?: boolean
-    help?: string
+    help?: string | null
     isValidationOn?: boolean
+    validationRules?: Object | undefined | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    modelValue: '',
+    modelValue: null,
     name: 'input',
     label: 'label',
     placeholder: null,
@@ -62,14 +63,19 @@ const props = withDefaults(defineProps<Props>(), {
     disabled: false,
     hidden: false,
     help: null,
-    isValidationOn: true
+    isValidationOn: true,
+    validationRules: undefined
 })
 
 const nameRef = toRef(props, 'name')
 //TODO - meta touched is not working, find out why
-const { errorMessage, value: fieldValue } = useField(nameRef, undefined, {
-    initialValue: props.modelValue
-})
+const { errorMessage, value: fieldValue } = useField(
+    nameRef,
+    props.validationRules,
+    {
+        initialValue: props.modelValue
+    }
+)
 
 const visibilityStyle = computed(() => {
     if (props.hidden) {

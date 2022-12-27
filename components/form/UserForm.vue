@@ -152,7 +152,7 @@ const {
 } = useForm({ validationSchema })
 
 const languagesOptions = computed(() => {
-    return $i18n.locales
+    return $i18n.locales.value
         .map((locale) => ({ value: locale.iso, label: locale.name }))
         .sort((a, b) => a.value.localeCompare(b.value))
 })

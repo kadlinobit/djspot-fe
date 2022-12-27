@@ -1,7 +1,33 @@
 <template>
     <section class="section">
         <div class="container">
-            <h1 class="title">Sounds {{ sounds?.meta?.filter_count || 0 }}</h1>
+            <div class="columns is-mobile is-vcentered">
+                <div class="column">
+                    <h1 class="title">
+                        {{ $i18n.t('sound.sounds') }}
+                    </h1>
+                </div>
+                <div class="column is-narrow" v-if="auth?.loggedIn">
+                    <o-field>
+                        <o-switch
+                            position="left"
+                            v-model="liked"
+                            @update:modelValue="onSearch"
+                            >{{ $i18n.t('sound.liked_by_me') }}</o-switch
+                        >
+                    </o-field>
+                </div>
+                <div class="column is-narrow" v-if="auth?.loggedIn">
+                    <o-field>
+                        <o-switch
+                            position="left"
+                            v-model="following"
+                            @update:modelValue="onSearch"
+                            >{{ $i18n.t('dj.followed_by_me') }}</o-switch
+                        >
+                    </o-field>
+                </div>
+            </div>
             <o-field>
                 <o-input
                     v-model="name"
@@ -80,7 +106,15 @@
             </div>
             <div v-else-if="!fetchPending && sounds?.meta?.filter_count > 0">
                 <sounds-page-list :sounds="sounds.data" />
-
+                <div class="block">
+                    <div class="tag is-secondary is-medium">
+                        {{
+                            $i18n.t('sound.total_found', [
+                                sounds?.meta?.filter_count || 0
+                            ])
+                        }}
+                    </div>
+                </div>
                 <o-pagination
                     :current="page"
                     :total="sounds?.meta?.filter_count"
@@ -115,11 +149,17 @@ const formStore = useFormStore()
 const directus = useDirectus()
 const auth = useAuth()
 
-type UrlFilterObj = {
+interface UrlFilterObj {
     name?: string
     city?: string
     type?: string
     genres?: Array<any>
+    liked?: boolean
+    following?: boolean
+}
+
+interface RequestFilterObj {
+    _and: Array<Object>
 }
 
 const name = ref(route.query.name ? String(route.query.name) : '')
@@ -128,13 +168,21 @@ const genres = ref([]) // FILLED IN OnMounted
 const sort = ref(route.query.sort ? String(route.query.sort) : 'name')
 const perPage = ref(4)
 const page = ref(route.query.page ? parseInt(String(route.query.page)) : 1)
+const liked = ref(
+    route.query.liked === 'true' && auth.loggedIn.value ? true : false
+)
+const following = ref(
+    route.query.following === 'true' && auth.loggedIn.value ? true : false
+)
 
 const urlFilter = computed(() => {
     const urlFilterObj: UrlFilterObj = {}
     if (name.value) urlFilterObj.name = name.value
     if (type.value) urlFilterObj.type = type.value
     if (!_.isEmpty(genres))
-        urlFilterObj.genres = genres.value.map((genre) => genre.id)
+        urlFilterObj.genres = genres.value.map((genre: Genre) => genre.id)
+    if (!_.isNil(liked.value)) urlFilterObj.liked = liked.value
+    if (!_.isNil(following.value)) urlFilterObj.following = following.value
 
     return !_.isEmpty(urlFilterObj) ? urlFilterObj : null
 })
@@ -152,7 +200,7 @@ const requestQuery = computed(() => {
     let fields = $api.collection.getCollectionFields('sound', 'default')
 
     if (auth.loggedIn.value) {
-        fields = fields.filter((field) => field !== 'likes')
+        fields = fields.filter((field: string) => field !== 'likes')
     }
 
     return {
@@ -166,15 +214,33 @@ const requestQuery = computed(() => {
 })
 
 const requestFilter = computed(() => {
-    if (!name.value && !type.value && _.isEmpty(genres.value)) return null
+    if (
+        !name.value &&
+        !type.value &&
+        _.isEmpty(genres.value) &&
+        !liked.value &&
+        !following.value
+    )
+        return null
 
-    const requestFilterObj = { _and: [] }
+    const requestFilterObj: RequestFilterObj = { _and: [] }
 
     if (name.value) {
         requestFilterObj._and.push({
-            name: {
-                _contains: name.value.toLowerCase().trim()
-            }
+            _or: [
+                {
+                    name: {
+                        _contains: String(name.value).toLowerCase().trim()
+                    }
+                },
+                {
+                    dj: {
+                        name: {
+                            _contains: String(name.value).toLowerCase().trim()
+                        }
+                    }
+                }
+            ]
         })
     }
     if (type.value) {
@@ -189,7 +255,33 @@ const requestFilter = computed(() => {
         requestFilterObj._and.push({
             genres: {
                 genre_id: {
-                    _in: genres.value.map((genre) => genre.id)
+                    _in: genres.value.map((genre: Genre) => genre.id)
+                }
+            }
+        })
+    }
+
+    if (liked.value === true && auth?.user?.value?.email) {
+        requestFilterObj._and.push({
+            likes: {
+                user_created: {
+                    email: {
+                        _contains: auth.user.value.email
+                    }
+                }
+            }
+        })
+    }
+
+    if (following.value === true && auth?.user?.value?.email) {
+        requestFilterObj._and.push({
+            dj: {
+                follows: {
+                    user_created: {
+                        email: {
+                            _contains: auth.user.value.email
+                        }
+                    }
                 }
             }
         })
@@ -223,7 +315,7 @@ function onSearch() {
     pushRouterQuery()
     refresh()
 }
-function onPageChange(pageNumber) {
+function onPageChange(pageNumber: number) {
     page.value = pageNumber
     pushRouterQuery()
     refresh()
@@ -236,10 +328,10 @@ onMounted(async () => {
     // Fill in genres
     if (route.query.genres) {
         const urlGenres = Array.isArray(route.query.genres)
-            ? route.query.genres.map((genreId) => parseInt(genreId))
+            ? route.query.genres.map((genreId) => parseInt(String(genreId)))
             : [parseInt(route.query.genres)]
 
-        genres.value = formStore.genresOptions.filter((genreOption) =>
+        genres.value = formStore.genresOptions.filter((genreOption: Genre) =>
             urlGenres.includes(genreOption.id)
         )
     }
@@ -252,6 +344,8 @@ function resetSearch() {
     type.value = ''
     genres.value = []
     sort.value = 'name'
+    liked.value = false
+    following.value = false
 
     onSearch()
 }

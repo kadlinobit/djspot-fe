@@ -24,22 +24,29 @@
                         type="text"
                         :label="$i18n.t('dj.name')"
                         :placeholder="$i18n.t('dj.dj_name_placeholder')"
-                        rules="required|no_dj_prefix|alpha_num_dash_space"
+                        :validation-rules="validationSchema.name"
                     />
                     <o-validated-field
                         v-model="formData.slug"
                         name="slug"
-                        :disabled="true"
                         type="text"
                         :label="$i18n.t('dj.slug')"
-                        rules="required"
+                        :control-button="true"
+                        :control-button-label="'form.generate'"
+                        :custom-message="slugChangedMessage"
+                        :validation-rules="validationSchema.slug"
+                        @control-button-clicked="
+                            formData.slug = $api.tools.generateUrlSlug(
+                                formData.name
+                            )
+                        "
                     />
                     <o-validated-field
                         v-model="formData.email"
                         name="email"
                         type="email"
                         :label="$i18n.t('dj.email')"
-                        rules="email"
+                        :validation-rules="validationSchema.email"
                     />
                     <o-validated-select
                         v-model="formData.city"
@@ -49,6 +56,7 @@
                         :options="formStore.citiesOptions"
                         :expanded="true"
                         :placeholder="$i18n.t('dj.select_city')"
+                        :validation-rules="validationSchema.city"
                     />
                     <o-validated-tag-input
                         v-model="formData.genres"
@@ -59,6 +67,7 @@
                         field="name"
                         :max-tags="3"
                         :placeholder="$i18n.t('dj.select_3_genres')"
+                        :validation-rules="validationSchema.genres"
                     />
                 </div>
                 <div class="column is-half-tablet is-two-fifths-desktop">
@@ -68,6 +77,7 @@
                         :label="$i18n.t('dj.photo')"
                         rules="image_type"
                         :current-image="initialData ? initialData.photo : null"
+                        :validation-rules="validationSchema.photo"
                     />
                 </div>
             </div>
@@ -109,6 +119,7 @@
 <script setup lang="ts">
 // TODO - make slug editable
 // TODO - slug availability check online plus validation in form
+import _ from 'lodash'
 import * as yup from 'yup'
 import { useProgrammatic } from '@oruga-ui/oruga'
 import { useForm } from 'vee-validate'
@@ -120,7 +131,7 @@ import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
 import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
 import useDirectus from '~/composables/directus'
 
-const { $i18n } = useNuxtApp()
+const { $i18n, $api } = useNuxtApp()
 const { oruga: $oruga } = useProgrammatic()
 const formStore = useFormStore()
 const router = useRouter()
@@ -130,8 +141,11 @@ const emit = defineEmits<{
     (e: 'formSubmit', formSubmitData: FormSubmitData): void
 }>()
 
-interface Props extends FormProps {
-    initialData?: DjFormData
+interface Props {
+    initialData?: DjFormData | null
+    errorMessage?: string | null
+    successMessage?: string | null
+    isLoading?: boolean | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -155,17 +169,44 @@ const formData = ref<DjFormData>({
 const availableGenres = ref(null)
 const currentPhoto = ref(null)
 
-// Validation
-const nameRegEx = /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi
-const validationSchema = yup.object({
+async function verifyUniqueSlug(value: string) {
+    return $api.tools.verifyUnique('dj', 'slug', value, props.initialData?.slug)
+}
+const debounceVerifyUniqueSlug = $api.tools.asyncDebounce(
+    verifyUniqueSlug,
+    1500
+)
+async function verifyUniqueName(value: string) {
+    return $api.tools.verifyUnique('dj', 'name', value, props.initialData?.name)
+}
+const debounceVerifyUniqueName = $api.tools.asyncDebounce(
+    verifyUniqueName,
+    1500
+)
+
+const validationSchema = {
     name: yup
         .string()
         .required('validation.required')
-        .matches(nameRegEx, 'validation.alpha_num_dash_space')
-        .matches(/^(?!(dj |dj_|dj-).*$).*/gi, 'validation.no_dj_prefix'),
-    slug: null,
+        .matches(
+            $api.tools.regEx.profileName,
+            'validation.alpha_num_dash_space'
+        )
+        .matches($api.tools.regEx.noDjPrefix, 'validation.no_dj_prefix')
+        .test('verified', 'validation.unique_dj_name', async (value) => {
+            const verified = await debounceVerifyUniqueName(value as string)
+            return verified as boolean
+        }),
+    slug: yup
+        .string()
+        .required('validation.required')
+        .matches($api.tools.regEx.urlSlug, 'validation.url_slug')
+        .test('verified', 'validation.unique_slug', async (value) => {
+            const verified = await debounceVerifyUniqueSlug(value as string)
+            return verified as boolean
+        }),
     email: yup.string().email('validation.email'),
-    city: yup.string().required('validation.required'),
+    city: yup.number().required('validation.required'),
     photo: yup
         .mixed()
         .test('photo', 'validation.image_type', (val) => {
@@ -177,21 +218,62 @@ const validationSchema = yup.object({
         })
         .nullable(),
     genres: yup.array().min(1).max(3)
-})
+}
 
-const { errors: formErrors, validate } = useForm({ validationSchema })
+// Validation schema for the whole form. Not used at the moment as it validates the whole form at once including async validations
+// const validationSchema = yup.object({
+//     name: yup
+//         .string()
+//         .required('validation.required')
+//         .matches(nameRegEx, 'validation.alpha_num_dash_space')
+//         .matches(/^(?!(dj |dj_|dj-).*$).*/gi, 'validation.no_dj_prefix')
+//         .test(
+//             'verified',
+//             'validation.unique_dj_name',
+//             async (value, values) => {
+//                 const verified = await debounceVerifyUniqueName(
+//                     value as string,
+//                     values as yup.TestContext<any>
+//                 )
+//                 return verified as boolean
+//             }
+//         ),
+//     slug: yup
+//         .string()
+//         .required('validation.required')
+//         .matches(slugRegEx, 'validation.url_slug')
+//         .test('verified', 'validation.unique_slug', async (value, values) => {
+//             const verified = await debounceVerifyUniqueSlug(
+//                 value as string,
+//                 values as yup.TestContext<any>
+//             )
+//             return verified as boolean
+//         }),
+//     email: yup.string().email('validation.email'),
+//     city: yup.number().required('validation.required'),
+//     photo: yup
+//         .mixed()
+//         .test('photo', 'validation.image_type', (val) => {
+//             const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
+//             if (val === null) return true
+//             if (typeof val === 'string' && val === 'keep-current') return true
+//             if (val?.file && allowedTypes.includes(val?.file?.type)) return true
+//             return false
+//         })
+//         .nullable(),
+//     genres: yup.array().min(1).max(3)
+// })
 
-watch(
-    () => formData.value.name,
-    (val) => {
-        formData.value.slug = createSlug(val)
-    }
-)
+const { errors: formErrors, validate } = useForm()
 
 onMounted(async () => {
+    formStore.fetchCities()
+    formStore.fetchGenres()
+
     if (props.initialData) {
         formData.value = {
-            ...props.initialData
+            ...props.initialData,
+            city: props?.initialData?.city?.id
         }
     }
     // Check if initial data contains photo - if so, set form to keep existing photo
@@ -221,13 +303,15 @@ async function onSubmit() {
 function onCancel() {
     router.back()
 }
-function createSlug(val: string) {
-    if (!val) return ''
-    return val
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036F]/g, '')
-        .replace(/ /g, '-')
-        .replace(/[^\w-]+/g, '')
-}
+
+const slugChangedMessage = computed(() => {
+    if (
+        !_.isNil(props?.initialData?.slug) &&
+        formData.value.slug !== props?.initialData?.slug
+    )
+        return $i18n.t('validation.slug_changed_warning', [
+            props?.initialData?.slug
+        ])
+    return null
+})
 </script>

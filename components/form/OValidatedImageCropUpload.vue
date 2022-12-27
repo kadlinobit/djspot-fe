@@ -86,19 +86,21 @@ import { useField } from 'vee-validate'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
 
+const { $i18n } = useNuxtApp()
 const { apiBaseURL } = useRuntimeConfig().public
 
 interface Props {
     modelValue: object | string | null
-    currentImage?: string | null
+    currentImage?: string | Object | null
     name?: string
     type?: string
     label?: string
-    placeholder?: string
+    placeholder?: string | null
     disabled?: boolean
     hidden?: boolean
-    help?: string
+    help?: string | null
     isValidationOn?: boolean
+    validationRules?: Object | undefined | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -111,7 +113,8 @@ const props = withDefaults(defineProps<Props>(), {
     disabled: false,
     hidden: false,
     help: null,
-    isValidationOn: true
+    isValidationOn: true,
+    validationRules: undefined
 })
 
 const file = ref(null)
@@ -119,9 +122,13 @@ const photoUrl = ref(null)
 
 const nameRef = toRef(props, 'name')
 //TODO - meta touched is not working, find out why
-const { errorMessage, value: fieldValue } = useField(nameRef, undefined, {
-    initialValue: props.modelValue
-})
+const { errorMessage, value: fieldValue } = useField(
+    nameRef,
+    props.validationRules,
+    {
+        initialValue: props.modelValue
+    }
+)
 
 watch(file, (val) => {
     fieldValue.value = { file: file.value }

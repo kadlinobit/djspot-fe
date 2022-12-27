@@ -66,7 +66,7 @@
                             <span
                                 v-for="genre in sound.genres"
                                 :key="`genre-${genre.genre_id.id}`"
-                                class="tag is-peach is-size-5-desktop is-size-6-mobile is-size-6-tablet"
+                                class="tag is-dark is-size-5-desktop is-size-6-mobile is-size-6-tablet"
                             >
                                 {{ genre.genre_id.name }}
                             </span>
@@ -116,17 +116,19 @@
                     </div>
                     <div class="level-right">
                         <div class="level-item">
-                            <o-button
-                                variant="dark"
-                                tag="nuxt-link"
-                                icon-left="pencil"
-                                size="responsive"
+                            <nuxt-link
                                 :to="{
                                     path: `/sounds/manage/edit/${sound.id}`
                                 }"
                             >
-                                {{ $i18n.t('form.edit') }}
-                            </o-button>
+                                <o-button
+                                    variant="dark"
+                                    icon-left="pencil"
+                                    size="responsive"
+                                >
+                                    {{ $i18n.t('form.edit') }}
+                                </o-button>
+                            </nuxt-link>
                         </div>
                     </div>
                 </div>
@@ -153,14 +155,15 @@
 
 <script setup lang="ts">
 import _ from 'lodash'
+import { useProgrammatic } from '@oruga-ui/oruga'
 import DjInfoBox from '~/components/dj/DjInfoBox.vue'
 import CoverImage from '~/components/media/CoverImage.vue'
-import OResponsiveButton from '~/components/form/OResponsiveButton.vue'
 import ButtonPlayPause from '~~/components/audio/ButtonPlayPause.client.vue'
 import { useMainStore, usePlaylistStore } from '~/stores'
 import useDirectus, { useAuth } from '~/composables/directus'
 
-const { $i18n, $api, $marked, $time, $oruga, $audio } = useNuxtApp()
+const { $i18n, $api, $marked, $time, $audio } = useNuxtApp()
+const { oruga: $oruga } = useProgrammatic()
 const mainStore = useMainStore()
 const playlistStore = usePlaylistStore()
 const route = useRoute()
@@ -178,8 +181,8 @@ const {
 } = useLazyAsyncData(
     'soundDetailsPageQuery',
     async () => {
-        const slug = route.params.slug
-        const id = route.params.id
+        const djSlug = route.params.djSlug
+        const soundSlug = route.params.soundSlug
 
         let fields = $api.collection.getCollectionFields('sound', 'detailed')
 
@@ -189,7 +192,10 @@ const {
 
         const sounds = await directus.items('sound').readByQuery({
             filter: {
-                _and: [{ id: { _eq: id } }, { dj: { slug: { _eq: slug } } }]
+                _and: [
+                    { slug: { _eq: soundSlug } },
+                    { dj: { slug: { _eq: djSlug } } }
+                ]
             },
             fields,
             deep: auth.loggedIn
@@ -213,7 +219,7 @@ const {
     },
     // There must be no server side data load - otherwise it is not working
     // TODO: Maybe remove when we get to NUXT 3
-    { server: false, initialCache: false, watch: auth.loggedIn }
+    { initialCache: false, watch: auth.loggedIn }
 )
 
 const likeButtonVariant = computed(() => {

@@ -47,6 +47,7 @@ const collectionsConfig = {
                 'date_created',
                 'name',
                 'description',
+                'slug',
                 'url',
                 'dj.id',
                 'dj.name',
@@ -64,6 +65,7 @@ const collectionsConfig = {
                 'date_created',
                 'name',
                 'description',
+                'slug',
                 'url',
                 'dj.id',
                 'dj.name',
@@ -80,6 +82,7 @@ const collectionsConfig = {
                 'id',
                 'name',
                 'description',
+                'slug',
                 'url',
                 'dj',
                 'type',
@@ -93,6 +96,7 @@ const collectionsConfig = {
     user: {
         fieldSets: {
             default: [
+                'id',
                 'first_name',
                 'last_name',
                 'email',

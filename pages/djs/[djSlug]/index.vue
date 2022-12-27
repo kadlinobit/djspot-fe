@@ -9,7 +9,7 @@
         {{ fetchError }}
     </div>
     <div v-else>
-        <section class="hero is-secondary">
+        <section class="hero is-dark">
             <div class="hero-body">
                 <div class="container is-max-desktop">
                     <div class="columns is-mobile">
@@ -38,7 +38,7 @@
                                 <span
                                     v-for="genre in dj.genres"
                                     :key="`genre-${genre.genre_id.id}`"
-                                    class="tag is-peach is-size-5-desktop is-size-6-mobile is-size-6-tablet"
+                                    class="tag is-dark is-size-5-desktop is-size-6-mobile is-size-6-tablet"
                                 >
                                     {{ genre.genre_id.name }}
                                 </span>
@@ -136,7 +136,7 @@ const {
         // // PROMISE TO SET TIMEOUT FOR TESTING (TODO - REMOVE)
         // await new Promise((resolve) => setTimeout(resolve, 2000))
 
-        const slug = route.params.slug
+        const slug = route.params.djSlug
 
         let fields = $api.collection.getCollectionFields('dj', 'withSounds')
         if (!auth.loggedIn) {
@@ -168,11 +168,13 @@ const {
 
 const mixes = computed(() => {
     if (!dj.value.sounds) return []
-    return dj.value.sounds.filter((sound) => sound.type === 'mix') || []
+    return dj.value.sounds.filter((sound: Sound) => sound.type === 'mix') || []
 })
 const tracks = computed(() => {
     if (!dj.value.sounds) return []
-    return dj.value.sounds.filter((sound) => sound.type === 'track') || []
+    return (
+        dj.value.sounds.filter((sound: Sound) => sound.type === 'track') || []
+    )
 })
 async function onToggleFollow() {
     if (!auth.loggedIn.value) {

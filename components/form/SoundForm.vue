@@ -1,11 +1,11 @@
 <template>
     <section class="section">
         <o-loading :active="isLoading" />
-        <o-notification v-if="successMessage" variant="success">
+        <o-notification v-if="props.successMessage" variant="success">
             {{ $i18n.t(successMessage) }}
         </o-notification>
 
-        <o-notification v-if="errorMessage" type="danger">
+        <o-notification v-if="props.errorMessage" variant="danger">
             {{ $i18n.t(errorMessage) }}
         </o-notification>
 
@@ -16,10 +16,10 @@
                         v-model="formData.type"
                         name="type"
                         :label="$i18n.t('sound.type')"
-                        rules="required"
                         :options="soundTypeOptions"
                         :expanded="true"
                         :placeholder="$i18n.t('sound.select_sound_type')"
+                        :validation-rules="validationSchema.type"
                     />
                     <o-validated-field
                         v-model="formData.name"
@@ -27,7 +27,23 @@
                         type="text"
                         :label="$i18n.t(`${formData.type}.name`)"
                         :placeholder="$i18n.t(`${formData.type}.name`)"
-                        rules="required|alpha_num_dash_space"
+                        :validation-rules="validationSchema.name"
+                    />
+                    <o-validated-field
+                        v-model="formData.slug"
+                        name="slug"
+                        type="text"
+                        :label="$i18n.t(`${formData.type}.slug`)"
+                        :control-button="true"
+                        :control-button-label="'form.generate'"
+                        :custom-message="slugChangedMessage"
+                        :validation-rules="validationSchema.slug"
+                        @control-button-clicked="
+                            formData.slug = $api.tools.generateUrlSlug(
+                                formData.name
+                            )
+                        "
+                        :help="$i18n.t('sound.slug_help')"
                     />
                     <o-validated-field
                         v-model="formData.url"
@@ -35,8 +51,8 @@
                         type="url"
                         :label="$i18n.t('sound.url')"
                         :placeholder="$i18n.t('sound.url_placeholder')"
-                        rules="required|audio_load_state:@audioLoadState"
                         :help="$i18n.t('sound.url_help')"
+                        :validation-rules="validationSchema.url"
                     />
                     <o-validated-field
                         v-model="audioLoadState"
@@ -63,6 +79,7 @@
                         :max-tags="3"
                         expanded
                         :placeholder="$i18n.t('dj.select_3_genres')"
+                        :validation-rules="validationSchema.genres"
                     />
                 </div>
                 <div class="column is-half-tablet is-two-fifths-desktop">
@@ -70,8 +87,8 @@
                         v-model="formData.photo"
                         name="photo"
                         :label="$i18n.t('dj.photo')"
-                        rules="image_type"
                         :current-image="initialData ? initialData.photo : null"
+                        :validation-rules="validationSchema.photo"
                     />
                 </div>
             </div>
@@ -93,7 +110,7 @@
                 </div>
                 <div class="control">
                     <o-button
-                        :disabled="isLoading"
+                        :disabled="props.isLoading"
                         variant="dark"
                         @click="onSave"
                     >
@@ -109,7 +126,7 @@
                     class="control"
                 >
                     <o-button
-                        :disabled="isLoading"
+                        :disabled="props.isLoading"
                         variant="primary"
                         @click="onSaveAndPublish"
                     >
@@ -134,7 +151,7 @@ import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 import OValidatedImageCropUpload from '~/components/form/OValidatedImageCropUpload.vue'
 import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue'
 
-const { $i18n, $audio } = useNuxtApp()
+const { $i18n, $audio, $api, $fetch } = useNuxtApp()
 const { oruga: $oruga } = useProgrammatic()
 const directus = useDirectus()
 const auth = useAuth()
@@ -172,8 +189,11 @@ const emit = defineEmits<{
     (e: 'formSubmit', formSubmitData: FormSubmitData): void
 }>()
 
-interface Props extends FormProps {
-    initialData?: SoundFormData
+interface Props {
+    initialData?: SoundFormData | null
+    errorMessage?: string | null
+    successMessage?: string | null
+    isLoading?: boolean | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -184,10 +204,11 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const formData = ref<SoundFormData>({
-    name: null,
-    url: null,
-    description: null,
-    genres: null,
+    name: '',
+    url: '',
+    slug: '',
+    description: '',
+    genres: [],
     dj: auth.user.value.djs[0].id,
     type: 'mix',
     duration: null,
@@ -196,18 +217,68 @@ const formData = ref<SoundFormData>({
 
 const availableGenres = ref(null)
 const audioUrl = ref(null)
-const audioLoadState = ref(null)
+const audioLoadState = ref<String | null>(null)
 const currentPhoto = ref(null)
+const isLoading = ref(false)
 
-const validationSchema = yup.object({
+async function verifyUniqueSlug(value: string) {
+    return $api.tools.verifyUnique(
+        'sound',
+        'slug',
+        value,
+        props.initialData?.slug
+    )
+}
+const debounceVerifyUniqueSlug = $api.tools.asyncDebounce(
+    verifyUniqueSlug,
+    1500
+)
+async function verifyUniqueName(value: string) {
+    return $api.tools.verifyUnique(
+        'sound',
+        'name',
+        value,
+        props.initialData?.name
+    )
+}
+const debounceVerifyUniqueName = $api.tools.asyncDebounce(
+    verifyUniqueName,
+    1500
+)
+
+async function verifyAudioUrl(value: string) {
+    if (audioLoadState.value === 'error') return false
+    return true
+}
+
+const validationSchema = {
     type: yup.string().required(),
     name: yup
         .string()
         .required('validation.required')
         .matches(
-            /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi,
+            $api.tools.regEx.profileName,
             'validation.alpha_num_dash_space'
-        ),
+        )
+        .test('verified', 'validation.unique_sound_name', async (value) => {
+            const verified = await debounceVerifyUniqueName(value as string)
+            return verified as boolean
+        }),
+    slug: yup
+        .string()
+        .required('validation.required')
+        .matches($api.tools.regEx.urlSlug, 'validation.alpha_num_dash_space')
+        .test('verified', 'validation.unique_slug', async (value) => {
+            const verified = await debounceVerifyUniqueSlug(value as string)
+            return verified as boolean
+        }),
+    url: yup
+        .string()
+        .required('validation.required')
+        .test('verified', 'validation.wrong_audio_url', async (value) => {
+            const verified = await verifyAudioUrl(value as string)
+            return verified as boolean
+        }),
     photo: yup
         .mixed()
         .test('photo', 'validation.image_type', (val) => {
@@ -218,10 +289,13 @@ const validationSchema = yup.object({
             return false
         })
         .nullable(),
-    genres: yup.array().min(1).max(3)
-})
+    genres: yup
+        .array()
+        .min(1, 'validation.genres_min_max')
+        .max(3, 'validation.genres_min_max')
+}
 
-const { errors: formErrors, validate } = useForm({ validationSchema })
+const { errors: formErrors, validate, validateField } = useForm()
 
 const soundTypeOptions = computed(() => {
     return [
@@ -235,6 +309,13 @@ const debouncedGetAudioUrl = _.debounce(getAudioUrl, 500)
 watch(
     () => formData.value.url,
     (val) => debouncedGetAudioUrl()
+)
+
+watch(
+    () => props.isLoading,
+    (val) => {
+        isLoading.value = val
+    }
 )
 
 onMounted(async () => {
@@ -269,15 +350,17 @@ function onSaveAndPublish() {
     )
 }
 async function onSubmit(formDataObj, successMessage) {
+    isLoading.value = true
     await validate().then((result) => {
         if (!result.valid) {
             $oruga.notification.open({
                 message: $i18n.t('validation.form_validation_error'),
                 variant: 'danger'
             })
+            isLoading.value = false
             return
         }
-
+        isLoading.value = false
         emit('formSubmit', { formData: formDataObj, successMessage })
     })
 }
@@ -286,11 +369,14 @@ function onCancel() {
 }
 function onAudioLoadError() {
     audioLoadState.value = 'error'
+    validateField('url')
 }
 function onAudioLoadSuccess(data) {
     audioLoadState.value = 'success'
+    validateField('url')
     if (data && data.duration) formData.value.duration = data.duration
 }
+
 async function getAudioUrl() {
     const audioUrls = await $audio.getAudioUrls(formData.value.url)
 
@@ -300,4 +386,15 @@ async function getAudioUrl() {
         audioUrl.value = 'http://nonexistent/'
     }
 }
+
+const slugChangedMessage = computed(() => {
+    if (
+        !_.isNil(props?.initialData?.slug) &&
+        formData.value.slug !== props?.initialData?.slug
+    )
+        return $i18n.t('validation.slug_changed_warning', [
+            props?.initialData?.slug
+        ])
+    return null
+})
 </script>

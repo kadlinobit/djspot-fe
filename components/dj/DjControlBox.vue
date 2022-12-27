@@ -18,15 +18,16 @@
             </div>
         </div>
         <div class="level-right">
-            <o-button
-                variant="light"
-                icon-left="pencil"
-                tag="nuxt-link"
-                size="responsive"
-                :to="{ path: `/djs/manage/edit/` }"
-            >
-                {{ $i18n.t('form.edit') }}
-            </o-button>
+            <nuxt-link :to="{ path: `/djs/manage/edit/` }">
+                <o-button
+                    variant="light"
+                    icon-left="pencil"
+                    tag="nuxt-link"
+                    size="responsive"
+                >
+                    {{ $i18n.t('form.edit') }}
+                </o-button>
+            </nuxt-link>
         </div>
     </div>
 </template>

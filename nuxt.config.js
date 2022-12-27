@@ -52,7 +52,17 @@ export default defineNuxtConfig({
     ],
 
     // Modules: https://go.nuxtjs.dev/config-modules
-    modules: ['@nuxtjs/i18n', '@pinia/nuxt'],
+    modules: ['@nuxtjs/i18n', '@pinia/nuxt', '@nuxt/content'],
+    content: {
+        navigation: {
+            fields: ['description']
+        },
+        watch: {
+            ws: {
+                hostname: '127.0.0.1'
+            }
+        }
+    },
     i18n: {
         vueI18nLoader: true,
         strategy: 'no_prefix',

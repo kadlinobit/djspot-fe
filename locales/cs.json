@@ -5,6 +5,7 @@
         "cancel": "Zrušit",
         "edit": "Upravit",
         "search": "Hledat",
+        "generate" : "Generovat",
         "sort": {
             "a_z": "A > Z",
             "z_a": "Z > A",
@@ -102,9 +103,11 @@
         "deleted_successfully": "Tvůj DJský profil byl úspěšně smazán.",
         "follow": "Sledovat",
         "followers": "Sledujících",
+        "followed_by_me": "Moji sledovaní",
         "no_djs_found": "Bohužel, nenašli jsme žádné DJs.",
         "search_dj": "Hledat DJe...",
-        "whole_czechia": "Celá ČR"
+        "whole_czechia": "Celá ČR",
+        "total_found": "Celkem nalezeno {0} DJs"
     },
     "mix": {
         "type": "Set",
@@ -125,7 +128,8 @@
         "save_and_publish_success": "Set '{0}' byl uložen a zveřejněn. Odteď bude viditelný pro všechny uživatele.",
         "name": "Název setu",
         "description": "Popis setu",
-        "description_placeholder": "Popis setu - ideálně tracklist, případně historky z natáčení..."
+        "description_placeholder": "Popis setu - ideálně tracklist, případně historky z natáčení...",
+        "slug": "URL slug setu"
     },
     "track": {
         "type": "Track",
@@ -145,7 +149,8 @@
         "save_and_publish": "Uložit a zveřejnit track",
         "name": "Název tracku",
         "description": "Popis tracku",
-        "description_placeholder": "Popis tracku - cokoliv, co chceš posluchačům sdělit..."
+        "description_placeholder": "Popis tracku - cokoliv, co chceš posluchačům sdělit...",
+        "slug": "URL slug tracku"
     },
     "sound": {
         "sound": "Sound",
@@ -163,7 +168,10 @@
         "select_sound_type": "Vyber typ audia",
         "info": "Info",
         "all_types": "Všechny typy",
-        "no_sounds_found": "Bohužel, nenašli jsme žádné sety ani tracky."
+        "no_sounds_found": "Bohužel, nenašli jsme žádné sety ani tracky.",
+        "liked_by_me": "Oblíbené",
+        "total_found": "Celkem nalezeno {0} sounds",
+        "slug_help": "URL slug je identifikátor, který se používá pro tvorbu URL adresy k tvému setu nebo tracku. Například pro audio s názvem 'Příklad' a URL slugem 'priklad' bude adresa 'http://www.djspot.cz/djs/jmeno-dje/sounds/priklad'."
 
     },
     "playlist": {
@@ -182,7 +190,14 @@
         "form_validation_error": "Formulář není úplně v cajku, prosím opravit.",
         "no_dj_prefix": "Jméno nesmí obsahovat titul DJ na začátku",
         "alpha_num_dash_space": "Pole smí obsahovat jen písmena, čísla, mezeru a pomlčku",
-        "unique_email": "Tento email už existuje v naší databázi."
+        "unique_dj_name": "Toto DJské jméno už existuje v naší databázi.",
+        "unique_sound_name": "Tento název už pro svoje audio použil někdo jiný.",
+        "unique_email": "Tento email už existuje v naší databázi.",
+        "unique_slug": "Tento slug pro URL adresu už existuje v naší databázi.",
+        "url_slug": "URL adresa smí obsahovat jen malá písmena anglické abecedy, čísla a pomlčku (ale nesmí končit pomlčkou).",
+        "slug_changed_warning": "Měníš svoji URL adresu, což může způsobit problémy s odkazy na tvůj profil. Pokud si nejsi jistý, nech to tak jak je. (Původní hodnota je '{0}')",
+        "image_type": "Obrázek musí být ve formátu JPG, JPEG nebo PNG",
+        "genres_min_max": "Musíš vybrat alespoň 1 žánr (maximálně 3)"
     },
     "Email is already taken.": "Tento email už existuje v naší databázi.",
     "This email does not exist.": "Tento email neexistuje v naší databázi.",

@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 export const useMediaStore = defineStore('media', () => {
     const defaultCoverImages = ref({
         sound: {
-            url: '/images/sound-cover.png'
+            url: '/images/sound-cover.jpg'
         },
         dj: {
             url: '/images/dj-cover.jpg'
