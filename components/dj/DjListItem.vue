@@ -21,13 +21,13 @@
 </template>
 
 <script setup lang="ts">
-import CoverImage from '~/components/media/CoverImage.vue'
+import CoverImage from '~/components/media/CoverImage.vue';
 
 interface Props {
-    dj: Dj
+    dj: Dj;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     dj: () => ({})
-})
+});
 </script>

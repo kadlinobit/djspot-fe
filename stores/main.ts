@@ -1,65 +1,38 @@
-import { defineStore } from 'pinia'
-
-// interface State {
-//     isSidebarOpen: boolean
-//     isPlaylistOpen: boolean
-//     isLoginOpen: boolean
-//     isBottomBarOpen: boolean
-//     loginActiveComponent: string
-// }
-
-// export const useMainStore = defineStore('main', {
-//     state: (): State => ({
-//         isSidebarOpen: false,
-//         isPlaylistOpen: false,
-//         isLoginOpen: false,
-//         isBottomBarOpen: true,
-//         loginActiveComponent: 'login'
-//     }),
-
-//     actions: {
-//         toggleIsBottomBarOpen() {
-//             this.isBottomBarOpen = !this.isBottomBarOpen
-//         },
-//         setIsBottomBarOpen(value: boolean) {
-//             this.isBottomBarOpen = value
-//         }
-//     }
-// })
+import { defineStore } from 'pinia';
 
 export const useMainStore = defineStore('main', () => {
-    const isSidebarOpen = ref<boolean>(false)
-    const isPlaylistOpen = ref<boolean>(false)
-    const isLoginOpen = ref<boolean>(false)
-    const isBottomBarOpen = ref<boolean>(true)
-    const loginActiveComponent = ref<string>('login')
+    const isSidebarOpen = ref<boolean>(false);
+    const isPlaylistOpen = ref<boolean>(false);
+    const isLoginOpen = ref<boolean>(false);
+    const isBottomBarOpen = ref<boolean>(true);
+    const loginActiveComponent = ref<string>('login');
 
     // ACTIONS
     function toggleIsBottomBarOpen() {
-        isBottomBarOpen.value = !isBottomBarOpen.value
+        isBottomBarOpen.value = !isBottomBarOpen.value;
     }
     function setIsBottomBarOpen(value: boolean) {
-        isBottomBarOpen.value = value
+        isBottomBarOpen.value = value;
     }
 
     function toggleIsPlaylistOpen() {
-        isPlaylistOpen.value = !isPlaylistOpen.value
+        isPlaylistOpen.value = !isPlaylistOpen.value;
     }
 
     function setIsPlaylistOpen(value: boolean) {
-        isPlaylistOpen.value = value
+        isPlaylistOpen.value = value;
     }
 
     function toggleIsLoginOpen() {
-        isLoginOpen.value = !isLoginOpen.value
+        isLoginOpen.value = !isLoginOpen.value;
     }
 
     function setIsLoginOpen(value: boolean) {
-        isLoginOpen.value = value
+        isLoginOpen.value = value;
     }
 
     function setLoginActiveComponent(value: string) {
-        loginActiveComponent.value = value
+        loginActiveComponent.value = value;
     }
 
     return {
@@ -77,5 +50,5 @@ export const useMainStore = defineStore('main', () => {
         toggleIsLoginOpen,
         setIsLoginOpen,
         setLoginActiveComponent
-    }
-})
+    };
+});

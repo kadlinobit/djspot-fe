@@ -106,19 +106,19 @@ const collectionsConfig = {
             form: ['first_name', 'last_name', 'email', 'location', 'language']
         }
     }
-}
+};
 
 const collection = () => {
     const getCollectionFields = (collection, fieldSet) => {
-        if (!fieldSet) fieldSet = 'default'
-        return collectionsConfig[collection].fieldSets[fieldSet]
-    }
+        if (!fieldSet) fieldSet = 'default';
+        return collectionsConfig[collection].fieldSets[fieldSet];
+    };
 
     const api = {
         getCollectionFields
-    }
+    };
 
-    return api
-}
+    return api;
+};
 
-export default collection
+export default collection;

@@ -19,58 +19,70 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash'
-import { useField } from 'vee-validate'
-import BmEditor from '~/components/editor/BmEditor.vue'
+import _ from 'lodash';
+import { useField, type RuleExpression } from 'vee-validate';
+import BmEditor from '~/components/editor/BmEditor.vue';
 
-const { $i18n } = useNuxtApp()
+const { $i18n } = useNuxtApp();
 
 interface Props {
-    modelValue: string | null
-    name?: string
-    type?: string
-    label?: string
-    placeholder?: string
-    disabled?: boolean
-    hidden?: boolean
-    help?: string
-    isValidationOn?: boolean
-    validationRules?: Object | undefined | null
+    name?: string;
+    type?: string;
+    label?: string;
+    placeholder?: string;
+    disabled?: boolean;
+    hidden?: boolean;
+    help?: string;
+    isValidationOn?: boolean;
+    validationRules?: RuleExpression<string>;
 }
 
+const modelValue = defineModel<string>();
+
 const props = withDefaults(defineProps<Props>(), {
-    modelValue: '',
     name: 'input',
     type: 'text',
     label: 'label',
-    placeholder: null,
     disabled: false,
     hidden: false,
-    help: null,
-    isValidationOn: true,
-    validationRules: undefined
-})
+    isValidationOn: true
+});
 
-const nameRef = toRef(props, 'name')
-//TODO - meta touched is not working, find out why
+const nameRef = toRef(props, 'name');
 const { errorMessage, value: fieldValue } = useField(
     nameRef,
     props.validationRules,
     {
-        initialValue: props.modelValue
+        initialValue: modelValue.value
     }
-)
+);
+
+watch(
+    modelValue,
+    (val) => {
+        if (val !== fieldValue.value) {
+            fieldValue.value = val ?? '';
+        }
+    },
+    { immediate: true }
+);
+
+watch(fieldValue, (val) => {
+    if (val !== modelValue.value) {
+        modelValue.value = val;
+    }
+});
 
 const visibilityStyle = computed(() => {
     if (props.hidden) {
-        return { display: 'none' }
+        return { display: 'none' };
     }
-    return { display: 'default' }
-})
+    return { display: 'default' };
+});
 
 const getFieldVariant = computed(() => {
-    if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger'
-    if (props.isValidationOn && !errorMessage.value) return 'success'
-    return null
-})
+    if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger';
+    if (props.isValidationOn && !errorMessage.value) return 'success';
+    return null;
+});
 </script>

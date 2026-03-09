@@ -81,27 +81,31 @@
  * TODO
  * - put canvas size somwehre to config
  */
-import _ from 'lodash'
-import { useField } from 'vee-validate'
-import { Cropper } from 'vue-advanced-cropper'
-import 'vue-advanced-cropper/dist/style.css'
+import _ from 'lodash';
+import { useField, type RuleExpression } from 'vee-validate';
+import { Cropper, type CropperResult } from 'vue-advanced-cropper';
+import 'vue-advanced-cropper/dist/style.css';
 
-const { $i18n } = useNuxtApp()
-const { apiBaseURL } = useRuntimeConfig().public
+const { $i18n } = useNuxtApp();
+const { apiBaseURL } = useRuntimeConfig().public;
+
+export type CroppedImage = { file: File | null; croppedImage?: CropperResult };
+export type CropUploadModelValue = CroppedImage | 'keep-current' | null;
 
 interface Props {
-    modelValue: object | string | null
-    currentImage?: string | Object | null
-    name?: string
-    type?: string
-    label?: string
-    placeholder?: string | null
-    disabled?: boolean
-    hidden?: boolean
-    help?: string | null
-    isValidationOn?: boolean
-    validationRules?: Object | undefined | null
+    currentImage?: string | Object | null;
+    name?: string;
+    type?: string;
+    label?: string;
+    placeholder?: string | null;
+    disabled?: boolean;
+    hidden?: boolean;
+    help?: string | null;
+    isValidationOn?: boolean;
+    validationRules?: RuleExpression<CropUploadModelValue>;
 }
+
+const modelValue = defineModel<CropUploadModelValue>({ default: null });
 
 const props = withDefaults(defineProps<Props>(), {
     modelValue: '',
@@ -113,63 +117,80 @@ const props = withDefaults(defineProps<Props>(), {
     disabled: false,
     hidden: false,
     help: null,
-    isValidationOn: true,
-    validationRules: undefined
-})
+    isValidationOn: true
+});
 
-const file = ref(null)
-const photoUrl = ref(null)
+const file = ref<File | null>(null);
+const photoUrl = ref<string>();
 
-const nameRef = toRef(props, 'name')
+const nameRef = toRef(props, 'name');
 //TODO - meta touched is not working, find out why
-const { errorMessage, value: fieldValue } = useField(
+const { errorMessage, value: fieldValue } = useField<CropUploadModelValue>(
     nameRef,
     props.validationRules,
     {
-        initialValue: props.modelValue
+        initialValue: modelValue.value
     }
-)
+);
 
 watch(file, (val) => {
-    fieldValue.value = { file: file.value }
-    if (!val || val === 'keep-current') {
-        photoUrl.value = null
-        return
+    console.warn('FILE CHANGED', val);
+    if (!val) {
+        photoUrl.value = undefined;
+        return;
     }
+    fieldValue.value = { file: val };
     try {
         if (file?.value?.type && file.value.type.split('/')[0] === 'image') {
-            photoUrl.value = URL.createObjectURL(file.value)
+            photoUrl.value = URL.createObjectURL(file.value);
         }
     } catch (e) {
-        console.error(e)
-        photoUrl.value = null
+        console.error(e);
+        photoUrl.value = undefined;
     }
-})
+});
 
-function onCroppedImageChange(croppedImage) {
-    fieldValue.value = { file: file.value, croppedImage }
+watch(
+    modelValue,
+    (val) => {
+        if (val !== fieldValue.value) {
+            fieldValue.value = val;
+        }
+    },
+    { immediate: true }
+);
+
+watch(fieldValue, (val) => {
+    if (val !== modelValue.value) {
+        modelValue.value = val;
+    }
+});
+
+function onCroppedImageChange(croppedImage: CropperResult) {
+    // this.$emit('input', { file: this.file, croppedImage })
+    fieldValue.value = { file: file.value, croppedImage };
     // this.$emit('input', { file: this.file, croppedImage })
 }
 function onRemoveImage() {
-    file.value = null
-    fieldValue.value = null
+    file.value = null;
+    fieldValue.value = null;
     // this.$emit('input', null)
 }
 function onKeepCurrentImage() {
-    file.value = null
-    fieldValue.value = 'keep-current'
+    file.value = null;
+    fieldValue.value = 'keep-current';
     // this.$emit('input', 'keep-current')
 }
 const visibilityStyle = computed(() => {
     if (props.hidden) {
-        return { display: 'none' }
+        return { display: 'none' };
     }
-    return { display: 'default' }
-})
+    return { display: 'default' };
+});
 
 const getFieldVariant = computed(() => {
-    if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger'
-    if (props.isValidationOn && !errorMessage.value) return 'success'
-    return null
-})
+    if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger';
+    if (props.isValidationOn && !errorMessage.value) return 'success';
+    return null;
+});
 </script>

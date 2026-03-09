@@ -1,8 +1,80 @@
-@import './variables';
-@import 'bulma/bulma.sass';
-@import '@oruga-ui/theme-bulma/dist/scss/bulma';
+// Derived colors
+$primary: #EDC139;
+$primary-light: findLightColor($primary);
+$primary-dark: findDarkColor($primary);
+$primary-invert: findColorInvert($primary);
 
- 
+$secondary: #D02440;
+$secondary-light: findLightColor($secondary);
+$secondary-dark: findDarkColor($secondary);
+$secondary-invert: findColorInvert($secondary);
+
+$link: #3CBEC5;
+$link-light: findLightColor($link);
+$link-dark: findDarkColor($link);
+$link-invert: findColorInvert($link);
+
+$danger: $secondary;
+
+// Lists and maps
+$custom-colors: null !default;
+$custom-shades: null !default;
+
+$white: #FFF;
+
+
+// Add new colors to the colors map
+// $theme-bulma-custom-colors: (
+//     "tertiary": $red,
+// );
+
+// Include the Oruga Bulma theme with Bulma included
+@use "@oruga-ui/theme-bulma/dist/scss/bulma-build" with (
+    $family-primary: '"Nunito", sans-serif',
+    $primary: $primary,
+    $link: $link,
+    $theme-bulma-custom-colors: $custom-colors,
+
+    // Body global
+    // $body-background-color: #FFF,
+
+    // Text
+    // $text: $white,
+    // $text-strong: $white,
+
+    // Links
+    // $link: $secondary-dark,
+    // $link-invert: $secondary-invert,
+    // $link-focus-border: $secondary,
+    // $link-hover: $link-light,
+
+    // Box
+    // $box-background-color: $secondary,
+    // $box-color: $white,
+
+    // Card
+    // $card-background-color: $grey-dark,
+
+    // Dropdown
+    // $dropdown-content-background-color: $grey-darker,
+
+    // Input
+    // $input-color: $white,
+    // $input-border-color: $grey-dark,
+    // $input-background-color: $grey-dark,
+
+    //Modal
+    // $modal-card-head-background-color: $link,
+    // $modal-card-body-background-color: $grey-darker,
+    // $modal-card-spacing: 160px,
+    // $modal-card-head-border-bottom: none,
+    // $modal-card-foot-border-top: none,
+
+
+    //Tag
+    // $tag-background-color: $grey-darker,
+);
+
 // html {
 //     background-color: $fresh;
 // }
@@ -19,3 +91,10 @@
         display: none;
     }
 }
+
+// @media screen and (max-width: $desktop) {
+//     .navbar-menu {
+//         background-color: $primary;
+//     }
+// }
+

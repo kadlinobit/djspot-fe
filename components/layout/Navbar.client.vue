@@ -13,7 +13,7 @@
                 />
             </nuxt-link>
             <a
-                v-if="auth.loggedIn.value"
+                v-if="getIsLoggedIn()"
                 class="navbar-item"
                 @click="() => (mainStore.isSidebarOpen = true)"
             >
@@ -40,16 +40,23 @@
             :class="{ 'is-active': isMenuExpanded }"
         >
             <div class="navbar-start">
-                <nuxt-link class="navbar-item" to="/djs">{{
-                    $i18n.t('dj.djs')
-                }}</nuxt-link>
-                <nuxt-link class="navbar-item" to="/sounds">{{
-                    $i18n.t('sound.sounds')
-                }}</nuxt-link>
+                <nuxt-link
+                    class="navbar-item"
+                    to="/djs"
+                    @click.native="() => setIsMenuExpanded(false)"
+                    >{{ $i18n.t('dj.djs') }}</nuxt-link
+                >
+                <nuxt-link
+                    class="navbar-item"
+                    to="/sounds"
+                    @click.native="() => setIsMenuExpanded(false)"
+                    >{{ $i18n.t('sound.sounds') }}</nuxt-link
+                >
             </div>
             <div class="navbar-end">
+                <theme-switch />
                 <language-selection />
-                <div v-if="!auth.loggedIn.value" class="navbar-item">
+                <div v-if="!getIsLoggedIn()" class="navbar-item">
                     <div class="buttons">
                         <a class="button is-light" @click="openLoginModal">
                             {{ $i18n.t('user.login') }}
@@ -62,22 +69,25 @@
 </template>
 
 <script setup lang="ts">
-import LanguageSelection from '~~/components/layout/LanguageSelection.client.vue'
-import { useMainStore } from '~/stores'
-import { useAuth } from '~/composables/directus'
+import LanguageSelection from '~/components/layout/LanguageSelection.client.vue';
+import ThemeSwitch from '~/components/layout/ThemeSwitch.vue';
+import { useMainStore, useUserStore } from '~/stores';
 
-const { $i18n } = useNuxtApp()
-const auth = useAuth()
-
-const mainStore = useMainStore()
-const isMenuExpanded = ref(false)
+const { getIsLoggedIn } = useUserStore();
+const { $i18n } = useNuxtApp();
+const mainStore = useMainStore();
+const isMenuExpanded = ref(false);
 
 function openLoginModal() {
-    mainStore.setIsLoginOpen(true)
-    mainStore.setLoginActiveComponent('login')
+    mainStore.setIsLoginOpen(true);
+    mainStore.setLoginActiveComponent('login');
+}
+
+function setIsMenuExpanded(val: boolean) {
+    isMenuExpanded.value = val;
 }
 
 function toggleIsMenuExpanded() {
-    isMenuExpanded.value = !isMenuExpanded.value
+    isMenuExpanded.value = !isMenuExpanded.value;
 }
 </script>

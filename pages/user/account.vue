@@ -43,28 +43,28 @@
 </template>
 
 <script setup lang="ts">
-import { useProgrammatic } from '@oruga-ui/oruga'
-import UserForm from '~/components/form/UserForm.vue'
-import UserNewPasswordForm from '~/components/form/UserNewPasswordForm.vue'
-import useDirectus, { useAuth } from '~/composables/directus'
-const directus = useDirectus()
-const auth = useAuth()
+import { useOruga } from '@oruga-ui/oruga';
+import UserForm from '~/components/form/UserForm.vue';
+import UserNewPasswordForm from '~/components/form/UserNewPasswordForm.vue';
+import useDirectus, { useAuth } from '~/composables/directus';
+const directus = useDirectus();
+const auth = useAuth();
 
-const { $i18n, $api } = useNuxtApp()
-const { oruga: $oruga } = useProgrammatic()
+const { $i18n, $api } = useNuxtApp();
+const $oruga = useOruga();
 
-definePageMeta({
-    middleware: ['authenticated']
-})
+// definePageMeta({
+//     middleware: ['authenticated']
+// });
 
-const success = ref(null)
-const isLoading = ref(false)
-const activeTab = ref(1)
+const success = ref(null);
+const isLoading = ref(false);
+const activeTab = ref(1);
 
 const errorMessage = computed(() => {
-    const errorMessage = $api.tools.parseErrorMessage(error.value)
-    return errorMessage
-})
+    const errorMessage = $api.tools.parseErrorMessage(error.value);
+    return errorMessage;
+});
 
 const {
     data: initialData,
@@ -76,65 +76,37 @@ const {
     // await new Promise((resolve) => setTimeout(resolve, 2000))
     const data = await directus.users.me.read({
         fields: $api.collection.getCollectionFields('user', 'form')
-    })
-    return data
-})
+    });
+    return data;
+});
 
 watch(
     () => pending,
     (val) => (isLoading.value = pending.value)
-)
-
-// async function fetch() {
-//     try {
-//         // // AXIOS WAY
-//         // const data = await this.$axios.$get('users/me', {
-//         //     params: {
-//         //         fields: this.$api.collection
-//         //             .getCollectionFields('user', 'form')
-//         //             .join(',')
-//         //     }
-//         // })
-
-//         // DIRECTUS WAY
-//         const data = await directus.users.me.read({
-//             fields: this.$api.collection.getCollectionFields('user', 'form')
-//         })
-//         if (data) {
-//             this.initialData = data
-//         } else {
-//             throw new Error('Cannot get user data')
-//         }
-//     } catch (e) {
-//         this.$fetchState.error = e
-//         if (e.statusCode && e.statusCode === 404) {
-//             return this.$nuxt.error({ statusCode: 404, message: e.message })
-//         }
-//     }
-// }
+);
 
 async function editUser({ formData, successMessage }) {
     try {
-        error.value = null
-        success.value = null
-        isLoading.value = true
+        error.value = null;
+        success.value = null;
+        isLoading.value = true;
 
         // AXIOS WAY
         // await this.$axios.patch(`users/me`, formDataObj)
 
         // DIRECTUS WAY
-        await directus.users.me.update(formData)
-        refresh()
-        auth.fetchUser()
+        await directus.users.me.update(formData);
+        refresh();
+        auth.fetchUser();
         $oruga.notification.open({
             message: $i18n.t(successMessage),
             variant: 'success'
-        })
+        });
     } catch (e) {
-        error.value = $api.tools.parseErrorMessage(e)
+        error.value = $api.tools.parseErrorMessage(e);
     } finally {
-        isLoading.value = false
-        initialData.value.password_check = null
+        isLoading.value = false;
+        initialData.value.password_check = null;
     }
 }
 

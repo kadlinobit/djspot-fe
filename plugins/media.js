@@ -10,7 +10,7 @@ export default defineNuxtPlugin((nuxtApp) => {
      * quality URL is returned (the highest quality possible).
      * @param {object} image - {url, formats: {large, medium, small, thumbnail}} image object
      * @param {string} quality - desired photo quality - 'large', 'medium', 'small', 'thumbnail' or empty
-     * @param {string} baseUrl - baseUrl for absolute path - default 'http://localhost:8055/assets'
+     * @param {string} baseUrl - baseUrl for absolute path - default 'http://127.0.0.1:8055/assets'
      */
     function getImageUrl(imageId, quality, baseUrl = `${apiBaseURL}/assets`) {
         // const qualities = ['large', 'medium', 'small', 'thumbnail']

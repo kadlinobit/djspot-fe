@@ -1,12 +1,12 @@
 <template>
     <div class="modal-card animation-content">
-        <header class="modal-card-head">
+        <header class="modal-card-head is-link">
             <p class="modal-card-title">{{ title }}</p>
         </header>
         <section class="modal-card-body is-flex">
             <div class="media">
                 <div v-if="hasIcon" class="media-left">
-                    <o-icon :icon="icon" size="large" variant="danger" />
+                    <o-icon :icon="icon" size="large" variant="primary" />
                 </div>
                 <div class="media-content">
                     <p>
@@ -16,12 +16,12 @@
             </div>
         </section>
         <footer class="modal-card-foot">
-            <button type="button" class="button" @click="close">
+            <button type="button" class="button is-light" @click="close">
                 <span>{{ cancelText }}</span>
             </button>
             <button
                 type="button"
-                class="button is-danger"
+                class="button is-dark"
                 @click="confirmAndClose"
             >
                 <span>{{ confirmText }}</span>

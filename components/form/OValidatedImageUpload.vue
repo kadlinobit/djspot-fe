@@ -7,7 +7,7 @@
             :message="errors[0]"
         >
             <div v-if="currentImage && value === 'keep-current'">
-                <o-image :src="`http://localhost:1337${currentImage.url}`" />
+                <o-image :src="`http://127.0.0.1:1337${currentImage.url}`" />
             </div>
             <o-upload
                 v-else

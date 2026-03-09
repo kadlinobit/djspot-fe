@@ -14,19 +14,19 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash'
-import DjListItem from '~/components/dj/DjListItem.vue'
-import DjListItemSkeleton from '~/components/dj/DjListItemSkeleton.vue'
+import _ from 'lodash';
+import DjListItem from '~/components/dj/DjListItem.vue';
+import DjListItemSkeleton from '~/components/dj/DjListItemSkeleton.vue';
 
 interface Props {
-    djs: Array<Object>
+    djs: Array<Object>;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     djs: () => []
-})
+});
 
 const isDjListEmpty = computed(() => {
-    return _.isEmpty(props.djs)
-})
+    return _.isEmpty(props.djs);
+});
 </script>

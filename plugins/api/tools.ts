@@ -1,34 +1,34 @@
-import _ from 'lodash'
-import useDirectus from '~/composables/directus'
-const directus = useDirectus()
+import _ from 'lodash';
+import { readItems } from '@directus/sdk';
 
 const tools = () => {
     const regEx = {
         profileName: /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi,
+        userName: /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi,
         urlSlug: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
         noDjPrefix: /^(?!(dj |dj_|dj-).*$).*/gi
-    }
+    };
 
     function parseErrorMessage(e) {
-        if (_.isNil(e)) return null
-        if (typeof e === 'string') return e
+        if (_.isNil(e)) return null;
+        if (typeof e === 'string') return e;
 
         const errorMessage =
             e?.response?.data?.errors[0]?.message ||
             e?.response?._data?.errors[0]?.message ||
             e?.message ||
-            e
-        return errorMessage
+            e;
+        return errorMessage;
     }
 
     function generateUrlSlug(val: string) {
-        if (!val) return ''
+        if (!val) return '';
         return val
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036F]/g, '')
             .replace(/ /g, '-')
-            .replace(/[^\w-]+/g, '')
+            .replace(/[^\w-]+/g, '');
     }
 
     /**
@@ -47,12 +47,12 @@ const tools = () => {
         const debounced = _.debounce((resolve, reject, args: Parameters<F>) => {
             func(...args)
                 .then(resolve)
-                .catch(reject)
-        }, wait)
+                .catch(reject);
+        }, wait);
         return (...args: Parameters<F>): ReturnType<F> =>
             new Promise((resolve, reject) => {
-                debounced(resolve, reject, args)
-            }) as ReturnType<F>
+                debounced(resolve, reject, args);
+            }) as ReturnType<F>;
     }
 
     /**
@@ -63,31 +63,33 @@ const tools = () => {
      * @param currentValue - current value (the value that is already in the DB - if they are the same, no need to call API)
      */
     const verifyUnique = async function (
-        collection: string,
+        collection: 'dj' | 'sound',
         fieldName: string,
         newValue: string,
         currentValue: string | null = null
     ) {
         try {
-            if (!newValue) return true as boolean
-            if (newValue === currentValue) return true as boolean
+            const { $directus } = useNuxtApp();
+            if (!newValue) return true as boolean;
+            if (newValue === currentValue) return true as boolean;
 
-            const item = await directus.items(collection).readByQuery({
-                filter: {
-                    [fieldName]: {
-                        _eq: newValue
-                    }
-                },
-                fields: ['id']
-            })
-            if (item?.data?.length !== undefined && item?.data?.length > 0) {
-                return false
-            }
-            return true
+            const djs = await $directus.request(
+                readItems(collection, {
+                    filter: {
+                        [fieldName]: {
+                            _eq: newValue
+                        }
+                    },
+                    fields: ['id']
+                })
+            );
+
+            return !djs.length;
         } catch (e) {
-            return false
+            console.error(e);
+            return false;
         }
-    }
+    };
 
     const api = {
         regEx,
@@ -95,9 +97,9 @@ const tools = () => {
         generateUrlSlug,
         asyncDebounce,
         verifyUnique
-    }
+    };
 
-    return api
-}
+    return api;
+};
 
-export default tools
+export default tools;

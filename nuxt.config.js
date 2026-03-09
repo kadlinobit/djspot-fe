@@ -1,5 +1,4 @@
-import i18n from './config/i18n'
-import eslintPlugin from 'vite-plugin-eslint'
+import eslintPlugin from 'vite-plugin-eslint';
 
 export default defineNuxtConfig({
     // vite: {
@@ -9,6 +8,7 @@ export default defineNuxtConfig({
     alias: {
         tslib: 'tslib/tslib.es6.js'
     },
+    debug: false,
     // TODO - Add @vueuse/head to be able to use new useHead composable
     head: {
         title: 'djspot-fe',
@@ -32,7 +32,9 @@ export default defineNuxtConfig({
         '~/assets/scss/main.scss',
         '@mdi/font/css/materialdesignicons.min.css'
     ],
-
+    routeRules: {
+        '/directus/**': { proxy: import.meta.env.API_URL }
+    },
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
         { src: '~/plugins/audio.js' },
@@ -40,7 +42,8 @@ export default defineNuxtConfig({
         { src: '~/plugins/time.js' },
         { src: '~/plugins/oruga.js' },
         { src: '~/plugins/marked.js' },
-        { src: '~/plugins/api/index.js' }
+        { src: '~/plugins/api/index.js' },
+        { src: '~/plugins/theme.client' }
     ],
 
     // Auto import components: https://go.nuxtjs.dev/config-components
@@ -52,7 +55,13 @@ export default defineNuxtConfig({
     ],
 
     // Modules: https://go.nuxtjs.dev/config-modules
-    modules: ['@nuxtjs/i18n', '@pinia/nuxt', '@nuxt/content'],
+    modules: [
+        '@nuxtjs/i18n',
+        '@pinia/nuxt',
+        'pinia-plugin-persistedstate/nuxt',
+        '@nuxt/content',
+        '@nuxt/devtools'
+    ],
     content: {
         navigation: {
             fields: ['description']
@@ -64,77 +73,36 @@ export default defineNuxtConfig({
         }
     },
     i18n: {
-        vueI18nLoader: true,
-        strategy: 'no_prefix',
         defaultLocale: 'cs',
-        seo: true,
         locales: [
             {
                 code: 'en',
                 name: 'English',
-                iso: 'en-US'
+                iso: 'en-US',
+                file: 'en.json'
             },
             {
                 code: 'cs',
                 name: 'Čeština',
-                iso: 'cs'
+                iso: 'cs',
+                file: 'cs.json'
             }
-        ],
-        vueI18n: i18n
+        ]
     },
-    // Axios module configuration: https://go.nuxtjs.dev/config-axios
-    axios: {
-        baseURL: 'http://localhost:8055'
-    },
-    /*
-     ** Auth module configuration
-     ** See https://auth.nuxtjs.org/schemes/local.html#options
-     */
-
-    // auth: {
-    //     strategies: {
-    //         local: {
-    //             scheme: 'refresh',
-    //             token: {
-    //                 property: 'data.access_token',
-    //                 maxAge: 900000,
-    //                 global: true
-    //                 // type: 'Bearer'
-    //             },
-    //             refreshToken: {
-    //                 property: 'data.refresh_token',
-    //                 data: 'refresh_token',
-    //                 maxAge: 60 * 60 * 24 * 7
-    //             },
-    //             user: {
-    //                 property: 'data'
-    //                 // autoFetch: true
-    //             },
-    //             endpoints: {
-    //                 login: { url: '/auth/login', method: 'post' },
-    //                 refresh: { url: '/auth/refresh', method: 'post' },
-    //                 user: { url: '/users/me?fields=*,djs.*', method: 'get' }, // TBD - update fields loaded on user fetch
-    //                 logout: { url: '/auth/logout', method: 'post' }
-    //             }
-    //             // autoLogout: false
-    //         }
-    //     },
-    //     redirect: false
-    // },
     // Build Configuration: https://go.nuxtjs.dev/config-build
     build: {
         extend(config, ctx) {
             if (ctx.isDev) {
                 config.devtool = ctx.isClient
                     ? 'source-map'
-                    : 'inline-source-map'
+                    : 'inline-source-map';
             }
         }
     },
     runtimeConfig: {
         public: {
-            baseURL: process.env.BASE_URL || 'http://localhost:3000',
-            apiBaseURL: 'http://localhost:8055'
+            baseURL: process.env.BASE_URL || 'http://127.0.0.1:3000',
+            apiBaseURL: 'http://127.0.0.1:8055'
         }
     }
-})
+});

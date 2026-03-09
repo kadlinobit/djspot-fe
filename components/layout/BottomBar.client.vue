@@ -30,14 +30,14 @@ const bottomBarHiddenClass = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '~/assets/scss/_variables';
+// @import '~/assets/scss/_variables';
 
 .bottom-bar {
     position: fixed;
     left: 0;
     bottom: 0;
     width: 100%;
-    background-color: $primary;
+    // background-color: $primary;
 
     transition: bottom 0.5s;
 
@@ -60,14 +60,14 @@ const bottomBarHiddenClass = computed(() => {
             justify-content: center;
             height: 40px;
             width: 40px;
-            background-color: $dark;
+            // background-color: $dark;
             right: -40px;
             top: -40px;
 
             border-top: 1px solid;
             border-left: 1px solid;
             border-right: 1px solid;
-            border-color: $grey-lightest;
+            // border-color: $grey-lightest;
 
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;

@@ -2,7 +2,7 @@
     <li class="sound-list-item columns is-gapless is-mobile is-vcentered">
         <div class="column is-narrow mr-1">
             <cover-image
-                :cover-image="sound.photo || null"
+                :cover-image="sound.photo || undefined"
                 quality="thumbnail"
                 cover-type="sound"
                 :pixel-size="48"
@@ -29,15 +29,13 @@
 </template>
 
 <script setup lang="ts">
-import CoverImage from '~/components/media/CoverImage.vue'
-import ButtonPlayPause from '~~/components/audio/ButtonPlayPause.client.vue'
-import { object } from 'yup'
+import CoverImage from '~/components/media/CoverImage.vue';
+import ButtonPlayPause from '~~/components/audio/ButtonPlayPause.client.vue';
+import { type ISoundDefault } from '~/plugins/directus/collection';
 
 interface Props {
-    sound: object | null
+    sound: ISoundDefault;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    sound: null
-})
+defineProps<Props>();
 </script>

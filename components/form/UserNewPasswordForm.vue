@@ -49,12 +49,12 @@
 
 <script setup lang="ts">
 import * as yup from 'yup'
-import { useProgrammatic } from '@oruga-ui/oruga'
+import { useOruga } from '@oruga-ui/oruga'
 import { useForm } from 'vee-validate'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 
 const { $i18n } = useNuxtApp()
-const { oruga: $oruga } = useProgrammatic()
+const $oruga = useOruga()
 
 const emit = defineEmits<{
     (e: 'formSubmit', formSubmitData: FormSubmitData): void

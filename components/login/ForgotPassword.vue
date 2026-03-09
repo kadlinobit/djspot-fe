@@ -47,69 +47,69 @@
 </template>
 
 <script setup lang="ts">
-import * as yup from 'yup'
-import { useForm } from 'vee-validate'
-import { useMainStore } from '~/stores'
-import useDirectus from '~/composables/directus'
-import OValidatedField from '~/components/form/OValidatedField.vue'
+import * as yup from 'yup';
+import { useForm } from 'vee-validate';
+import { useMainStore } from '~/stores';
+// import useDirectus from '~/composables/directus'
+import OValidatedField from '~/components/form/OValidatedField.vue';
 
-const { baseURL } = useRuntimeConfig().public
-const { $i18n, $api } = useNuxtApp()
+const { baseURL } = useRuntimeConfig().public;
+const { $i18n, $api } = useNuxtApp();
 
-const directus = useDirectus()
-const mainStore = useMainStore()
+const directus = useDirectus();
+const mainStore = useMainStore();
 
 interface Props {
-    displayType?: string
+    displayType?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     displayType: 'page'
-})
+});
 
-const email = ref('')
-const success = ref(null)
-const error = ref(null)
-const isLoading = ref(false)
+const email = ref('');
+const success = ref(null);
+const error = ref(null);
+const isLoading = ref(false);
 
 const validationSchema = yup.object({
     email: yup
         .string()
         .required('validation.required')
         .email('validation.email')
-})
+});
 
-const { errors: formErrors, validate } = useForm({ validationSchema })
+const { errors: formErrors, validate } = useForm({ validationSchema });
 
 function onSubmit() {
     validate().then((result) => {
         if (!result.valid) {
-            return
+            return;
         }
-        forgotPassword()
-    })
+        forgotPassword();
+    });
 }
 async function forgotPassword() {
-    error.value = null
+    error.value = null;
     try {
-        isLoading.value = true
+        isLoading.value = true;
 
         await directus.auth.password.request(
             email.value,
             `${baseURL}/user/reset-password`
-        )
+        );
 
-        error.value = null
-        success.value = 'user.password_reset_link_sent'
+        error.value = null;
+        success.value = 'user.password_reset_link_sent';
     } catch (e) {
-        error.value = e
+        error.value = e;
     } finally {
-        isLoading.value = false
+        isLoading.value = false;
     }
 }
 
 const errorMessage = computed(() => {
-    const errorMessage = $api.tools.parseErrorMessage(error.value)
-    return errorMessage
-})
+    const errorMessage = $api.tools.parseErrorMessage(error.value);
+    return errorMessage;
+});
 </script>

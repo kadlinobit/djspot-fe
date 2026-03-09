@@ -1,6 +1,6 @@
 import file from './file.js'
 import collection from './collection.js'
-import tools from './tools.ts'
+import tools from './tools.js'
 import { defineNuxtPlugin } from '#app'
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -10,5 +10,9 @@ export default defineNuxtPlugin((nuxtApp) => {
         tools: tools()
     }
 
-    nuxtApp.provide('api', api)
+    // nuxtApp.provide('api', api)
+
+    return {
+        provide: { api }
+    }
 })

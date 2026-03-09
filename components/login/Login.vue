@@ -68,32 +68,32 @@
     </div>
 </template>
 <script setup lang="ts">
-import * as yup from 'yup'
-import { useMainStore } from '~/stores'
-import { useAuth } from '~/composables/directus'
-import { useProgrammatic } from '@oruga-ui/oruga'
-import { useForm } from 'vee-validate'
-import OValidatedField from '~/components/form/OValidatedField.vue'
+import * as yup from 'yup';
+import { useForm } from 'vee-validate';
+import { useOruga } from '@oruga-ui/oruga';
+import { useMainStore, useUserStore } from '~/stores';
 
-const { $i18n, $api } = useNuxtApp()
-const { oruga: $oruga } = useProgrammatic()
-const mainStore = useMainStore()
-const auth = useAuth()
-const emit = defineEmits(['loginSuccess'])
+import OValidatedField from '~/components/form/OValidatedField.vue';
+
+const { $i18n, $api, $login } = useNuxtApp();
+const $oruga = useOruga();
+const mainStore = useMainStore();
+
+const emit = defineEmits(['loginSuccess']);
 
 interface Props {
-    displayType?: string
+    displayType?: 'page' | 'modal';
 }
 
 const props = withDefaults(defineProps<Props>(), {
     displayType: 'page'
-})
+});
 
-const email = ref('')
-const password = ref('')
-const error = ref(null)
-const success = ref(null)
-const isLoading = ref(false)
+const email = ref('');
+const password = ref('');
+const error = ref<Error | null>(null);
+const success = ref(null);
+const isLoading = ref(false);
 
 const validationSchema = yup.object({
     email: yup
@@ -101,63 +101,46 @@ const validationSchema = yup.object({
         .required('validation.required')
         .email('validation.email'),
     password: yup.string().required('validation.required')
-})
+});
 
-const { errors: formErrors, validate } = useForm({ validationSchema })
+const { errors: formErrors, validate } = useForm({ validationSchema });
 
 onMounted(() => {
-    error.value = null
-    success.value = null
-    isLoading.value = false
-})
+    error.value = null;
+    success.value = null;
+    isLoading.value = false;
+});
 
 async function onSubmit() {
-    error.value = null
-    success.value = null
+    error.value = null;
+    success.value = null;
     await validate().then((result) => {
         if (!result.valid) {
             $oruga.notification.open({
                 message: $i18n.t('validation.form_validation_error'),
                 variant: 'danger'
-            })
-            return
+            });
+            return;
         }
-        onLogin()
-    })
+        onLogin();
+    });
 }
 async function onLogin() {
     try {
-        isLoading.value = true
-
-        // directus SDK method
-        await auth.login({
-            email: email.value,
-            password: password.value
-        })
-
-        // *** nuxt-auth method ***
-        // await $auth.loginWith('local', {
-        //     data: {
-        //         email: email.value,
-        //         password: password.value
-        //     }
-        // })
-
-        // *** nuxt-directus method ***
-        // await login({
-        //     email: email.value,
-        //     password: password.value
-        // })
-        emit('loginSuccess')
-    } catch (e) {
-        error.value = e
+        isLoading.value = true;
+        await $login(email.value, password.value);
+        emit('loginSuccess');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+        console.log(e);
+        if (e?.errors) error.value = e?.errors[0];
     } finally {
-        isLoading.value = false
+        isLoading.value = false;
     }
 }
 
 const errorMessage = computed(() => {
-    const errorMessage = $api.tools.parseErrorMessage(error.value)
-    return errorMessage
-})
+    const errorMessage = $api.tools.parseErrorMessage(error.value);
+    return errorMessage;
+});
 </script>

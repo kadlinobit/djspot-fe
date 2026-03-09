@@ -17,13 +17,13 @@
             </ul>
             <p class="menu-label">Deejay</p>
             <ul class="menu-list">
-                <li v-if="!djProfile" @click="closeSidebar">
+                <li v-if="!getUser()?.djs" @click="closeSidebar">
                     <nuxt-link to="/djs/manage/new">
                         <o-icon icon="plus" size="small" />
                         <span>{{ $i18n.t('dj.create_profile') }}</span>
                     </nuxt-link>
                 </li>
-                <li v-else>
+                <li v-else v-for="djProfile in getUser()?.djs">
                     <o-icon icon="album" size="small" />
                     <span>{{ djProfile.name }}</span>
                     <ul>
@@ -47,41 +47,42 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash'
-import { useProgrammatic } from '@oruga-ui/oruga'
-import { useMainStore } from '~/stores'
-import { useAuth } from '~/composables/directus'
-const mainStore = useMainStore()
-const auth = useAuth()
+import _ from 'lodash';
+import { useOruga } from '@oruga-ui/oruga';
+import { useMainStore, useUserStore } from '~/stores';
+// import { useAuth } from '~/composables/directus'
+const mainStore = useMainStore();
+const { getUser } = useUserStore();
+// const auth = useAuth()
 
-const { $i18n } = useNuxtApp()
-const { oruga: $oruga } = useProgrammatic()
+const { $i18n, $logout } = useNuxtApp();
+const $oruga = useOruga();
 
 interface Props {
-    open?: boolean
+    open?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     open: false
-})
+});
 
 const djProfile = computed(() => {
-    if (!_.isEmpty(auth.user.value.djs)) {
-        return auth.user.value.djs[0]
-    }
-    return null
-})
+    // if (!_.isEmpty(authData?.user?.value?.djs)) {
+    //     return authData?.user?.value?.djs[0];
+    // }
+    return null;
+});
 
 async function logout() {
-    closeSidebar()
-    await auth.logout()
+    closeSidebar();
+    await $logout();
     $oruga.notification.open({
         message: $i18n.t('user.logout_success'),
         variant: 'success'
-    })
+    });
 }
 
 function closeSidebar() {
-    mainStore.isSidebarOpen = false
+    mainStore.isSidebarOpen = false;
 }
 </script>

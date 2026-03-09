@@ -30,6 +30,13 @@
                 :label="$i18n.t('user.email')"
             />
 
+            <o-validated-select
+                v-model="formData.language"
+                name="language"
+                :options="languagesOptions"
+                :label="$i18n.t('user.language')"
+            />
+
             <o-validated-field
                 v-model="formData.password"
                 name="password"
@@ -47,7 +54,7 @@
                 <div class="control">
                     <o-button
                         :disabled="isLoading"
-                        variant="dark is-fullwidth"
+                        variant="primary is-fullwidth"
                         @click="onSubmit"
                     >
                         {{ $i18n.t('user.do_register') }}
@@ -73,48 +80,52 @@
 
 <script setup lang="ts">
 // TODO - register function still not working for DIRECTUS
-import * as yup from 'yup'
-import useDirectus from '~/composables/directus'
-import OValidatedField from '~/components/form/OValidatedField.vue'
-import { useMainStore } from '~/stores'
-import { useProgrammatic } from '@oruga-ui/oruga'
-import { useForm } from 'vee-validate'
+import * as yup from 'yup';
+import OValidatedField from '~/components/form/OValidatedField.vue';
+import OValidatedSelect from '~/components/form/OValidatedSelect.vue';
+import { useMainStore } from '~/stores';
+import { useOruga } from '@oruga-ui/oruga';
+import { useForm } from 'vee-validate';
 
-const { $i18n, $axios, $api } = useNuxtApp()
-const mainStore = useMainStore()
-const { oruga: $oruga } = useProgrammatic()
-const directus = useDirectus()
+const { $i18n, $axios, $api, $directus, $registerUser } = useNuxtApp();
+const mainStore = useMainStore();
+const $oruga = useOruga();
 
 interface Props {
-    displayType?: string
+    displayType?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     displayType: 'page'
-})
+});
 const formData = ref({
     first_name: '',
     last_name: '',
     email: '',
+    language: 'cs',
     password: ''
-})
+});
 
-const password_check = ref('')
-const success = ref(null)
-const error = ref(null)
-const isLoading = ref(false)
+const password_check = ref('');
+const success = ref(null);
+const error = ref(null);
+const isLoading = ref(false);
 
-const nameRegEx = /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi
+const languagesOptions = computed(() => {
+    return $i18n.locales.value
+        .map((locale) => ({ value: locale.iso, label: locale.name }))
+        .sort((a, b) => a.value.localeCompare(b.value));
+});
 
 const validationSchema = yup.object({
     first_name: yup
         .string()
         .required('validation.required')
-        .matches(nameRegEx, 'validation.alpha_num_dash_space'),
+        .matches($api.tools.regEx.userName, 'validation.alpha_num_dash_space'),
     last_name: yup
         .string()
         .required('validation.required')
-        .matches(nameRegEx, 'validation.alpha_num_dash_space'),
+        .matches($api.tools.regEx.userName, 'validation.alpha_num_dash_space'),
     email: yup
         .string()
         .required('validation.required')
@@ -123,47 +134,41 @@ const validationSchema = yup.object({
     password_check: yup
         .string()
         .test('passwords-match', 'validation.confirmed', function (val) {
-            return this.parent.password === val
+            return this.parent.password === val;
         })
-})
+});
 
-const { errors: formErrors, validate } = useForm({ validationSchema })
+const { errors: formErrors, validate } = useForm({ validationSchema });
 
 async function onSubmit() {
-    error.value = null
+    error.value = null;
     await validate().then((result) => {
         if (!result.valid) {
             $oruga.notification.open({
                 message: $i18n.t('validation.form_validation_error'),
                 variant: 'danger'
-            })
-            return
+            });
+            return;
         }
-        register()
-    })
+        register();
+    });
 }
 async function register() {
     try {
-        isLoading.value = true
-
-        // $axios.setToken(false)
-        // await $axios.post('auth/local/register', {
-        //     username,
-        //     email,
-        //     password: password1
-        // })
-
-        await directus.users.createOne({ ...formData.value })
-        success.value = 'user.register_success_message'
+        isLoading.value = true;
+        await $directus.request(
+            $registerUser(formData.value.email, formData.value.password)
+        );
+        success.value = 'user.register_success_message';
     } catch (e) {
-        error.value = e
+        error.value = e;
     } finally {
-        isLoading.value = false
+        isLoading.value = false;
     }
 }
 
 const errorMessage = computed(() => {
-    const errorMessage = $api.tools.parseErrorMessage(error.value)
-    return errorMessage
-})
+    const errorMessage = $api.tools.parseErrorMessage(error.value);
+    return errorMessage;
+});
 </script>

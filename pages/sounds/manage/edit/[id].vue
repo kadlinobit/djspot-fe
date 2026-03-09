@@ -15,36 +15,36 @@ TODO:
                 <div class="column">
                     <h1 class="title">
                         {{
-                            `${initialData.name} - ${$i18n.t(
-                                `${initialData.type}.edit`
+                            `${initialData?.name} - ${$i18n.t(
+                                `${initialData?.type}.edit`
                             )}`
                         }}
                     </h1>
                 </div>
                 <div class="column is-narrow">
                     <o-dropdown aria-role="list" position="bottom-left">
-                        <o-button
-                            slot="trigger"
-                            slot-scope="{ active }"
-                            variant="danger"
-                        >
-                            <o-icon
-                                :icon="active ? 'chevron-up' : 'chevron-down'"
-                            ></o-icon>
-                        </o-button>
+                        <template #trigger="{ active }">
+                            <o-button variant="danger">
+                                <o-icon
+                                    :icon="
+                                        active ? 'chevron-up' : 'chevron-down'
+                                    "
+                                ></o-icon>
+                            </o-button>
+                        </template>
 
                         <o-dropdown-item
                             aria-role="listitem"
                             @click="onDeleteSound"
                         >
-                            {{ $i18n.t(`${initialData.type}.delete`) }}
+                            {{ $i18n.t(`${initialData?.type}.delete`) }}
                         </o-dropdown-item>
                         <o-dropdown-item
-                            v-if="initialData.status === 'published'"
+                            v-if="initialData?.status === 'published'"
                             aria-role="listitem"
                             @click="onUnpublishSound"
                         >
-                            {{ $i18n.t(`${initialData.type}.unpublish`) }}
+                            {{ $i18n.t(`${initialData?.type}.unpublish`) }}
                         </o-dropdown-item>
                     </o-dropdown>
                 </div>
@@ -53,7 +53,7 @@ TODO:
                 :error-message="errorMessage"
                 :success-message="success"
                 :is-loading="isLoading"
-                :initial-data="initialData"
+                :initial-data="initialData || undefined"
                 @formSubmit="editSound"
             />
         </div>
@@ -61,152 +61,115 @@ TODO:
 </template>
 
 <script setup lang="ts">
-import SoundForm from '~/components/form/SoundForm.vue'
-import ConfirmModal from '~/components/form/ConfirmModal.vue'
-import useDirectus, { useAuth } from '~/composables/directus'
+import SoundForm, {
+    type ISoundFormData,
+    type ISoundFormSubmitData
+} from '~/components/form/SoundForm.vue';
+import ConfirmModal from '~/components/form/ConfirmModal.vue';
+import { useOruga } from '@oruga-ui/oruga';
+import { readItem, updateItem, deleteItem } from '@directus/sdk';
+import { soundFieldSets, type ISoundForm } from '~/plugins/directus/collection';
+import { useUserStore } from '@/stores';
 
-const directus = useDirectus()
-const auth = useAuth()
-const { $i18n, $axios, $oruga, $api } = useNuxtApp()
-const router = useRouter()
-const route = useRoute()
+const { $i18n, $api, $directus } = useNuxtApp();
+const $oruga = useOruga();
+const router = useRouter();
+const route = useRoute();
+const { getUser } = useUserStore();
 
-definePageMeta({
-    middleware: 'authenticated'
-})
-
-const error = ref(null)
-const success = ref(null)
-const isLoading = ref(false)
+const error = ref();
+const success = ref();
+const isLoading = ref(false);
 
 const errorMessage = computed(() => {
-    const errorMessage = $api.tools.parseErrorMessage(error.value)
-    return errorMessage
-})
+    const errorMessage = $api.tools.parseErrorMessage(error.value);
+    return errorMessage;
+});
 
 const {
     data: initialData,
     pending: fetchPending,
     refresh,
     error: fetchError
-} = useLazyAsyncData(
-    'soundFormQuery',
-    async function () {
-        // // PROMISE TO SET TIMEOUT FOR TESTING (TODO - REMOVE)
-        // await new Promise((resolve) => setTimeout(resolve, 2000))
-        const id = route.params.id
+} = useAsyncData('soundFormQuery', async function () {
+    const id = route.params.id;
 
-        // TODO - put it some error handling (nuxt at the moment doesnt return response body so its a bit hard)
-        const data = await directus.items('sound').readOne(id, {
-            fields: $api.collection.getCollectionFields('sound', 'form')
-        })
-        return {
-            ...data,
-            genres: data.genres.map((genre) => genre.genre_id)
-        }
-    },
-    // There must be no server side data load - otherwise it is not working
-    // TODO: Maybe remove when we get to NUXT 3
-    { server: false, initialCache: false }
-)
+    const data = await $directus.request(
+        readItem('sound', String(id), { fields: soundFieldSets.form })
+    );
 
-// async fetch() {
-//     try {
-//         const id = this.$nuxt.context.params.id
-//         const data = await this.$axios.$get(`items/sound/${id}`, {
-//             params: {
-//                 fields: this.$api.collection
-//                     .getCollectionFields('sound', 'form')
-//                     .join(',')
-//             }
-//         })
+    return data;
+});
 
-//         if (data.data) {
-//             this.initialData = {
-//                 ...data.data,
-//                 genres: data.data.genres.map((genre) => genre.genre_id)
-//             }
-//         } else {
-//             throw new Error('Sound not found')
-//         }
-//     } catch (e) {
-//         this.$fetchState.error = e
-//         if (e.statusCode && e.statusCode === 404) {
-//             return this.$nuxt.error({ statusCode: 404, message: e.message })
-//         }
-//     }
-// },
-
-async function editSound({ formData, successMessage = 'sound.edit_success' }) {
+async function editSound({
+    formData,
+    successMessage = 'sound.edit_success'
+}: ISoundFormSubmitData) {
+    if (!initialData.value) return;
     try {
-        isLoading.value = true
-        const id = formData.id
+        isLoading.value = true;
         // #1 Handle photo update || delete
-        const photo = await editPhoto(formData, initialData.value.photo)
-        delete formData.photo
-        delete formData.id
+        const photo = await editPhoto(formData, initialData.value.photo);
+        delete formData.photo;
 
-        const soundData = {
+        const soundData: Omit<ISoundForm, 'id'> = {
             ...formData,
             genres: formData.genres
                 ? formData.genres.map((genre) => ({
-                      genre_id: parseInt(genre.id)
+                      genre_id: genre
                   }))
-                : null
-        }
+                : null,
+            photo: photo && photo !== 'keep-current' ? photo : null
+        };
 
-        if (photo !== 'keep-current') {
-            soundData.photo = photo
-        }
-
-        const updatedSound = await directus
-            .items('sound')
-            .updateOne(id, soundData)
-
-        // // AXIOS WAY
-        // const updatedSound = await this.$axios.patch(
-        //     `items/sound/${id}`,
-        //     soundData
-        // )
+        const updatedSound = await $directus.request(
+            updateItem('sound', initialData.value.id, soundData)
+        );
 
         router.push(
-            `/djs/${auth.user.value.djs[0].slug}/sounds/${updatedSound.id}`
-        )
+            `/djs/${getUser()?.djs?.[0].slug}/sounds/${updatedSound.slug}`
+        );
 
         $oruga.notification.open({
             message: $i18n.t(successMessage, [formData.name]),
             variant: 'success',
             duration: 7000
-        })
-    } catch (e) {
-        error.value = e
+        });
+    } catch (e: any) {
+        error.value = e;
     } finally {
-        isLoading.value = false
+        isLoading.value = false;
     }
 }
-async function editPhoto(formData, prevPhoto) {
-    const newPhoto = formData.photo
+
+async function editPhoto(
+    formData: ISoundFormData,
+    prevPhoto: ISoundForm['photo']
+) {
+    const newPhoto = formData.photo;
     const newPhotoMeta = {
         title: `sound_${formData.name}`,
         filename_download: `sound_${formData.name}`
         // folder: 'TBD - ADD FOLDER LATER'
-    }
+    };
     const photoResult = await $api.file.handleCoverPhotoUpdate(
         newPhoto,
         prevPhoto,
         newPhotoMeta
-    )
-    return photoResult
+    );
+    return photoResult;
 }
+
 function onUnpublishSound() {
-    const { id, type, name } = initialData.value
+    if (!initialData.value) return;
+    const { id, type, name } = initialData.value;
 
     const formData = {
         id,
         status: 'draft',
         photo: 'keep-current',
         name
-    }
+    } as unknown as ISoundFormData; //TODO - remove this cast
 
     $oruga.modal.open({
         active: true,
@@ -222,10 +185,11 @@ function onUnpublishSound() {
                     successMessage: `${type}.unpublish_success`
                 })
         }
-    })
+    });
 }
 function onDeleteSound() {
-    const { type, name } = initialData.value
+    if (!initialData.value) return;
+    const { type, name } = initialData.value;
 
     $oruga.modal.open({
         active: true,
@@ -237,29 +201,27 @@ function onDeleteSound() {
             cancelText: $i18n.t('form.cancel'),
             onConfirm: () => deleteSound()
         }
-    })
+    });
 }
 async function deleteSound() {
+    if (!initialData.value) return;
     try {
-        isLoading.value = true
-        const { id, type, name } = initialData.value
+        isLoading.value = true;
+        const { id, type, name } = initialData.value;
 
-        // // AXIOS WAY
-        // await $axios.delete(`items/sound/${id}`)
+        await $directus.request(deleteItem('sound', id));
 
-        await directus.items('sound').deleteOne(id)
-
-        router.push(`/djs/${auth.user.value.djs[0].slug}`)
+        router.push(`/djs/${getUser()?.djs?.[0].slug}`);
 
         $oruga.notification.open({
             message: $i18n.t(`${type}.delete_success`, [name]),
             variant: 'success',
             duration: 7000
-        })
+        });
     } catch (e) {
-        error.value = parseErrorMessage(e)
+        error.value = $api.tools.parseErrorMessage(e);
     } finally {
-        isLoading.value = false
+        isLoading.value = false;
     }
 }
 </script>

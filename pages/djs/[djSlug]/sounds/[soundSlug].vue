@@ -85,15 +85,7 @@
                 <div class="level is-mobile sound-controls">
                     <div class="level-left">
                         <div class="level-item">
-                            <o-button
-                                :variant="likeButtonVariant"
-                                icon-left="heart"
-                                :disabled="isToggleLikeLoading"
-                                size="responsive"
-                                @click="onToggleLike"
-                            >
-                                {{ sound.like_count || 'Like' }}
-                            </o-button>
+                            <sound-like-button v-model:sound="sound" />
                         </div>
                         <div class="level-item">
                             <o-button
@@ -154,24 +146,20 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash'
-import { useProgrammatic } from '@oruga-ui/oruga'
-import DjInfoBox from '~/components/dj/DjInfoBox.vue'
-import CoverImage from '~/components/media/CoverImage.vue'
-import ButtonPlayPause from '~~/components/audio/ButtonPlayPause.client.vue'
-import { useMainStore, usePlaylistStore } from '~/stores'
-import useDirectus, { useAuth } from '~/composables/directus'
+import _ from 'lodash';
+import DjInfoBox from '~/components/dj/DjInfoBox.vue';
+import SoundLikeButton from '~/components/sound/SoundLikeButton.vue';
+import CoverImage from '~/components/media/CoverImage.vue';
+import ButtonPlayPause from '~~/components/audio/ButtonPlayPause.client.vue';
+import { usePlaylistStore, useUserStore } from '~/stores';
+import { readItems } from '@directus/sdk';
 
-const { $i18n, $api, $marked, $time, $audio } = useNuxtApp()
-const { oruga: $oruga } = useProgrammatic()
-const mainStore = useMainStore()
-const playlistStore = usePlaylistStore()
-const route = useRoute()
-const directus = useDirectus()
-const auth = useAuth()
+const { $i18n, $api, $marked, $time, $audio, $directus } = useNuxtApp();
+const playlistStore = usePlaylistStore();
+const route = useRoute();
+const { getIsLoggedIn, getUser } = useUserStore();
 
-const activeTab = ref(1)
-const isToggleLikeLoading = ref(false)
+const activeTab = ref(1);
 
 const {
     data: sound,
@@ -181,97 +169,46 @@ const {
 } = useLazyAsyncData(
     'soundDetailsPageQuery',
     async () => {
-        const djSlug = route.params.djSlug
-        const soundSlug = route.params.soundSlug
+        /*
+        TODO: 
+        - remove follows in case user is not logged in
+        */
+        const djSlug = route.params.djSlug as string;
+        const soundSlug = route.params.soundSlug as string;
 
-        let fields = $api.collection.getCollectionFields('sound', 'detailed')
+        const fields = $api.collection.getCollectionFields('sound', 'detailed');
 
-        if (!auth.loggedIn) {
-            fields = fields.filter((field) => field !== 'likes')
-        }
+        const sounds = await $directus.request(
+            readItems('sound', {
+                filter: {
+                    _and: [
+                        { slug: { _eq: soundSlug } },
+                        { dj: { slug: { _eq: djSlug } } }
+                    ]
+                },
+                fields,
+                deep: {
+                    likes: {
+                        _filter: {
+                            user_created: {
+                                _eq: getUser()?.id || undefined
+                            }
+                        }
+                    }
+                }
+            })
+        );
 
-        const sounds = await directus.items('sound').readByQuery({
-            filter: {
-                _and: [
-                    { slug: { _eq: soundSlug } },
-                    { dj: { slug: { _eq: djSlug } } }
-                ]
-            },
-            fields,
-            deep: auth.loggedIn
-                ? {
-                      likes: {
-                          _filter: {
-                              user_created: {
-                                  _eq: auth?.user?.value?.id || null
-                              }
-                          }
-                      }
-                  }
-                : null
-        })
-
-        if (sounds.data && sounds.data.length > 0) {
-            return sounds.data[0]
+        if (sounds?.length) {
+            return sounds[0];
         } else {
-            throw new Error('Sound not found')
+            throw new Error('DJ not found');
         }
-    },
+    }
     // There must be no server side data load - otherwise it is not working
     // TODO: Maybe remove when we get to NUXT 3
-    { initialCache: false, watch: auth.loggedIn }
-)
-
-const likeButtonVariant = computed(() => {
-    if (!auth.loggedIn.value) return 'light'
-    return sound.value.likes.length > 0 ? 'dark' : 'light'
-})
-
-async function onToggleLike() {
-    if (!auth.loggedIn.value) {
-        mainStore.setLoginActiveComponent('login')
-        mainStore.setIsLoginOpen(true)
-        return
-    }
-    isToggleLikeLoading.value = true
-    try {
-        _.isEmpty(sound.value.likes) ? await createLike() : await deleteLike()
-    } catch (e) {
-        throw new Error(e)
-    } finally {
-        isToggleLikeLoading.value = false
-    }
-}
-async function createLike() {
-    try {
-        const result = await directus.items('user_sound_like').createOne({
-            sound: sound.value.id
-        })
-        if (result?.id) {
-            sound.value.likes = [result.id]
-            sound.value.like_count++
-        }
-    } catch (e) {
-        $oruga.notification.open({
-            message: e,
-            variant: 'danger',
-            duration: 7000
-        })
-    }
-}
-async function deleteLike() {
-    try {
-        await directus.items('user_sound_like').deleteOne(sound.value.likes[0])
-        sound.value.likes = []
-        sound.value.like_count--
-    } catch (e) {
-        $oruga.notification.open({
-            message: e,
-            variant: 'danger',
-            duration: 7000
-        })
-    }
-}
+    // { initialCache: false, watch: auth.loggedIn }
+);
 </script>
 
 <style lang="scss" scoped>

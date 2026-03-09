@@ -200,6 +200,7 @@
         "genres_min_max": "Musíš vybrat alespoň 1 žánr (maximálně 3)"
     },
     "Email is already taken.": "Tento email už existuje v naší databázi.",
+    "Field \"email\" has to be unique." : "Bohužel tento email je již zabraný.",
     "This email does not exist.": "Tento email neexistuje v naší databázi.",
     "jwt malformed" : "Aktivační token je neplatný."
 }

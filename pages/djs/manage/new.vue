@@ -15,33 +15,32 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash'
-import DjForm from '~/components/form/DjForm.vue'
-import useDirectus, { useAuth } from '~/composables/directus'
+import _ from 'lodash';
+import DjForm from '~/components/form/DjForm.vue';
+import { createItem } from '@directus/sdk';
 
-const { $oruga, $i18n, $api, $media } = useNuxtApp()
-const router = useRouter()
-const directus = useDirectus()
-const auth = useAuth()
+const { $oruga, $i18n, $api, $media, $directus } = useNuxtApp();
+const router = useRouter();
 
 // TODO - find out why definePageMeta is not working
 // definePageMeta({
 //     middleware: 'authorized'
 // })
 
-const error = ref(null)
-const success = ref(null)
-const isLoading = ref(false)
+const error = ref(null);
+const success = ref(null);
+const isLoading = ref(false);
 
 const errorMessage = computed(() => {
-    const errorMessage = $api.tools.parseErrorMessage(error.value)
-    return errorMessage
-})
+    const errorMessage = $api.tools.parseErrorMessage(error.value);
+    return errorMessage;
+});
 
 async function createDj({ formData }) {
     try {
-        isLoading.value = true
-        const photo = await createPhoto(formData)
+        console.log('SENDING');
+        isLoading.value = true;
+        const photo = await createPhoto(formData);
 
         const djData = {
             ...formData,
@@ -52,41 +51,41 @@ async function createDj({ formData }) {
                 : null,
             photo: photo?.id ? photo.id : null,
             status: 'published'
-        }
+        };
 
-        const newDj = await directus.items('dj').createOne(djData)
-        await auth.fetchUser()
+        const newDj = await $directus.request(createItem('dj', djData));
+        // await auth.fetchUser();
 
-        router.push(`/djs/${newDj.slug}`)
+        router.push(`/djs/${newDj.slug}`);
 
         $oruga.notification.open({
             message: $i18n.t('dj.created_successfully'),
             variant: 'success',
             duration: 7000
-        })
+        });
     } catch (e) {
-        error.value = e
+        error.value = e;
     } finally {
-        isLoading.value = false
+        isLoading.value = false;
     }
 }
 async function createPhoto(formData) {
-    let newPhoto = null
+    let newPhoto = null;
 
     if (!_.isEmpty(formData.photo)) {
-        const photoBlob = await $media.getCroppedImageBlob(formData.photo)
+        const photoBlob = await $media.getCroppedImageBlob(formData.photo);
 
         if (photoBlob) {
             const photoMeta = {
                 title: `dj_${formData.slug}`,
                 filename_download: `dj_${formData.slug}`
                 // folder: 'TBD - ADD FOLDER LATER'
-            }
+            };
 
-            newPhoto = await $api.file.uploadFile(photoBlob, photoMeta)
+            newPhoto = await $api.file.handleUploadFile(photoBlob, photoMeta);
         }
 
-        return newPhoto
+        return newPhoto;
     }
 }
 </script>

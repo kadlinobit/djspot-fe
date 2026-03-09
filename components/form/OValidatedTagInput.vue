@@ -11,9 +11,9 @@
                 <o-icon size="small" icon="help-circle-outline"></o-icon>
             </o-tooltip>
         </template>
-        <o-inputitems
+        <o-taginput
             v-model="fieldValue"
-            :data="filteredTags"
+            :options="filteredTags"
             :autocomplete="props.autocomplete"
             :allow-new="props.allowNew"
             :open-on-focus="props.openOnFocus"
@@ -22,47 +22,48 @@
             :placeholder="props.placeholder"
             :maxitems="props.maxTags"
             :expanded="props.expanded"
-            @typing="getFilteredTags"
+            @typing="(text: string) => (searchTerm = text)"
         >
-        </o-inputitems>
+        </o-taginput>
     </o-field>
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash'
-import { useField } from 'vee-validate'
-const { $i18n } = useNuxtApp()
+import _ from 'lodash';
+import { useField, type RuleExpression } from 'vee-validate';
+const { $i18n } = useNuxtApp();
 
 interface TagItem {
-    value: string
-    label: string
+    value: string | number;
+    label: string;
 }
 
 interface Props {
-    modelValue: any
-    name?: string
-    label?: string
-    placeholder?: string
-    expanded?: boolean
-    icon?: string
-    autocomplete?: boolean
-    allowNew?: boolean
-    openOnFocus?: boolean
-    field: string
-    maxTags?: number
-    tags: Array<TagItem> | null
-    disabled?: boolean
-    hidden?: boolean
-    help?: string
-    isValidationOn?: boolean
-    validationRules?: Object | undefined | null
+    name?: string;
+    label?: string;
+    placeholder?: string;
+    expanded?: boolean;
+    icon?: string;
+    autocomplete?: boolean;
+    allowNew?: boolean;
+    openOnFocus?: boolean;
+    field: string;
+    maxTags?: number;
+    tags: Array<TagItem>;
+    disabled?: boolean;
+    hidden?: boolean;
+    help?: string;
+    isValidationOn?: boolean;
+    validationRules?: RuleExpression<any>;
 }
+
+const modelValue = defineModel<number[]>();
+const searchTerm = ref('');
 
 const props = withDefaults(defineProps<Props>(), {
     modelValue: '',
     name: 'input',
     label: '',
-    placeholder: null,
     expanded: true,
     icon: 'tag',
     autocomplete: true,
@@ -73,49 +74,57 @@ const props = withDefaults(defineProps<Props>(), {
     tags: () => [],
     disabled: false,
     hidden: false,
-    help: null,
-    isValidationOn: true,
-    validationRules: undefined
-})
+    isValidationOn: true
+});
 
-const filteredTags = ref([])
+const filteredTags = computed(() => {
+    if (!props.tags) return [];
 
-// Do we need this watch????
-// watch(props.tags, () => getFilteredTags(''))
+    if (!searchTerm.value) return props.tags;
 
-function getFilteredTags(text = '') {
-    if (props.tags && Array.isArray(props.tags)) {
-        filteredTags.value = props.tags.filter((tag) => {
-            return tag[props.field]
-                .toString()
-                .toLowerCase()
-                .includes(text.toLowerCase())
-        })
-    }
-}
+    const s = searchTerm.value.toLowerCase();
 
-const nameRef = toRef(props, 'name')
+    return props.tags.filter((tag) => tag.label.toLowerCase().includes(s));
+});
+
+const nameRef = toRef(props, 'name');
 //TODO - meta touched is not working, find out why
 const { errorMessage, value: fieldValue } = useField(
     nameRef,
     props.validationRules,
     {
-        initialValue: props.modelValue
+        initialValue: modelValue.value
     }
-)
+);
+
+watch(
+    modelValue,
+    (val) => {
+        if (val !== fieldValue.value) {
+            fieldValue.value = val ?? '';
+        }
+    },
+    { immediate: true }
+);
+
+watch(fieldValue, (val) => {
+    if (val !== modelValue.value) {
+        modelValue.value = val;
+    }
+});
 
 const visibilityStyle = computed(() => {
     if (props.hidden) {
-        return { display: 'none' }
+        return { display: 'none' };
     }
-    return { display: 'default' }
-})
+    return { display: 'default' };
+});
 
 const getFieldVariant = computed(() => {
-    if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger'
-    if (props.isValidationOn && !errorMessage.value) return 'success'
-    return null
-})
+    if (props.isValidationOn && !_.isNil(errorMessage.value)) return 'danger';
+    if (props.isValidationOn && !errorMessage.value) return 'success';
+    return null;
+});
 </script>
 
 <style lang="scss" scoped>

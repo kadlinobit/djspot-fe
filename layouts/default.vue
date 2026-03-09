@@ -21,20 +21,20 @@
                 </div>
             </template>
         </o-modal>
-        <client-only>
-            <o-sidebar
-                v-if="auth.user"
-                variant="dark"
-                :fullheight="true"
-                :fullwidth="false"
-                :overlay="true"
-                :right="false"
-                :open="mainStore.isSidebarOpen"
-                @close="() => (mainStore.isSidebarOpen = false)"
-            >
-                <SidebarMenu />
-            </o-sidebar>
-        </client-only>
+
+        <o-sidebar
+            v-if="getIsLoggedIn()"
+            variant="dark"
+            :fullheight="true"
+            :fullwidth="false"
+            :overlay="true"
+            :right="false"
+            v-model:active="mainStore.isSidebarOpen"
+            @close="() => (mainStore.isSidebarOpen = false)"
+        >
+            <SidebarMenu />
+        </o-sidebar>
+
         <Navbar />
         <slot style="margin-bottom: 100px"></slot>
         <BottomBar />
@@ -42,16 +42,15 @@
 </template>
 
 <script setup lang="ts">
-import Navbar from '~~/components/layout/Navbar.client.vue'
-import SidebarMenu from '~~/components/layout/SidebarMenu.client.vue'
-import BottomBar from '~~/components/layout/BottomBar.client.vue'
-import Playlist from '~~/components/audio/Playlist.client.vue'
-import LoginModal from '~/components/login/LoginModal.vue'
+import Navbar from '~~/components/layout/Navbar.client.vue';
+import SidebarMenu from '~~/components/layout/SidebarMenu.client.vue';
+import BottomBar from '~~/components/layout/BottomBar.client.vue';
+import Playlist from '~~/components/audio/Playlist.client.vue';
+import LoginModal from '~/components/login/LoginModal.vue';
 
-import { useMainStore } from '~/stores'
-import { useAuth } from '~/composables/directus'
-const mainStore = useMainStore()
-const auth = useAuth()
+import { useMainStore, useUserStore } from '~/stores';
+const mainStore = useMainStore();
+const { getIsLoggedIn } = useUserStore();
 
 // TODO - Rewrite to new useHead composable (but there is a problem with @vueuse/head)
 function head() {
@@ -64,7 +63,7 @@ function head() {
                     ? 'is-clipped'
                     : ''
         }
-    }
+    };
 }
 </script>
 

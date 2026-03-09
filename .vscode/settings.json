@@ -2,14 +2,19 @@
     "editor.formatOnSave": true,
     "[vue]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-     },
-     "[html]": {
+    },
+    "[html]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-     },
-     "[javascript]": {
+    },
+    "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-     },
-     "[typescript]": {
+    },
+    "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
-     },
+    },
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#2A300B",
+        "titleBar.activeBackground": "#3B4410",
+        "titleBar.activeForeground": "#FAFCF0"
+    }
 }

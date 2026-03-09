@@ -7,11 +7,11 @@
                         {{ $i18n.t('dj.djs') }}
                     </h1>
                 </div>
-                <div class="column is-narrow" v-if="auth?.loggedIn">
+                <div class="column is-narrow" v-if="getIsLoggedIn()">
                     <o-field>
                         <o-switch
                             position="left"
-                            v-model="following"
+                            v-model="search.following"
                             @update:modelValue="onSearch"
                             >{{ $i18n.t('dj.followed_by_me') }}</o-switch
                         >
@@ -21,7 +21,7 @@
 
             <o-field>
                 <o-input
-                    v-model="name"
+                    v-model="search.name"
                     :placeholder="$i18n.t('dj.search_dj')"
                     type="search"
                     expanded
@@ -35,7 +35,11 @@
                 </p>
             </o-field>
             <o-field horizontal grouped class="no-label">
-                <o-select v-model="sort" expanded @update:modelValue="onSearch">
+                <o-select
+                    v-model="search.sort"
+                    expanded
+                    @update:modelValue="onSearch"
+                >
                     <option
                         v-for="option in formStore.djsPageSortOptions"
                         :key="option.value"
@@ -46,7 +50,7 @@
                 </o-select>
                 <o-field>
                     <o-select
-                        v-model="city"
+                        v-model="search.city"
                         expanded
                         @update:modelValue="onSearch"
                     >
@@ -62,8 +66,8 @@
                         </option>
                     </o-select>
                     <o-select
-                        v-if="city"
-                        v-model="radius"
+                        v-if="search.city"
+                        v-model="search.radius"
                         @update:modelValue="onSearch"
                     >
                         <option
@@ -78,7 +82,7 @@
 
                 <client-only>
                     <o-validated-tag-input
-                        v-model="genres"
+                        v-model="search.genres"
                         name="genres"
                         :tags="formStore.genresOptions"
                         :is-validation-on="false"
@@ -100,7 +104,7 @@
             <div v-else-if="fetchError">
                 {{ fetchError }}
             </div>
-            <div v-else-if="!fetchPending && djs?.meta?.filter_count === 0">
+            <div v-else-if="!fetchPending && djs?.data.length === 0">
                 <section class="hero is-secondary is-medium">
                     <div class="hero-body">
                         <p class="title">{{ $i18n.t('dj.no_djs_found') }}</p>
@@ -113,23 +117,19 @@
                 </section>
             </div>
             <div v-else>
-                <dj-list :djs="djs?.data" />
+                <dj-list v-if="djs?.data" :djs="djs.data" />
                 <div class="block">
                     <div class="tag is-secondary is-medium">
-                        {{
-                            $i18n.t('dj.total_found', [
-                                djs?.meta?.filter_count || 0
-                            ])
-                        }}
+                        {{ $i18n.t('dj.total_found', [djs?.data.length || 0]) }}
                     </div>
                 </div>
                 <o-pagination
-                    :current="page"
-                    :total="djs?.meta?.filter_count"
+                    :current="search.page"
+                    :total="djs?.meta?.count"
                     :range-before="1"
                     :range-after="1"
                     order="centered"
-                    :per-page="perPage"
+                    :per-page="search.perPage"
                     :aria-next-label="$i18n.t('form.pagination.next_page')"
                     :aria-previous-label="
                         $i18n.t('form.pagination.previous_page')
@@ -147,111 +147,118 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash'
-import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue'
-import DjList from '~/components/dj/DjList.vue'
-import { useFormStore } from '~/stores'
-import useDirectus, { useAuth } from '~/composables/directus'
+import _ from 'lodash';
+import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue';
+import DjList from '~/components/dj/DjList.vue';
+import { useFormStore, useUserStore } from '~/stores';
 
-const { $i18n, $api, $geo } = useNuxtApp()
-const route = useRoute()
-const router = useRouter()
-const formStore = useFormStore()
-const auth = useAuth()
-const directus = useDirectus()
+const { $i18n, $api, $geo, $directus } = useNuxtApp();
+import { readItems, aggregate } from '@directus/sdk';
+const route = useRoute();
+const router = useRouter();
+const formStore = useFormStore();
+const { getIsLoggedIn, getUser } = useUserStore();
+
+const runtimeConfig = useRuntimeConfig();
 
 interface UrlFilterObj {
-    name?: string
-    city?: number
-    radius?: number
-    genres?: Array<any>
-    following?: boolean
+    name?: string;
+    city?: number;
+    radius?: number;
+    genres?: Array<any>;
+    following?: boolean;
 }
 
 interface RequestFilterObj {
-    _and: Array<Object>
+    _and: Array<Object>;
 }
 
-const name = ref(route.query.name ? String(route.query.name) : '')
-const city = ref(route.query.city ? parseInt(String(route.query.city)) : null)
-const radius = ref(
-    route.query.radius ? parseInt(String(route.query.radius)) : 0
-)
-const genres = ref([]) // FILLED IN OnMounted
-const sort = ref(route.query.sort ? String(route.query.sort) : 'name')
-const perPage = ref(4)
-const page = ref(route.query.page ? parseInt(String(route.query.page)) : 1)
-const following = ref(
-    route.query.following === 'true' && auth.loggedIn.value ? true : false
-)
+interface ISearch {
+    name: string;
+    city: string | null;
+    radius: number;
+    genres: Genre[];
+}
+
+const search = reactive({
+    name: route.query.name ? String(route.query.name) : '',
+    city: route.query.city ? parseInt(String(route.query.city)) : null,
+    radius: route.query.radius ? parseInt(String(route.query.radius)) : 0,
+    genres: [], // FILLED IN OnMounted,
+    sort: route.query.sort ? String(route.query.sort) : 'name',
+    perPage: 4,
+    page: route.query.page ? parseInt(String(route.query.page)) : 1,
+    following:
+        route.query.following === 'true' && getIsLoggedIn() ? true : false
+});
 
 const urlFilter = computed(() => {
-    const urlFilterObj: UrlFilterObj = {}
-    if (name.value) urlFilterObj.name = name.value.toLowerCase()
-    if (city.value) urlFilterObj.city = city.value
-    if (city.value && radius.value) urlFilterObj.radius = radius.value
-    if (!_.isEmpty(genres))
-        urlFilterObj.genres = genres.value.map((genre: Genre) => genre.id)
-    if (!_.isNil(following.value)) urlFilterObj.following = following.value
+    const urlFilterObj: UrlFilterObj = {};
+    if (search.name) urlFilterObj.name = search.name.toLowerCase();
+    if (search.city) urlFilterObj.city = search.city;
+    if (search.city && search.radius) urlFilterObj.radius = search.radius;
+    if (!_.isEmpty(search.genres))
+        urlFilterObj.genres = search.genres.map((genre: Genre) => genre.id);
+    if (!_.isNil(search.following)) urlFilterObj.following = search.following;
 
-    return !_.isEmpty(urlFilterObj) ? urlFilterObj : null
-})
+    return !_.isEmpty(urlFilterObj) ? urlFilterObj : null;
+});
 
 const urlQuery = computed(() => {
     return {
-        limit: perPage.value,
-        page: page.value,
-        sort: sort.value,
+        limit: search.perPage,
+        page: search.page,
+        sort: search.sort,
         ...urlFilter.value
-    }
-})
+    };
+});
 
 const requestQuery = computed(() => {
-    let fields = $api.collection.getCollectionFields('dj', 'default')
+    let fields = $api.collection.getCollectionFields('dj', 'default');
 
-    if (auth.loggedIn.value) {
-        fields = fields.filter((field: string) => field !== 'follows')
+    if (true) {
+        // if (authStatus.value === 'authenticated') {
+        fields = fields.filter((field: string) => field !== 'follows');
     }
     return {
-        meta: '*',
         fields,
-        limit: perPage.value,
-        page: page.value,
-        sort: sort.value,
+        limit: search.perPage,
+        page: search.page,
+        sort: search.sort,
         filter: requestFilter.value
-    }
-})
+    };
+});
 
 const requestFilter = computed(() => {
     if (
-        !name.value &&
-        !city.value &&
-        _.isEmpty(genres.value) &&
-        !following.value
+        !search.name &&
+        !search.city &&
+        _.isEmpty(search.genres) &&
+        !search.following
     )
-        return null
+        return {};
 
-    const requestFilterObj: RequestFilterObj = { _and: [] }
+    const requestFilterObj: RequestFilterObj = { _and: [] };
 
-    if (name.value) {
+    if (search.name) {
         requestFilterObj._and.push({
             name: {
-                _contains: String(name.value).toLowerCase().trim()
+                _contains: String(search.name).toLowerCase().trim()
             }
-        })
+        });
     }
-    if (city.value) {
-        let cityFilter
+    if (search.city) {
+        let cityFilter;
         const cityDirectFilter = {
             city: {
                 id: {
-                    _eq: city.value
+                    _eq: search.city
                 }
             }
-        }
+        };
 
-        if (radius.value === 0) {
-            cityFilter = cityDirectFilter
+        if (search.radius === 0) {
+            cityFilter = cityDirectFilter;
         } else {
             cityFilter = {
                 _or: [
@@ -260,108 +267,100 @@ const requestFilter = computed(() => {
                         city: {
                             gps: {
                                 _intersects: $geo.getPointRadius(
-                                    formStore.getCityCoordinates(city.value),
-                                    radius.value
+                                    formStore.getCityCoordinates(search.city),
+                                    search.radius
                                 )
                             }
                         }
                     }
                 ]
-            }
+            };
         }
 
-        requestFilterObj._and.push(cityFilter)
+        requestFilterObj._and.push(cityFilter);
     }
 
-    if (!_.isEmpty(genres.value)) {
+    if (!_.isEmpty(search.genres)) {
         requestFilterObj._and.push({
             genres: {
                 genre_id: {
-                    _in: genres.value.map((genre: Genre) => genre.id)
+                    _in: search.genres.map((genre: Genre) => genre.id)
                 }
             }
-        })
+        });
     }
 
-    if (following.value === true && auth?.user?.value?.email) {
+    if (search.following === true && getUser()?.email) {
         requestFilterObj._and.push({
             follows: {
                 user_created: {
                     email: {
-                        _contains: auth.user.value.email
+                        _contains: getUser()?.email
                     }
                 }
             }
-        })
+        });
     }
 
-    return requestFilterObj
-})
+    return requestFilterObj;
+});
 
 const {
     data: djs,
     pending: fetchPending,
     refresh,
     error: fetchError
-} = useLazyAsyncData('djsPageQuery', async function () {
-    // FETCH WAY
-    // TODO -REMOVE
-    // const djs = $fetch('http://localhost:8055/items/dj', {
-    //     method: 'SEARCH',
-    //     body: JSON.stringify({
-    //         query: requestQuery.value
-    //     }),
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     }
-    // })
-    const djs = await directus.items('dj').readByQuery(requestQuery.value)
-    return djs
-})
+} = useAsyncData('djsPageQuery', async function () {
+    const data = await $directus.request(readItems('dj', requestQuery.value));
+    const meta = await $directus.request(
+        aggregate('dj', { aggregate: { count: '*' }, ...requestQuery.value })
+    );
+
+    return { data, meta: meta[0] };
+});
 
 function pushRouterQuery() {
     router.push({
         path: '/djs',
         query: _.isEmpty(urlQuery.value) ? null : urlQuery.value
-    })
+    });
 }
 
 function onSearch() {
-    page.value = 1
-    pushRouterQuery()
-    refresh()
+    search.page = 1;
+    pushRouterQuery();
+    refresh();
 }
 function onPageChange(pageNumber: number) {
-    page.value = pageNumber
-    pushRouterQuery()
-    refresh()
+    search.page = pageNumber;
+    pushRouterQuery();
+    refresh();
 }
 
 function resetSearch() {
-    name.value = ''
-    city.value = null
-    radius.value = 0
-    genres.value = []
-    sort.value = 'name'
+    search.name = '';
+    search.city = null;
+    search.radius = 0;
+    search.genres = [];
+    search.sort = 'name';
+    search.following = false;
 
-    onSearch()
+    onSearch();
 }
 
 onMounted(() => {
-    formStore.fetchCities()
-    formStore.fetchGenres()
+    formStore.fetchCities();
+    formStore.fetchGenres();
 
     // Fill in genres
     if (route.query.genres) {
         const urlGenres = Array.isArray(route.query.genres)
             ? route.query.genres.map((genreId) => parseInt(String(genreId)))
-            : [parseInt(route.query.genres)]
+            : [parseInt(route.query.genres)];
 
-        genres.value = formStore.genresOptions.filter((genreOption: Genre) =>
+        search.genres = formStore.genresOptions.filter((genreOption: Genre) =>
             urlGenres.includes(genreOption.id)
-        )
+        );
     }
-
-    refresh()
-})
+});
 </script>

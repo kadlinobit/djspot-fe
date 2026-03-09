@@ -1,12 +1,12 @@
-import { defineStore } from 'pinia'
-import _ from 'lodash'
-import useDirectus from '~/composables/directus'
+import { defineStore } from 'pinia';
+import { readItems } from '@directus/sdk';
+import _ from 'lodash';
+import type { City, Genre } from '~/plugins/directus/types';
 
 export const useFormStore = defineStore('form', () => {
-    const directus = useDirectus()
-
-    const cities = ref([])
-    const genres = ref([])
+    const { $directus } = useNuxtApp();
+    const cities = ref<City[]>([]);
+    const genres = ref<Genre[]>([]);
     const djsPageSortOptions = ref([
         {
             value: 'name',
@@ -28,7 +28,7 @@ export const useFormStore = defineStore('form', () => {
             value: '-follow_count',
             label: 'form.sort.most_followed'
         }
-    ])
+    ]);
     const soundsPageSortOptions = ref([
         {
             value: 'name',
@@ -50,7 +50,7 @@ export const useFormStore = defineStore('form', () => {
             value: '-like_count',
             label: 'form.sort.most_liked'
         }
-    ])
+    ]);
     const soundTypeOptions = ref([
         {
             value: 'mix',
@@ -60,7 +60,7 @@ export const useFormStore = defineStore('form', () => {
             value: 'track',
             label: 'track.type'
         }
-    ])
+    ]);
 
     const radiusOptions = ref([
         {
@@ -79,22 +79,24 @@ export const useFormStore = defineStore('form', () => {
             value: 100,
             label: 'form.radius.100'
         }
-    ])
+    ]);
 
     // GETTERS
     const citiesOptions = computed(() => {
         return cities.value.map((city) => {
-            return { value: city.id, label: city.name }
-        })
-    })
+            return { value: city.id, label: city.name };
+        });
+    });
 
     const genresOptions = computed(() => {
-        return genres.value
-    })
+        return genres.value.map((genre) => {
+            return { value: genre.id, label: genre.name };
+        });
+    });
 
     // ACTIONS
-    function setCities(val) {
-        cities.value = val
+    function setCities(val: City[]) {
+        cities.value = val;
     }
     /**
      * Fetch cities data from the server
@@ -102,24 +104,23 @@ export const useFormStore = defineStore('form', () => {
      * @returns
      */
     async function fetchCities(forceFetch: boolean = false) {
-        if (!_.isEmpty(cities.value) && !forceFetch) return
-
-        const citiesData = await directus
-            .items('city')
-            .readByQuery({ limit: -1 })
-        setCities(citiesData.data)
+        if (!_.isEmpty(cities?.value) && !forceFetch) return;
+        const citiesData = await $directus.request(
+            readItems('city', { limit: -1, sort: 'name' })
+        );
+        setCities(citiesData);
     }
 
     function getCityCoordinates(id: number) {
         const city = _.find(cities.value, (city) => {
-            return city.id === id
-        })
+            return city.id === id;
+        });
 
-        return city?.gps?.coordinates || null
+        return city?.gps || null;
     }
 
-    function setGenres(val) {
-        genres.value = val
+    function setGenres(val: Genre[]) {
+        genres.value = val;
     }
     /**
      * Fetch genres data from the server
@@ -127,12 +128,12 @@ export const useFormStore = defineStore('form', () => {
      * @returns
      */
     async function fetchGenres(forceFetch: boolean = false) {
-        if (!_.isEmpty(genres.value) && !forceFetch) return
+        if (!_.isEmpty(genres?.value) && !forceFetch) return;
 
-        const genresData = await directus
-            .items('genre')
-            .readByQuery({ limit: -1 })
-        setGenres(genresData.data)
+        const genresData = await $directus.request(
+            readItems('genre', { limit: -1 })
+        );
+        setGenres(genresData);
     }
 
     return {
@@ -153,5 +154,5 @@ export const useFormStore = defineStore('form', () => {
         getCityCoordinates,
         fetchGenres,
         setGenres
-    }
-})
+    };
+});

@@ -50,22 +50,24 @@
 </template>
 
 <script setup lang="ts">
-import Login from './Login.vue'
-import ForgotPassword from './ForgotPassword.vue'
-import Register from './Register.vue'
-import { useMainStore } from '~/stores'
+import { useOruga } from '@oruga-ui/oruga';
+import Login from './Login.vue';
+import ForgotPassword from './ForgotPassword.vue';
+import Register from './Register.vue';
+import { useMainStore } from '~/stores';
 
-const { $oruga, $i18n } = useNuxtApp()
-const mainStore = useMainStore()
+const $oruga = useOruga();
+const { $i18n } = useNuxtApp();
+const mainStore = useMainStore();
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
 function afterLoginSuccess() {
-    mainStore.setIsLoginOpen(false)
+    mainStore.setIsLoginOpen(false);
     $oruga.notification.open({
         message: $i18n.t('user.login_success'),
         variant: 'success'
-    })
+    });
 }
 </script>

@@ -14,19 +14,20 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash'
-import SoundListItem from '~/components/sound/SoundListItem.vue'
-import DjListItemSkeleton from '~/components/dj/DjListItemSkeleton.vue'
+import _ from 'lodash';
+import SoundListItem from '~/components/sound/SoundListItem.vue';
+import DjListItemSkeleton from '~/components/dj/DjListItemSkeleton.vue';
+import { type ISoundDefault } from '~/plugins/directus/collection';
 
 interface Props {
-    sounds?: Array<Object>
+    sounds?: Array<ISoundDefault>;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     sounds: () => []
-})
+});
 
 const isSoundListEmpty = computed(() => {
-    return _.isEmpty(props.sounds)
-})
+    return _.isEmpty(props.sounds);
+});
 </script>

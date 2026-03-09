@@ -80,14 +80,14 @@
 <script setup lang="ts">
 // TODO - password check na backendu nefunguje při updateu uživatele
 import * as yup from 'yup'
-import { useProgrammatic } from '@oruga-ui/oruga'
+import { useOruga } from '@oruga-ui/oruga'
 import { useForm } from 'vee-validate'
 import { useFormStore } from '~/stores'
 import OValidatedField from '~/components/form/OValidatedField.vue'
 import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
 
 const { $i18n } = useNuxtApp()
-const { oruga: $oruga } = useProgrammatic()
+const $oruga = useOruga()
 const formStore = useFormStore()
 
 const emit = defineEmits<{
