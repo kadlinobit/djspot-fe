@@ -1,34 +1,47 @@
 {
     "welcome_message": "Welcome to DJSpot!",
-    "form" : {
-        "cancel": "Cancel"
+    "form": {
+        "cancel": "Cancel",
+        "search": "Search",
+        "sort": {
+            "a_z": "A > Z",
+            "z_a": "Z > A",
+            "newest": "Newest",
+            "oldest": "Oldest",
+            "most_followed": "Most followed"
+        },
+        "pagination": {
+            "next_page": "Next page",
+            "previous_page": "Previous page",
+            "page": "Page",
+            "current_page": "Current page"
+        }
     },
-    "user" : {
+    "user": {
         "register": "Register",
         "do_register": "Register",
         "username": "Username",
         "email": "Email",
         "password": "Password",
         "password_again": "Password again",
-        "passwords_do_not_match" : "Passwords do not match",
-        "forgot_password" : "Forgot password",
-        "email_reset_link" : "Email me a reset link",
-        "password_reset_link_sent" : "A reset password link has been sent to your email account. Please click on the link in email to complete the password reset.",
-        "new_password" : "New password",
-        "reset_password" : "Reset password",
-        "do_reset_password" : "Reset password",
-        "password_reset_success" : "Password updated successfully. You can now use it to log in to your account.",
-        "already_got_an_account" : "Already got an account?",
-        "dont_have_an_account" : "Don't have an account yet?",
-        "do_login" : "Login",
+        "passwords_do_not_match": "Passwords do not match",
+        "forgot_password": "Forgot password",
+        "email_reset_link": "Email me a reset link",
+        "password_reset_link_sent": "A reset password link has been sent to your email account. Please click on the link in email to complete the password reset.",
+        "new_password": "New password",
+        "reset_password": "Reset password",
+        "do_reset_password": "Reset password",
+        "password_reset_success": "Password updated successfully. You can now use it to log in to your account.",
+        "already_got_an_account": "Already got an account?",
+        "dont_have_an_account": "Don't have an account yet?",
+        "do_login": "Login",
         "login": "Login",
-        "go_to_login_page" : "Go to login page",
+        "go_to_login_page": "Go to login page",
         "register_success_message": "A confirmation link has been sent to your email account. Please click on the link to complete the registration process.",
         "logout_success": "You have been successfully logged out. See you later!"
-        
-    },    
-    "dj" : {
-        "profile" : "DJ Profile",
+    },
+    "dj": {
+        "profile": "DJ Profile",
         "create_profile": "Create DJ profile",
         "do_create_profile": "Create DJ profile",
         "email": "Booking email",
@@ -37,26 +50,38 @@
         "bio": "Bio",
         "photo": "Photo",
         "remove_photo": "Remove photo",
-        "remove_current_photo" : "Remove current photo",
-        "keep_current_photo" : "Keep current photo",
+        "remove_current_photo": "Remove current photo",
+        "keep_current_photo": "Keep current photo",
         "select_city": "Select city",
         "dj_name_placeholder": "DJ name (without DJ in the front)",
         "djs": "DJs",
         "genres": "Genres",
-        "select_3_genres" : "Choose max. 3 genres",
+        "select_3_genres": "Choose max. 3 genres",
         "slug": "DJ's URL address",
-        "created_successfully" : "Your DJ profile has been created successfully!",
-        "edit_profile" : "Edit profile",
-        "save_profile" : "Save profile",
-        "updated_successfully" : "Your profile has been updated successfully!",
+        "created_successfully": "Your DJ profile has been created successfully!",
+        "edit_profile": "Edit profile",
+        "save_profile": "Save profile",
+        "updated_successfully": "Your profile has been updated successfully!",
         "delete_profile": "Delete profile",
         "delete_profile_confirm_message": "Are you sure you want to delete your DJ profile? This action cannot be undone.",
-        "deleted_successfully" : "Tvůj DJský profil byl úspěšně smazán."
+        "deleted_successfully": "Your DJ profile has been deleted successfully.",
+        "followed_by_me": "Followed by me",
+        "search_dj": "Search DJ...",
+        "whole_czechia": "Whole Czechia",
+        "total_found": "Total found {0} DJs"
     },
-    "mix" : {
+    "sound": {
+        "sounds": "Sounds",
+        "add": "Add audio"
+    },
+    "track": {
+        "type": "Track"
+    },
+    "mix": {
+        "type": "Mix",
         "mixes": "Mixes",
         "add_mix": "Add mix",
-        "save_mix": "Uložit set",
+        "save_mix": "Save mix",
         "name": "Mix title",
         "description": "Mix description",
         "description_placeholder": "Description of the mix - ideally the tracklist, if possible...",
@@ -64,7 +89,7 @@
         "url_placeholder": "URL address of the sound file",
         "audio_load_error": "Failed loading the audio data, URL is invalid."
     },
-    "validation" : {
+    "validation": {
         "required": "This field is required",
         "email": "This field must be an email",
         "confirmed": "Password confirmation does not match",

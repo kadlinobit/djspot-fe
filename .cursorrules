@@ -1,0 +1,7 @@
+This is a Nuxt v3 app.
+The dev server runs on localhost:3000/en.
+To start the dev server and automatically watch for changes, run: `npm run dev`
+
+Test Credentials (Local):
+Email: test1@test.com
+Password: pass

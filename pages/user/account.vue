@@ -46,11 +46,9 @@
 import { useOruga } from '@oruga-ui/oruga';
 import UserForm from '~/components/form/UserForm.vue';
 import UserNewPasswordForm from '~/components/form/UserNewPasswordForm.vue';
-import useDirectus, { useAuth } from '~/composables/directus';
-const directus = useDirectus();
-const auth = useAuth();
+import { readMe, updateMe } from '@directus/sdk';
 
-const { $i18n, $api } = useNuxtApp();
+const { $i18n, $api, $directus, $updateUser } = useNuxtApp();
 const $oruga = useOruga();
 
 // definePageMeta({
@@ -74,9 +72,11 @@ const {
 } = useLazyAsyncData('userFormQuery', async function () {
     // PROMISE TO SET TIMEOUT FOR TESTING
     // await new Promise((resolve) => setTimeout(resolve, 2000))
-    const data = await directus.users.me.read({
-        fields: $api.collection.getCollectionFields('user', 'form')
-    });
+    const data = await $directus.request(
+        readMe({
+            fields: $api.collection.getCollectionFields('user', 'form')
+        })
+    );
     return data;
 });
 
@@ -95,9 +95,9 @@ async function editUser({ formData, successMessage }) {
         // await this.$axios.patch(`users/me`, formDataObj)
 
         // DIRECTUS WAY
-        await directus.users.me.update(formData);
+        await $directus.request(updateMe(formData));
         refresh();
-        auth.fetchUser();
+        await $updateUser();
         $oruga.notification.open({
             message: $i18n.t(successMessage),
             variant: 'success'
