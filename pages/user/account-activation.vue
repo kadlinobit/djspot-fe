@@ -45,10 +45,6 @@ const successMessage = ref(null)
 const progressMessage = ref(null)
 const token = ref(null)
 
-definePageMeta({
-    middleware: ['guest']
-})
-
 onMounted(() => {
     try {
         if (!route.query.token) {
@@ -57,6 +53,7 @@ onMounted(() => {
             token.value = route.query.token
             progressMessage.value = 'user.token_received'
 
+            // TODO - Timeout for testing, remove
             setTimeout(activateAccount, 2000)
         }
     } catch (e) {

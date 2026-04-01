@@ -30,13 +30,6 @@
                 :label="$i18n.t('user.email')"
             />
 
-            <o-validated-select
-                v-model="formData.language"
-                name="language"
-                :options="languagesOptions"
-                :label="$i18n.t('user.language')"
-            />
-
             <o-validated-field
                 v-model="formData.password"
                 name="password"
@@ -79,15 +72,14 @@
 </template>
 
 <script setup lang="ts">
-// TODO - register function still not working for DIRECTUS
+import { registerUser } from '@directus/sdk';
 import * as yup from 'yup';
 import OValidatedField from '~/components/form/OValidatedField.vue';
-import OValidatedSelect from '~/components/form/OValidatedSelect.vue';
 import { useMainStore } from '~/stores';
 import { useOruga } from '@oruga-ui/oruga';
 import { useForm } from 'vee-validate';
 
-const { $i18n, $axios, $api, $directus, $registerUser } = useNuxtApp();
+const { $i18n, $axios, $api, $directus } = useNuxtApp();
 const mainStore = useMainStore();
 const $oruga = useOruga();
 
@@ -102,18 +94,17 @@ const formData = ref({
     first_name: '',
     last_name: '',
     email: '',
-    language: 'cs',
     password: ''
 });
 
 const password_check = ref('');
-const success = ref(null);
-const error = ref(null);
+const success = ref<string | null>(null);
+const error = ref<any>(null);
 const isLoading = ref(false);
 
 const languagesOptions = computed(() => {
-    return $i18n.locales.value
-        .map((locale) => ({ value: locale.iso, label: locale.name }))
+    return ($i18n.locales.value as any[])
+        .map((locale) => ({ value: locale.iso as string, label: locale.name as string }))
         .sort((a, b) => a.value.localeCompare(b.value));
 });
 
@@ -157,7 +148,11 @@ async function register() {
     try {
         isLoading.value = true;
         await $directus.request(
-            $registerUser(formData.value.email, formData.value.password)
+            registerUser(formData.value.email, formData.value.password, {
+                first_name: formData.value.first_name,
+                last_name: formData.value.last_name,
+                verification_url: 'http://localhost:3000/user/account-activation'
+            } as any)
         );
         success.value = 'user.register_success_message';
     } catch (e) {
