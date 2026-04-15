@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { useMainStore } from './';
+import { useMainStore } from '../stores';
 
 export const usePlayerStore = defineStore(
     'player',

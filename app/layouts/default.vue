@@ -42,10 +42,10 @@
 </template>
 
 <script setup lang="ts">
-import Navbar from '~~/components/layout/Navbar.client.vue';
-import SidebarMenu from '~~/components/layout/SidebarMenu.client.vue';
-import BottomBar from '~~/components/layout/BottomBar.client.vue';
-import Playlist from '~~/components/audio/Playlist.client.vue';
+import Navbar from '~/components/layout/Navbar.client.vue';
+import SidebarMenu from '~/components/layout/SidebarMenu.client.vue';
+import BottomBar from '~/components/layout/BottomBar.client.vue';
+import Playlist from '~/components/audio/Playlist.client.vue';
 import LoginModal from '~/components/login/LoginModal.vue';
 
 import { useMainStore, useUserStore } from '~/stores';

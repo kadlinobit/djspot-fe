@@ -146,7 +146,7 @@ import { useForm } from 'vee-validate';
 import { useUserStore, useFormStore } from '@/stores';
 import type { ISoundForm } from '@/plugins/directus/collection';
 
-import Player from '~~/components/audio/Player.client.vue';
+import Player from '~/components/audio/Player.client.vue';
 import OValidatedField from '~/components/form/OValidatedField.vue';
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue';
 import OValidatedSelect from '~/components/form/OValidatedSelect.vue';
