@@ -197,7 +197,7 @@ async function verifyUniqueName(value: string) {
     );
 }
 
-function verifyExistingCity(value: number) {
+function verifyExistingCity(value: string) {
     return formStore.citiesOptions.some((city) => city.value === value);
 }
 const debounceVerifyUniqueName = $api.tools.asyncDebounce(
@@ -227,7 +227,7 @@ const validationSchema = {
             return verified as boolean;
         }),
     email: yup.string().email('validation.email'),
-    city: yup.number().required('validation.required').not([-1]),
+    city: yup.string().required('validation.required'),
     photo: yup
         .mixed()
         .test('photo', 'validation.image_type', (val) => {

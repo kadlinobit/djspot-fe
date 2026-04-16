@@ -2,7 +2,7 @@ import type { DirectusActivity } from '@directus/sdk';
 
 /** * Generated TypeScript types for Directus Schema * Generated on: 2025-09-17T11:02:13.265Z */
 export interface City {
-    id: number;
+    id: string;
     name: string;
     gps: string;
     district: string;
@@ -25,20 +25,20 @@ export interface Dj {
     user: string | DirectusUser;
     // photo: string | DirectusFile | null; // NOT SURE IF WE EVER GET DIRECTUS FILE
     photo: string | null;
-    genres: number[] | DjGenre[];
+    genres: string[] | DjGenre[];
     sounds: string[] | Sound[];
-    follows: number[] | UserDjFollow[];
-    city: number | City;
+    follows: string[] | UserDjFollow[];
+    city: string | City;
 }
 
 export interface DjGenre {
-    id: number;
+    id: string;
     dj_id: string | Dj;
-    genre_id: number | Genre;
+    genre_id: string | Genre;
 }
 
 export interface Genre {
-    id: number;
+    id: string;
     name: string;
 }
 
@@ -54,8 +54,8 @@ export interface Sound {
     type: 'track' | 'mix';
     duration: number;
     dj: string | Dj;
-    genres: number[] | SoundGenre[];
-    likes: number[] | UserSoundLike[];
+    genres: string[] | SoundGenre[];
+    likes: string[] | UserSoundLike[];
     // photo: string | DirectusFile | null; // NOT SURE IF WE EVER GET DIRECTUS FILE
     photo: string | null;
     like_count: number;
@@ -64,20 +64,20 @@ export interface Sound {
 }
 
 export interface SoundGenre {
-    id: number;
+    id: string;
     sound_id: string | Sound;
-    genre_id: number | Genre;
+    genre_id: string | Genre;
 }
 
 export interface UserDjFollow {
-    id: number;
+    id: string;
     user_created: string | DirectusUser;
     date_created: 'datetime';
     dj: string | Dj;
 }
 
 export interface UserSoundLike {
-    id: number;
+    id: string;
     user_created: string | DirectusUser;
     date_created: 'datetime';
     sound: string | Sound;
