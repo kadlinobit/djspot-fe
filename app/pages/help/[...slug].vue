@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import Breadcrumbs from '~~/components/content/Breadcrumbs.vue'
+import Breadcrumbs from '~/components/content/Breadcrumbs.vue'
 const route = useRoute()
 const { path } = route
 

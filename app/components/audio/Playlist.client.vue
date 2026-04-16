@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import Draggable from 'vuedraggable'
-import PlaylistItem from '~~/components/audio/PlaylistItem.client.vue'
+import PlaylistItem from '~/components/audio/PlaylistItem.client.vue'
 import { usePlaylistStore } from '~/stores'
 
 const playlistStore = usePlaylistStore()

@@ -150,7 +150,7 @@ import _ from 'lodash';
 import DjInfoBox from '~/components/dj/DjInfoBox.vue';
 import SoundLikeButton from '~/components/sound/SoundLikeButton.vue';
 import CoverImage from '~/components/media/CoverImage.vue';
-import ButtonPlayPause from '~~/components/audio/ButtonPlayPause.client.vue';
+import ButtonPlayPause from '~/components/audio/ButtonPlayPause.client.vue';
 import { usePlaylistStore, useUserStore } from '~/stores';
 import { readItems } from '@directus/sdk';
 

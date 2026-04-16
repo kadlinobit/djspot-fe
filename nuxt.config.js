@@ -33,7 +33,7 @@ export default defineNuxtConfig({
         '@mdi/font/css/materialdesignicons.min.css'
     ],
     routeRules: {
-        '/directus/**': { proxy: import.meta.env.API_URL }
+        '/directus/**': { proxy: process.env.API_URL || 'http://0.0.0.0:8055/**' }
     },
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
@@ -102,7 +102,7 @@ export default defineNuxtConfig({
     runtimeConfig: {
         public: {
             baseURL: process.env.BASE_URL || 'http://127.0.0.1:3000',
-            apiBaseURL: 'http://127.0.0.1:8055'
+            apiBaseURL: process.env.API_BASE_URL || 'http://127.0.0.1:8055'
         }
     }
 });

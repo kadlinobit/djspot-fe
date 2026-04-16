@@ -17,7 +17,7 @@
             </ul>
             <p class="menu-label">Deejay</p>
             <ul class="menu-list">
-                <li v-if="!getUser()?.djs" @click="closeSidebar">
+                <li v-if="!getUser()?.djs?.length" @click="closeSidebar">
                     <nuxt-link to="/djs/manage/new">
                         <o-icon icon="plus" size="small" />
                         <span>{{ $i18n.t('dj.create_profile') }}</span>
