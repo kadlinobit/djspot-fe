@@ -1,5 +1,8 @@
 import eslintPlugin from 'vite-plugin-eslint';
 
+const apiUrl = process.env.API_URL || 'http://0.0.0.0:8055';
+const proxyUrl = apiUrl.endsWith('/**') ? apiUrl : apiUrl.replace(/\/$/, '') + '/**';
+
 export default defineNuxtConfig({
     // vite: {
     //     plugins: [eslintPlugin()]
@@ -33,7 +36,7 @@ export default defineNuxtConfig({
         '@mdi/font/css/materialdesignicons.min.css'
     ],
     routeRules: {
-        '/directus/**': { proxy: process.env.API_URL || 'http://0.0.0.0:8055/**' }
+        '/directus/**': { proxy: proxyUrl }
     },
     // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
     plugins: [
