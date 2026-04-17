@@ -167,7 +167,7 @@ const search = reactive({
     type: route.query.type ? String(route.query.type) : '',
     genres: [], // FILLED IN OnMounte,
     sort: route.query.sort ? String(route.query.sort) : 'name',
-    perPage: 4,
+    perPage: 20,
     page: route.query.page ? parseInt(String(route.query.page)) : 1,
 
     liked: false,

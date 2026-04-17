@@ -37,6 +37,7 @@
         "vee-validate": "^4.7.0",
         "vue": "^3.5.17",
         "vue-advanced-cropper": "^2.8.6",
+        "vue-boring-avatars": "^1.4.0",
         "vuedraggable": "^4.1.0",
         "yup": "^0.32.11"
     },

@@ -186,7 +186,7 @@ const search = reactive({
     radius: route.query.radius ? parseInt(String(route.query.radius)) : 0,
     genres: [], // FILLED IN OnMounted,
     sort: route.query.sort ? String(route.query.sort) : 'name',
-    perPage: 4,
+    perPage: 20,
     page: route.query.page ? parseInt(String(route.query.page)) : 1,
     following:
         route.query.following === 'true' && getIsLoggedIn() ? true : false
