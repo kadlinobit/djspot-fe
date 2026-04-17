@@ -26,9 +26,9 @@ export default defineNuxtPlugin(() => {
 
     const storage = new NuxtCookieStorage() as AuthenticationStorage;
 
-    const directus = createDirectus<ApiCollections>(
-        'http://localhost:3000/directus'
-    )
+    const url = import.meta.client ? window.location.origin : useRequestURL().origin;
+
+    const directus = createDirectus<ApiCollections>(`${url}/directus`)
         .with(authentication('cookie', { credentials: 'include', storage }))
         .with(rest({ credentials: 'include' }));
 
