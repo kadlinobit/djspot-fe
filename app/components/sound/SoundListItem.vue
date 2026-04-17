@@ -2,7 +2,8 @@
     <li class="sound-list-item columns is-gapless is-mobile is-vcentered">
         <div class="column is-narrow mr-1">
             <cover-image
-                :cover-image="sound.photo || undefined"
+                :name="sound?.name"
+                :cover-image="sound?.photo || undefined"
                 quality="thumbnail"
                 cover-type="sound"
                 :pixel-size="48"

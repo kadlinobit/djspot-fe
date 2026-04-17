@@ -55,10 +55,11 @@
                             </div>
                             <div class="column is-hidden-tablet is-narrow">
                                 <cover-image
+                                    :name="sound?.name"
                                     quality="thumbnail"
                                     cover-type="sound"
                                     :pixel-size="100"
-                                    :cover-image="sound.photo || null"
+                                    :cover-image="sound?.photo || undefined"
                                 />
                             </div>
                         </div>
@@ -75,10 +76,11 @@
                     </div>
                     <div class="column is-narrow is-hidden-mobile">
                         <cover-image
+                            :name="sound?.name"
                             quality="small"
                             cover-type="sound"
                             :pixel-size="300"
-                            :cover-image="sound.photo || null"
+                            :cover-image="sound?.photo || undefined"
                         />
                     </div>
                 </div>

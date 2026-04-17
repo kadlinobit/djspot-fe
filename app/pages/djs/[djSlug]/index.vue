@@ -27,6 +27,7 @@
                                 </div>
                                 <div class="column is-hidden-tablet is-narrow">
                                     <cover-image
+                                        :name="dj?.name"
                                         quality="small"
                                         cover-type="dj"
                                         :pixel-size="100"
@@ -46,10 +47,11 @@
                         </div>
                         <div class="column is-hidden-mobile is-narrow">
                             <cover-image
+                                :name="dj?.name"
                                 quality="small"
                                 cover-type="dj"
                                 :pixel-size="300"
-                                :cover-image="dj.photo || null"
+                                :cover-image="dj?.photo || undefined"
                             />
                         </div>
                     </div>

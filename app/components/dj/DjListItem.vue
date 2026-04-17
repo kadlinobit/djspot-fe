@@ -2,15 +2,16 @@
     <div class="dj-list-item card">
         <div class="card-image">
             <cover-image
-                :cover-image="props.dj.photo || null"
+                :name="dj?.name"
+                :cover-image="dj?.photo || undefined"
                 quality="thumbnail"
                 cover-type="dj"
             />
         </div>
         <div class="card-content">
             <div class="title is-5">
-                <nuxt-link :to="`/djs/${props.dj.slug}`">{{
-                    props.dj.name
+                <nuxt-link :to="`/djs/${dj.slug}`">{{
+                    dj.name
                 }}</nuxt-link>
             </div>
             <div class="subtitle is-6">
@@ -22,12 +23,11 @@
 
 <script setup lang="ts">
 import CoverImage from '~/components/media/CoverImage.vue';
+import { type IDjDefault } from '~/plugins/directus/collection';
 
 interface Props {
-    dj: Dj;
+    dj: IDjDefault;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    dj: () => ({})
-});
+const props = defineProps<Props>()
 </script>

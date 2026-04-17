@@ -3,7 +3,8 @@
         <div class="media">
             <figure class="media-left">
                 <cover-image
-                    :cover-image="dj.photo || null"
+                    :name="dj?.name"
+                    :cover-image="dj?.photo || undefined"
                     quality="thumbnail"
                     cover-type="dj"
                     :pixel-size="64"
@@ -11,8 +12,8 @@
             </figure>
             <div class="media-right">
                 <p class="title is-4">
-                    <nuxt-link :to="{ path: `/djs/${dj.slug}` }">
-                        {{ dj.name }}
+                    <nuxt-link :to="{ path: `/djs/${dj?.slug}` }">
+                        {{ dj?.name }}
                     </nuxt-link>
                 </p>
                 <p class="subtitle is-6">
