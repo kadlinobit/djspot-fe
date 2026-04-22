@@ -7,8 +7,7 @@
             item-key="id"
         >
             <template #item="{ element }">
-                <playlist-item :key="element.id" :playlist-item="element">
-                </playlist-item>
+                <playlist-item :key="element.id" :playlist-item="element"/>
             </template>
         </draggable>
     </div>

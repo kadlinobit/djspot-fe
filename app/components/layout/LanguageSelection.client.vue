@@ -1,8 +1,12 @@
 <template>
-    <a class="navbar-item is-right" @click="toggleLocale">
-        <o-icon icon="earth" />
-        <span class="ml-1">{{ $i18n.locale.value }}</span>
-    </a>
+    <UButton
+        icon="i-lucide-languages"
+        variant="ghost"
+        color="neutral"
+        @click="toggleLocale"
+    >
+        {{ $i18n.locale.value }}
+    </UButton>
 </template>
 
 <script setup lang="ts">

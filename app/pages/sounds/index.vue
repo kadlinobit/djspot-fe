@@ -7,22 +7,22 @@
                         {{ $i18n.t('sound.sounds') }}
                     </h1>
                 </div>
-                <div class="column is-narrow" v-if="getIsLoggedIn()">
+                <div v-if="getIsLoggedIn()" class="column is-narrow">
                     <o-field>
                         <o-switch
-                            position="left"
                             v-model="search.liked"
-                            @update:modelValue="onSearch"
+                            position="left"
+                            @update:model-value="onSearch"
                             >{{ $i18n.t('sound.liked_by_me') }}</o-switch
                         >
                     </o-field>
                 </div>
-                <div class="column is-narrow" v-if="getIsLoggedIn()">
+                <div v-if="getIsLoggedIn()" class="column is-narrow">
                     <o-field>
                         <o-switch
-                            position="left"
                             v-model="search.following"
-                            @update:modelValue="onSearch"
+                            position="left"
+                            @update:model-value="onSearch"
                             >{{ $i18n.t('dj.followed_by_me') }}</o-switch
                         >
                     </o-field>
@@ -34,7 +34,7 @@
                     placeholder="Search in Sound or DJ name"
                     type="search"
                     expanded
-                ></o-input>
+                />
                 <p class="control">
                     <o-button
                         variant="primary"
@@ -76,7 +76,7 @@
                         :max-tags="3"
                         expanded
                         :placeholder="$i18n.t('dj.select_3_genres')"
-                        @update:modelValue="onSearch"
+                        @update:model-value="onSearch"
                     />
                 </client-only>
             </o-field>
@@ -128,8 +128,7 @@
                     aria-page-label="Page"
                     aria-current-label="Current page"
                     @change="onPageChange"
-                >
-                </o-pagination>
+                />
             </div>
         </div>
     </section>
@@ -159,7 +158,7 @@ interface UrlFilterObj {
 }
 
 interface RequestFilterObj {
-    _and: Array<Object>;
+    _and: Array<object>;
 }
 
 const search = reactive({

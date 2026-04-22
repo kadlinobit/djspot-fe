@@ -164,7 +164,7 @@ const props = withDefaults(defineProps<Props>(), {
     isLoading: false,
     mode: 'new'
 });
-let formData = reactive<IDjFormData>({
+const formData = reactive<IDjFormData>({
     name: '',
     slug: '',
     email: '',

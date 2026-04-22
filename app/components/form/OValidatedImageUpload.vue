@@ -20,7 +20,7 @@
                     <div class="content has-text-centered">
                         <div v-if="!value || (value && errors[0])">
                             <p>
-                                <o-icon icon="upload" size="large"> </o-icon>
+                                <o-icon icon="upload" size="large"/>
                             </p>
                             <p>Drop your files here or click to upload</p>
                         </div>

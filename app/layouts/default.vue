@@ -1,17 +1,8 @@
 <template>
-    <div class="app">
+    <UApp>
         <login-modal />
-        <o-modal
-            trap-focus
-            :destroy-on-hide="false"
-            content-class="modal-content"
-            aria-role="dialog"
-            aria-label="Playlist modal"
-            aria-modal
-            :active="mainStore.isPlaylistOpen"
-            @close="() => (mainStore.isPlaylistOpen = false)"
-        >
-            <template #default>
+        <UModal v-model:open="mainStore.isPlaylistOpen" title="Playlist">
+            <template #content>
                 <div class="modal-card" style="width: auto">
                     <header class="modal-card-head">Playlist</header>
                     <section class="modal-card-body">
@@ -20,29 +11,26 @@
                     <footer class="modal-card-foot">Footer</footer>
                 </div>
             </template>
-        </o-modal>
+        </UModal>
 
-        <o-sidebar
+        <USlideover
             v-if="getIsLoggedIn()"
-            variant="dark"
-            :fullheight="true"
-            :fullwidth="false"
-            :overlay="true"
-            :right="false"
-            v-model:active="mainStore.isSidebarOpen"
-            @close="() => (mainStore.isSidebarOpen = false)"
+            v-model:open="mainStore.isSidebarOpen"
+            side="left"
         >
-            <SidebarMenu />
-        </o-sidebar>
+            <template #content>
+                <SidebarMenu />
+            </template>
+        </USlideover>
 
         <Navbar />
-        <slot style="margin-bottom: 100px"></slot>
+        <slot style="margin-bottom: 100px" />
         <BottomBar />
-    </div>
+    </UApp>
 </template>
 
 <script setup lang="ts">
-import Navbar from '~/components/layout/Navbar.client.vue';
+import Navbar from '~/components/layout/Navbar.vue';
 import SidebarMenu from '~/components/layout/SidebarMenu.client.vue';
 import BottomBar from '~/components/layout/BottomBar.client.vue';
 import Playlist from '~/components/audio/Playlist.client.vue';

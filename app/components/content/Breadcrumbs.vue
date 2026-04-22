@@ -9,7 +9,7 @@
 </template>
 <script setup lang="ts">
 interface Props {
-    navPath?: Array<Object>
+    navPath?: Array<object>
 }
 
 const props = withDefaults(defineProps<Props>(), {

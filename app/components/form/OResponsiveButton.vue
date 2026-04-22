@@ -20,7 +20,7 @@
 <script setup lang="ts">
 //TODO - handle nuxt link better
 interface Props {
-    to?: string | Object
+    to?: string | object
 }
 
 const props = withDefaults(defineProps<Props>(), {

@@ -6,7 +6,7 @@
                 rounded
                 height="64px"
                 width="64px"
-            ></o-skeleton>
+            />
         </div>
         <div class="column">
             <o-skeleton
@@ -14,12 +14,12 @@
                 rounded
                 height="1.5em"
                 :width="randomWidth(18, 26)"
-            ></o-skeleton>
+            />
             <o-skeleton
                 animated
                 rounded
                 :width="randomWidth(15, 22)"
-            ></o-skeleton>
+            />
         </div>
     </li>
 </template>

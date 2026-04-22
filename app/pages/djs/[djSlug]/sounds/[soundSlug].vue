@@ -35,7 +35,7 @@
                                         <span class="icon">
                                             <i
                                                 class="mdi mdi-clock-outline"
-                                            ></i>
+                                            />
                                         </span>
                                         <span>{{
                                             $audio.convertTimeHHMMSS(
@@ -45,7 +45,7 @@
                                     </span>
                                     <span class="icon-text">
                                         <span class="icon">
-                                            <i class="mdi mdi-calendar"></i>
+                                            <i class="mdi mdi-calendar"/>
                                         </span>
                                         <span>{{
                                             $time.fromNow(sound.created_at)

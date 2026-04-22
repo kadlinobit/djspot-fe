@@ -8,7 +8,7 @@
                 :error-message="errorMessage"
                 :success-message="success"
                 :is-loading="isLoading"
-                @formSubmit="createSound"
+                @form-submit="createSound"
             />
         </div>
     </section>

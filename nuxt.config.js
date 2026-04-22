@@ -1,13 +1,31 @@
-import eslintPlugin from 'vite-plugin-eslint';
+ 
 
 const apiUrl = process.env.API_URL || 'http://0.0.0.0:8055';
 const proxyUrl = apiUrl.endsWith('/**') ? apiUrl : apiUrl.replace(/\/$/, '') + '/**';
 
 export default defineNuxtConfig({
-    // vite: {
-    //     plugins: [eslintPlugin()]
-    // },
-    // Global page headers: https://go.nuxtjs.dev/config-head
+    vite: {
+        optimizeDeps: {
+        include: [
+            '@vue/devtools-core',
+            '@vue/devtools-kit',
+            'url-parse', // CJS
+            'lodash', // CJS
+            'base-64', // CJS
+            'utf8', // CJS
+            '@oruga-ui/oruga',
+            '@oruga-ui/theme-bulma',
+            'dayjs', // CJS
+            'dayjs/locale/de', // CJS
+            'dayjs/locale/cs', // CJS
+            'dayjs/plugin/relativeTime', // CJS
+            'marked',
+            'isomorphic-dompurify', // CJS
+            '@directus/sdk',
+            '@turf/circle',
+        ]
+        }
+    },
     alias: {
         tslib: 'tslib/tslib.es6.js'
     },
@@ -32,8 +50,9 @@ export default defineNuxtConfig({
 
     // Global CSS: https://go.nuxtjs.dev/config-css
     css: [
-        '~/assets/scss/main.scss',
-        '@mdi/font/css/materialdesignicons.min.css'
+        '~/assets/css/main.css',
+        '~/assets/scss/main.scss', // TO BE REMOVED AFTER NUXT UI MIGRATION
+        '@mdi/font/css/materialdesignicons.min.css' // TO BE REMOVED AFTER NUXT UI MIGRATION
     ],
     routeRules: {
         '/directus/**': { proxy: proxyUrl }
@@ -45,8 +64,7 @@ export default defineNuxtConfig({
         { src: '~/plugins/time.js' },
         { src: '~/plugins/oruga.js' },
         { src: '~/plugins/marked.js' },
-        { src: '~/plugins/api/index.js' },
-        { src: '~/plugins/theme.client' }
+        { src: '~/plugins/api/index.js' }
     ],
 
     // Auto import components: https://go.nuxtjs.dev/config-components
@@ -59,11 +77,13 @@ export default defineNuxtConfig({
 
     // Modules: https://go.nuxtjs.dev/config-modules
     modules: [
+        '@nuxt/ui',
         '@nuxtjs/i18n',
         '@pinia/nuxt',
         'pinia-plugin-persistedstate/nuxt',
         '@nuxt/content',
-        '@nuxt/devtools'
+        '@nuxt/devtools',
+        '@nuxt/eslint'
     ],
     content: {
         navigation: {

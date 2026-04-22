@@ -29,7 +29,7 @@ TODO:
                                     :icon="
                                         active ? 'chevron-up' : 'chevron-down'
                                     "
-                                ></o-icon>
+                                />
                             </o-button>
                         </template>
 
@@ -54,7 +54,7 @@ TODO:
                 :success-message="success"
                 :is-loading="isLoading"
                 :initial-data="initialData || undefined"
-                @formSubmit="editSound"
+                @form-submit="editSound"
             />
         </div>
     </section>

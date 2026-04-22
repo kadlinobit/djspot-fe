@@ -1,14 +1,14 @@
 <template>
-    <div v-if="coverImageUrl" class="cover-image" :style="coverImageStyle"></div>
+    <div v-if="coverImageUrl" class="cover-image" :style="coverImageStyle"/>
     <avatar v-else square :variant="avatarVariant" :style="avatarStyle" :name="name" :colors="['#923EA5', '#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1']" />
 </template>
 
 <script setup lang="ts">
 import { useMediaStore } from '~/stores';
-const mediaStore = useMediaStore();
-const { $media } = useNuxtApp();
 import type { CSSProperties } from 'vue';
 import Avatar from "vue-boring-avatars";
+const mediaStore = useMediaStore();
+const { $media } = useNuxtApp();
 
 const { baseURL } = useRuntimeConfig().public;
 

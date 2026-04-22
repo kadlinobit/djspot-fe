@@ -38,12 +38,12 @@
                         :control-button-label="'form.generate'"
                         :custom-message="slugChangedMessage"
                         :validation-rules="validationSchema.slug"
+                        :help="$i18n.t('sound.slug_help')"
                         @control-button-clicked="
                             formData.slug = $api.tools.generateUrlSlug(
                                 formData.name
                             )
                         "
-                        :help="$i18n.t('sound.slug_help')"
                     />
                     <o-validated-field
                         v-model="formData.url"
@@ -192,7 +192,7 @@ const props = withDefaults(defineProps<Props>(), {
     isLoading: false
 });
 
-let formData = reactive<ISoundFormData>({
+const formData = reactive<ISoundFormData>({
     name: '',
     url: '',
     slug: '',
@@ -207,7 +207,7 @@ let formData = reactive<ISoundFormData>({
 
 const availableGenres = ref(formStore.genresOptions);
 const audioUrl = ref();
-const audioLoadState = ref<String | null>(null);
+const audioLoadState = ref<string | null>(null);
 const currentPhoto = ref<string>();
 const isLoading = ref(false);
 

@@ -8,12 +8,12 @@
         <template v-if="help" #label>
             {{ label }}
             <o-tooltip variant="dark" :label="help" multilined>
-                <o-icon size="small" icon="help-circle-outline"></o-icon>
+                <o-icon size="small" icon="help-circle-outline"/>
             </o-tooltip>
         </template>
 
         <div class="control">
-            <bm-editor :placeholder="placeholder" v-model="fieldValue" />
+            <bm-editor v-model="fieldValue" :placeholder="placeholder" />
         </div>
     </o-field>
 </template>

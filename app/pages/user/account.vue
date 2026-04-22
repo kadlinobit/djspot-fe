@@ -2,8 +2,8 @@
     <section class="section">
         <o-loading
             v-if="pending"
+            v-model:active="pending"
             :full-page="false"
-            :active.sync="pending"
             :can-cancel="true"
         />
         <div class="container is-max-desktop">
@@ -26,15 +26,15 @@
                         :error-message="errorMessage"
                         :success-message="success"
                         :is-loading="isLoading"
-                        @formSubmit="editUser"
+                        @form-submit="editUser"
                     />
                 </o-tab-item>
                 <o-tab-item :label="$i18n.t('user.change_password')">
                     <user-new-password-form
                         :error-message="errorMessage"
-                        :successMessage="success"
+                        :success-message="success"
                         :is-loading-in="isLoading"
-                        @formSubmit="editUser"
+                        @form-submit="editUser"
                     />
                 </o-tab-item>
             </o-tabs>

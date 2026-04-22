@@ -19,7 +19,7 @@ import DjListItem from '~/components/dj/DjListItem.vue';
 import DjListItemSkeleton from '~/components/dj/DjListItemSkeleton.vue';
 
 interface Props {
-    djs: Array<Object>;
+    djs: Array<object>;
 }
 
 const props = withDefaults(defineProps<Props>(), {

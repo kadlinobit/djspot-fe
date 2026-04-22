@@ -12,7 +12,7 @@ export default defineNuxtPlugin((nuxtApp) => {
      */
     function isValidUrl(url) {
         try {
-            // eslint-disable-next-line no-new
+             
             new URL(url);
         } catch (e) {
             console.warn('FAILED URL FORMAt');

@@ -2,7 +2,7 @@
     <div class="o-player is-relative">
         <o-slider
             :tooltip="false"
-            :modelValue="playerStore.currentSeconds"
+            :model-value="playerStore.currentSeconds"
             :max="playerStore.durationSeconds"
             :disabled="!playerStore.isLoaded || playerStore.isError"
             variant="secondary mb-0 mt-0"
@@ -41,7 +41,7 @@
             @play="playerStore.setIsPlaying(true)"
             @error="onError"
             @ended="playNext"
-        ></audio>
+        />
     </div>
 </template>
 
@@ -122,7 +122,7 @@ function onError() {
     playerStore.setIsError(true)
 }
 function playNext() {
-    if (canPlayNext)
+    if (canPlayNext.value)
         playerStore.loadNewAudio(
             playlistStore.playlist[
                 playlistStore.soundIndexInPlaylist(playerStore.currentSound) + 1

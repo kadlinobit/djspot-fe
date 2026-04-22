@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import CoverImage from '~/components/media/CoverImage.vue';
 import ButtonPlayPause from '~/components/audio/ButtonPlayPause.client.vue';
-import { type ISoundDefault } from '~/plugins/directus/collection';
+import type { ISoundDefault } from '~/plugins/directus/collection';
 
 interface Props {
     sound: ISoundDefault;

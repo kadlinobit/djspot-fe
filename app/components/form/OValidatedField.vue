@@ -8,12 +8,12 @@
         <template v-if="props.help" #label>
             {{ label }}
             <o-tooltip variant="dark" :label="props.help" multilined>
-                <o-icon size="small" icon="help-circle-outline"></o-icon>
+                <o-icon size="small" icon="help-circle-outline"/>
             </o-tooltip>
         </template>
         <o-input
-            expanded
             v-model="fieldValue"
+            expanded
             :placeholder="props.placeholder"
             :type="props.type"
             :use-html5-validation="false"

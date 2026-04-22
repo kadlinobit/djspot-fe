@@ -3,15 +3,15 @@
         <div class="container">
             <Breadcrumbs
                 v-if="navObject.navPath.length > 1"
-                :navPath="navObject.navPath"
+                :nav-path="navObject.navPath"
             />
             <div v-if="data.article._path === path && !data.article._id">
                 <h1 class="title">{{ data.article._dir.title }}</h1>
                 <p class="subtitle">{{ data.article._dir.description }}</p>
                 <article
-                    class="media"
                     v-for="child in navObject.navChildren"
                     :key="child.path"
+                    class="media"
                 >
                     <div class="media-content">
                         <div class="content">
@@ -39,11 +39,11 @@ const { path } = route
 
 const { data } = await useAsyncData(`content-${path}`, async () => {
     // fetch document where the document path matches with the cuurent route
-    let article = queryContent().where({ _path: path }).findOne()
+    const article = queryContent().where({ _path: path }).findOne()
 
     // get the surround information,
     // which is an array of documeents that come before and after the current document
-    let surround = queryContent()
+    const surround = queryContent()
         .only(['_path', 'title', 'description'])
         .sort({ date: 1 })
         .findSurround(path)

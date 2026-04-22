@@ -8,7 +8,7 @@
         <template v-if="props.help" #label>
             {{ label }}
             <o-tooltip variant="dark" :label="props.help" multilined>
-                <o-icon size="small" icon="help-circle-outline"></o-icon>
+                <o-icon size="small" icon="help-circle-outline"/>
             </o-tooltip>
         </template>
         <o-taginput
@@ -23,8 +23,7 @@
             :maxitems="props.maxTags"
             :expanded="props.expanded"
             @typing="(text: string) => (searchTerm = text)"
-        >
-        </o-taginput>
+        />
     </o-field>
 </template>
 

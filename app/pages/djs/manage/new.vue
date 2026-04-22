@@ -8,7 +8,7 @@
                 :success-message="success"
                 :is-loading="isLoading"
                 :initial-data="null"
-                @formSubmit="createDj"
+                @form-submit="createDj"
             />
         </div>
     </section>

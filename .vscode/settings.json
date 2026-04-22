@@ -1,4 +1,17 @@
 {
+    "files.associations": {
+        "*.css": "tailwindcss"
+    },
+    "editor.quickSuggestions": {
+        "strings": "on"
+    },
+    "tailwindCSS.classAttributes": [
+        "class",
+        "ui"
+    ],
+    "tailwindCSS.classFunctions": [
+        "defineAppConfig"
+    ],
     "editor.formatOnSave": true,
     "[vue]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -11,6 +24,16 @@
     },
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
+        "vue"
+    ],
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
     },
     "workbench.colorCustomizations": {
         "activityBar.background": "#2A300B",

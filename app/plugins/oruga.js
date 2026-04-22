@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/no-named-as-default
+ 
 import Oruga from '@oruga-ui/oruga';
 import { bulmaConfig } from '@oruga-ui/theme-bulma';
 

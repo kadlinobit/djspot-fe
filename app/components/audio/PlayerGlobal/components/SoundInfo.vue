@@ -15,12 +15,12 @@
         </div>
         <div v-if="playerStore.isLoading" class="column">
             <o-loading
+                v-model:active="playerStore.isLoading"
                 :full-page="false"
-                :active.sync="playerStore.isLoading"
                 :overlay="false"
                 :can-cancel="false"
                 icon-size="small"
-            ></o-loading>
+            />
         </div>
         <div
             v-else

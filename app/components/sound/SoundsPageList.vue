@@ -17,7 +17,7 @@
 import _ from 'lodash';
 import SoundListItem from '~/components/sound/SoundListItem.vue';
 import DjListItemSkeleton from '~/components/dj/DjListItemSkeleton.vue';
-import { type ISoundDefault } from '~/plugins/directus/collection';
+import type { ISoundDefault } from '~/plugins/directus/collection';
 
 interface Props {
     sounds?: Array<ISoundDefault>;

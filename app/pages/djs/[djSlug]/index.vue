@@ -57,9 +57,9 @@
                     </div>
 
                     <dj-control-box
+                        v-model:dj="dj"
                         :dj="dj"
                         :is-toggle-follow-loading="isToggleFollowLoading"
-                        v-model:dj="dj"
                     />
                 </div>
             </div>
@@ -140,7 +140,7 @@ const {
 
         const slug = route.params.djSlug as string;
 
-        let fields = djFieldSets.withSounds;
+        const fields = djFieldSets.withSounds;
 
         const djs = await $directus.request(
             readItems('dj', {

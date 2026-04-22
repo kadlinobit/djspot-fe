@@ -14,7 +14,7 @@
 import _ from 'lodash';
 import { useUserStore, useMainStore } from '@/stores';
 import { useOruga } from '@oruga-ui/oruga';
-import { type ISoundDefault } from '~/plugins/directus/collection';
+import type { ISoundDefault } from '~/plugins/directus/collection';
 import { createItem, deleteItem } from '@directus/sdk';
 
 const { $i18n, $directus } = useNuxtApp();

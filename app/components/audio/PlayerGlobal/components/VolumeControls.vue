@@ -16,12 +16,12 @@
         </div>
         <div class="column mr-4">
             <o-slider
-                :modelValue="playerStore.volume"
+                :model-value="playerStore.volume"
                 :tooltip="false"
                 :max="100"
                 :disabled="!playerStore.isLoaded || playerStore.isError"
                 variant="secondary"
-                @update:modelValue="
+                @update:model-value="
                     (newVolume) => playerStore.setVolume(newVolume)
                 "
             />

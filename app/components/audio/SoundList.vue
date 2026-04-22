@@ -9,7 +9,7 @@ import SoundListItem from '~/components/audio/SoundListItem.vue'
 
 const props = defineProps({
     sounds: {
-        type: Array<Object>,
+        type: Array<object>,
         required: true
     }
 })

@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import CoverImage from '~/components/media/CoverImage.vue';
-import { type IDjDefault } from '~/plugins/directus/collection';
+import type { IDjDefault } from '~/plugins/directus/collection';
 
 interface Props {
     dj: IDjDefault;

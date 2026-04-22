@@ -7,12 +7,12 @@
                         {{ $i18n.t('dj.djs') }}
                     </h1>
                 </div>
-                <div class="column is-narrow" v-if="getIsLoggedIn()">
+                <div v-if="getIsLoggedIn()" class="column is-narrow">
                     <o-field>
                         <o-switch
-                            position="left"
                             v-model="search.following"
-                            @update:modelValue="onSearch"
+                            position="left"
+                            @update:model-value="onSearch"
                             >{{ $i18n.t('dj.followed_by_me') }}</o-switch
                         >
                     </o-field>
@@ -25,7 +25,7 @@
                     :placeholder="$i18n.t('dj.search_dj')"
                     type="search"
                     expanded
-                ></o-input>
+                />
                 <p class="control">
                     <o-button
                         variant="primary"
@@ -38,7 +38,7 @@
                 <o-select
                     v-model="search.sort"
                     expanded
-                    @update:modelValue="onSearch"
+                    @update:model-value="onSearch"
                 >
                     <option
                         v-for="option in formStore.djsPageSortOptions"
@@ -52,7 +52,7 @@
                     <o-select
                         v-model="search.city"
                         expanded
-                        @update:modelValue="onSearch"
+                        @update:model-value="onSearch"
                     >
                         <option :value="null">
                             {{ $i18n.t('dj.whole_czechia') }}
@@ -68,7 +68,7 @@
                     <o-select
                         v-if="search.city"
                         v-model="search.radius"
-                        @update:modelValue="onSearch"
+                        @update:model-value="onSearch"
                     >
                         <option
                             v-for="option in formStore.radiusOptions"
@@ -90,7 +90,7 @@
                         :max-tags="3"
                         expanded
                         :placeholder="$i18n.t('dj.select_3_genres')"
-                        @update:modelValue="onSearch"
+                        @update:model-value="onSearch"
                     />
                 </client-only>
             </o-field>
@@ -139,8 +139,7 @@
                         $i18n.t('form.pagination.current_page')
                     "
                     @change="onPageChange"
-                >
-                </o-pagination>
+                />
             </div>
         </div>
     </section>
@@ -151,9 +150,9 @@ import _ from 'lodash';
 import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue';
 import DjList from '~/components/dj/DjList.vue';
 import { useFormStore, useUserStore } from '~/stores';
+import { readItems, aggregate } from '@directus/sdk';
 
 const { $i18n, $api, $geo, $directus } = useNuxtApp();
-import { readItems, aggregate } from '@directus/sdk';
 const route = useRoute();
 const router = useRouter();
 const formStore = useFormStore();
@@ -170,7 +169,7 @@ interface UrlFilterObj {
 }
 
 interface RequestFilterObj {
-    _and: Array<Object>;
+    _and: Array<object>;
 }
 
 interface ISearch {

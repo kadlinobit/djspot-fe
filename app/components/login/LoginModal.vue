@@ -1,16 +1,8 @@
 <template>
-    <o-modal
-        trap-focus
-        :destroy-on-hide="false"
-        width="400px"
-        content-class="modal-content"
-        aria-role="dialog"
-        aria-label="Login modal"
-        aria-modal
-        :active="mainStore.isLoginOpen"
-        @close="() => (mainStore.isLoginOpen = false)"
+    <UModal
+        v-model:open="mainStore.isLoginOpen"
     >
-        <template #default>
+        <template #content>
             <div class="modal-card" style="width: auto">
                 <header class="modal-card-head">
                     <h4 class="title is-4">
@@ -28,7 +20,7 @@
                     <login
                         v-if="mainStore.loginActiveComponent === 'login'"
                         display-type="modal"
-                        @loginSuccess="afterLoginSuccess"
+                        @login-success="afterLoginSuccess"
                     />
                     <forgot-password
                         v-else-if="
@@ -43,10 +35,10 @@
                         display-type="modal"
                     />
                 </section>
-                <footer class="modal-card-foot"></footer>
+                <footer class="modal-card-foot"/>
             </div>
         </template>
-    </o-modal>
+    </UModal>
 </template>
 
 <script setup lang="ts">

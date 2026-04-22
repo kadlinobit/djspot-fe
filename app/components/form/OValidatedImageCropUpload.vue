@@ -8,7 +8,7 @@
             :class="{ 'has-name': !!fieldValue }"
         >
             <div v-if="currentImage && fieldValue === 'keep-current'">
-                <img :src="`${apiBaseURL}/assets/${currentImage}`" />
+                <img :src="`${apiBaseURL}/assets/${currentImage}`" >
             </div>
             <o-upload
                 v-else-if="!file || (file && errorMessage)"
@@ -20,7 +20,7 @@
                     <div class="content has-text-centered">
                         <div>
                             <p>
-                                <o-icon icon="upload" size="large"></o-icon>
+                                <o-icon icon="upload" size="large"/>
                             </p>
                             <p>Drop your files here or click to upload</p>
                         </div>
@@ -93,7 +93,7 @@ export type CroppedImage = { file: File | null; croppedImage?: CropperResult };
 export type CropUploadModelValue = CroppedImage | 'keep-current' | null;
 
 interface Props {
-    currentImage?: string | Object | null;
+    currentImage?: string | object | null;
     name?: string;
     type?: string;
     label?: string;

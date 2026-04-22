@@ -86,7 +86,7 @@ function stop() {
     htmlAudio.value.currentTime = 0
 }
 function playNext() {
-    if (canPlayNext)
+    if (canPlayNext.value)
         playerStore.loadNewAudio(
             playlistStore.playlist[
                 playlistStore.soundIndexInPlaylist(playerStore.currentSound) + 1
@@ -94,7 +94,7 @@ function playNext() {
         )
 }
 function playPrevious() {
-    if (canPlayPrevious)
+    if (canPlayPrevious.value)
         playerStore.loadNewAudio(
             playlistStore.playlist[
                 playlistStore.soundIndexInPlaylist(playerStore.currentSound) - 1

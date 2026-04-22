@@ -4,7 +4,7 @@
             :full-page="false"
             :active="isLoading"
             :can-cancel="false"
-        ></o-loading>
+        />
         <div class="columns is-vcentered is-mobile">
             <div class="column is-narrow">
                 <div class="level is-mobile">
@@ -40,7 +40,7 @@
             <div v-if="!isError && !showVolume" class="column">
                 <o-slider
                     :tooltip="false"
-                    :modelValue="currentSeconds"
+                    :model-value="currentSeconds"
                     :max="durationSeconds"
                     :disabled="!loaded || isError"
                     variant="primary mb-2 mt-2"
@@ -98,7 +98,7 @@
             @pause="playing = false"
             @play="playing = true"
             @error="onError"
-        ></audio>
+        />
     </div>
 </template>
 
