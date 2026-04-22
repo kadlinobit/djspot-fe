@@ -1,33 +1,36 @@
 <template>
-    <o-button
-        icon-left="eye"
+    <UButton
+        icon="i-heroicons-eye"
+        :color="followButtonColor"
         :variant="followButtonVariant"
-        :disabled="isToggleFollowLoading"
-        size="responsive"
-        @click="onToggleFollow"
+        :loading="isToggleFollowLoading"
+        @click.stop="onToggleFollow"
     >
         {{ followButtonLabel }}
-    </o-button>
+    </UButton>
 </template>
 
 <script setup lang="ts">
 import _ from 'lodash';
 import { useUserStore, useMainStore } from '@/stores';
-import { useOruga } from '@oruga-ui/oruga';
-import type { IDjWithSounds } from '~/plugins/directus/collection';
+import type { Dj } from '~/plugins/directus/types';
 import { createItem, deleteItem } from '@directus/sdk';
 
 const { $i18n, $directus } = useNuxtApp();
-const $oruga = useOruga();
+const toast = useToast();
 const mainStore = useMainStore();
 const { getIsLoggedIn } = useUserStore();
 
-const dj = defineModel<IDjWithSounds>('dj');
+const dj = defineModel<Dj>('dj');
 const isToggleFollowLoading = ref(false);
 
 const followButtonVariant = computed(() => {
-    if (!getIsLoggedIn()) return 'light';
-    return dj?.value?.follows?.length ? 'dark' : 'light';
+    if (!getIsLoggedIn()) return 'outline';
+    return dj?.value?.follows?.length ? 'solid' : 'outline';
+});
+
+const followButtonColor = computed(() => {
+    return 'neutral';
 });
 
 async function onToggleFollow() {
@@ -42,11 +45,16 @@ async function onToggleFollow() {
             ? await createFollow()
             : await deleteFollow();
     } catch (e: any) {
-        throw new Error(e?.message || e);
+        toast.add({
+            title: $i18n.t('error.title'),
+            description: e?.message || e,
+            color: 'error'
+        });
     } finally {
         isToggleFollowLoading.value = false;
     }
 }
+
 async function createFollow() {
     if (!dj?.value?.id) return;
     try {
@@ -57,15 +65,20 @@ async function createFollow() {
         if (result?.id) {
             dj.value.follows = [result.id];
             dj.value.follow_count++;
+            toast.add({
+                title: $i18n.t('dj.follow_success'),
+                color: 'success'
+            });
         }
-    } catch (e) {
-        $oruga.notification.open({
-            message: e,
-            variant: 'danger',
-            duration: 7000
+    } catch (e: any) {
+        toast.add({
+            title: $i18n.t('error.title'),
+            description: e?.message || e,
+            color: 'error'
         });
     }
 }
+
 async function deleteFollow() {
     if (!dj.value?.follows.length) return;
     try {
@@ -74,11 +87,15 @@ async function deleteFollow() {
         );
         dj.value.follows = [];
         dj.value.follow_count--;
-    } catch (e) {
-        $oruga.notification.open({
-            message: e,
-            variant: 'danger',
-            duration: 7000
+        toast.add({
+            title: $i18n.t('dj.unfollow_success'),
+            color: 'success'
+        });
+    } catch (e: any) {
+        toast.add({
+            title: $i18n.t('error.title'),
+            description: e?.message || e,
+            color: 'error'
         });
     }
 }

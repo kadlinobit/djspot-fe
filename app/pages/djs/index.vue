@@ -1,156 +1,145 @@
 <template>
-    <section class="section">
-        <div class="container">
-            <div class="columns is-mobile is-vcentered">
-                <div class="column">
-                    <h1 class="title">
-                        {{ $i18n.t('dj.djs') }}
-                    </h1>
-                </div>
-                <div v-if="getIsLoggedIn()" class="column is-narrow">
-                    <o-field>
-                        <o-switch
-                            v-model="search.following"
-                            position="left"
-                            @update:model-value="onSearch"
-                            >{{ $i18n.t('dj.followed_by_me') }}</o-switch
-                        >
-                    </o-field>
-                </div>
-            </div>
-
-            <o-field>
-                <o-input
-                    v-model="search.name"
-                    :placeholder="$i18n.t('dj.search_dj')"
-                    type="search"
-                    expanded
-                />
-                <p class="control">
-                    <o-button
-                        variant="primary"
-                        :label="$i18n.t('form.search')"
-                        @click="onSearch"
-                    />
-                </p>
-            </o-field>
-            <o-field horizontal grouped class="no-label">
-                <o-select
-                    v-model="search.sort"
-                    expanded
+    <UContainer class="py-10">
+        <!-- Header -->
+        <div class="mb-8 flex items-center justify-between">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                {{ $i18n.t('dj.djs') }}
+            </h1>
+            <div v-if="getIsLoggedIn()" class="flex items-center gap-3">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ $i18n.t('dj.followed_by_me') }}
+                </span>
+                <USwitch
+                    v-model="search.following"
                     @update:model-value="onSearch"
-                >
-                    <option
-                        v-for="option in formStore.djsPageSortOptions"
-                        :key="option.value"
-                        :value="option.value"
-                    >
-                        {{ $i18n.t(option.label) }}
-                    </option>
-                </o-select>
-                <o-field>
-                    <o-select
-                        v-model="search.city"
-                        expanded
-                        @update:model-value="onSearch"
-                    >
-                        <option :value="null">
-                            {{ $i18n.t('dj.whole_czechia') }}
-                        </option>
-                        <option
-                            v-for="option in formStore.citiesOptions"
-                            :key="option.value"
-                            :value="option.value"
-                        >
-                            {{ option.label }}
-                        </option>
-                    </o-select>
-                    <o-select
-                        v-if="search.city"
-                        v-model="search.radius"
-                        @update:model-value="onSearch"
-                    >
-                        <option
-                            v-for="option in formStore.radiusOptions"
-                            :key="option.value"
-                            :value="option.value"
-                        >
-                            {{ $i18n.t(option.label) }}
-                        </option>
-                    </o-select>
-                </o-field>
-
-                <client-only>
-                    <o-validated-tag-input
-                        v-model="search.genres"
-                        name="genres"
-                        :tags="formStore.genresOptions"
-                        :is-validation-on="false"
-                        field="name"
-                        :max-tags="3"
-                        expanded
-                        :placeholder="$i18n.t('dj.select_3_genres')"
-                        @update:model-value="onSearch"
-                    />
-                </client-only>
-            </o-field>
-
-            <o-loading
-                v-if="fetchPending"
-                :full-page="false"
-                :active="fetchPending"
-                :can-cancel="true"
-            />
-            <div v-else-if="fetchError">
-                {{ fetchError }}
-            </div>
-            <div v-else-if="!fetchPending && djs?.data.length === 0">
-                <section class="hero is-secondary is-medium">
-                    <div class="hero-body">
-                        <p class="title">{{ $i18n.t('dj.no_djs_found') }}</p>
-                        <p class="subtitle">
-                            <a @click="resetSearch">{{
-                                $i18n.t('form.reset_search')
-                            }}</a>
-                        </p>
-                    </div>
-                </section>
-            </div>
-            <div v-else>
-                <dj-list v-if="djs?.data" :djs="djs.data" />
-                <div class="block">
-                    <div class="tag is-secondary is-medium">
-                        {{ $i18n.t('dj.total_found', [djs?.data.length || 0]) }}
-                    </div>
-                </div>
-                <o-pagination
-                    :current="search.page"
-                    :total="djs?.meta?.count"
-                    :range-before="1"
-                    :range-after="1"
-                    order="centered"
-                    :per-page="search.perPage"
-                    :aria-next-label="$i18n.t('form.pagination.next_page')"
-                    :aria-previous-label="
-                        $i18n.t('form.pagination.previous_page')
-                    "
-                    :aria-page-label="$i18n.t('form.pagination.page')"
-                    :aria-current-label="
-                        $i18n.t('form.pagination.current_page')
-                    "
-                    @change="onPageChange"
                 />
             </div>
         </div>
-    </section>
+
+        <!-- Search and Filters -->
+        <div class="mb-8 space-y-4">
+            <!-- Search Bar -->
+            <div class="flex gap-2">
+                <UInput
+                    v-model="search.name"
+                    icon="i-heroicons-magnifying-glass"
+                    :placeholder="$i18n.t('dj.search_dj')"
+                    class="flex-1"
+                    size="lg"
+                    @keyup.enter="onSearch"
+                />
+                <UButton
+                    size="lg"
+                    color="neutral"
+                    variant="solid"
+                    @click="onSearch"
+                >
+                    {{ $i18n.t('form.search') }}
+                </UButton>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <USelectMenu
+                    v-model="search.sort"
+                    :items="formStore.djsPageSortOptions"
+                    value-key="value"
+                    @update:model-value="onSearch"
+                />
+                
+                <div class="flex gap-2">
+                    <USelectMenu
+                        v-model="search.city"
+                        :items="citiesOptionsWithWholeCzechia"
+                        value-key="value"
+                        class="flex-1"
+                        @update:model-value="onSearch"
+                    />
+                    <USelectMenu
+                        v-if="search.city"
+                        v-model="search.radius"
+                        :items="formStore.radiusOptions"
+                        value-key="value"
+                        class="w-24"
+                        @update:model-value="onSearch"
+                    />
+                </div>
+
+                <div class="lg:col-span-2">
+                    <UInputMenu
+                        v-model="search.genres"
+                        :items="formStore.genresOptions"
+                        multiple
+                        value-key="value"
+                        label-key="label"
+                        :placeholder="$i18n.t('dj.select_3_genres')"
+                        @update:model-value="onSearch"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div v-if="fetchPending" class="space-y-6">
+            <UProgress animation="carousel" color="neutral" />
+            <dj-list />
+        </div>
+        
+        <div v-else-if="fetchError" class="py-12 text-center">
+            <UAlert
+                icon="i-heroicons-exclamation-triangle"
+                color="error"
+                variant="subtle"
+                :title="fetchError.message"
+            />
+        </div>
+
+        <div v-else-if="!fetchPending && djs?.data.length === 0" class="py-20">
+            <div class="text-center">
+                <UIcon name="i-heroicons-user-group" class="mx-auto h-12 w-12 text-gray-400" />
+                <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">
+                    {{ $i18n.t('dj.no_djs_found') }}
+                </h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    {{ $i18n.t('form.no_results_help') }}
+                </p>
+                <div class="mt-6">
+                    <UButton
+                        color="neutral"
+                        variant="soft"
+                        @click="resetSearch"
+                    >
+                        {{ $i18n.t('form.reset_search') }}
+                    </UButton>
+                </div>
+            </div>
+        </div>
+
+        <div v-else class="space-y-8">
+            <dj-list v-if="djs?.data" :djs="djs.data" />
+            
+            <div class="flex items-center justify-between border-t border-gray-200 pt-6 dark:border-gray-800">
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    {{ $i18n.t('dj.total_found', [djs?.meta?.count || 0]) }}
+                </span>
+                
+                <UPagination
+                    v-model="search.page"
+                    :total="djs?.meta?.count"
+                    :page-count="search.perPage"
+                    @update:model-value="onPageChange"
+                />
+            </div>
+        </div>
+    </UContainer>
 </template>
 
 <script setup lang="ts">
 import _ from 'lodash';
-import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue';
 import DjList from '~/components/dj/DjList.vue';
 import { useFormStore, useUserStore } from '~/stores';
 import { readItems, aggregate } from '@directus/sdk';
+import type { Genre } from '~/plugins/directus/types';
 
 const { $i18n, $api, $geo, $directus } = useNuxtApp();
 const route = useRoute();
@@ -158,67 +147,43 @@ const router = useRouter();
 const formStore = useFormStore();
 const { getIsLoggedIn, getUser } = useUserStore();
 
-const runtimeConfig = useRuntimeConfig();
-
-interface UrlFilterObj {
-    name?: string;
-    city?: number;
-    radius?: number;
-    genres?: Array<any>;
-    following?: boolean;
-}
-
-interface RequestFilterObj {
-    _and: Array<object>;
-}
-
-interface ISearch {
-    name: string;
-    city: string | null;
-    radius: number;
-    genres: Genre[];
-}
-
 const search = reactive({
     name: route.query.name ? String(route.query.name) : '',
-    city: route.query.city ? parseInt(String(route.query.city)) : null,
+    city: route.query.city ? String(route.query.city) : null,
     radius: route.query.radius ? parseInt(String(route.query.radius)) : 0,
-    genres: [], // FILLED IN OnMounted,
+    genres: [] as string[],
     sort: route.query.sort ? String(route.query.sort) : 'name',
     perPage: 20,
     page: route.query.page ? parseInt(String(route.query.page)) : 1,
-    following:
-        route.query.following === 'true' && getIsLoggedIn() ? true : false
+    following: route.query.following === 'true' && getIsLoggedIn()
 });
 
-const urlFilter = computed(() => {
-    const urlFilterObj: UrlFilterObj = {};
-    if (search.name) urlFilterObj.name = search.name.toLowerCase();
-    if (search.city) urlFilterObj.city = search.city;
-    if (search.city && search.radius) urlFilterObj.radius = search.radius;
-    if (!_.isEmpty(search.genres))
-        urlFilterObj.genres = search.genres.map((genre: Genre) => genre.id);
-    if (!_.isNil(search.following)) urlFilterObj.following = search.following;
-
-    return !_.isEmpty(urlFilterObj) ? urlFilterObj : null;
+const citiesOptionsWithWholeCzechia = computed(() => {
+    return [
+        { value: null, label: $i18n.t('dj.whole_czechia') },
+        ...formStore.citiesOptions
+    ];
 });
 
 const urlQuery = computed(() => {
-    return {
+    const query: any = {
         limit: search.perPage,
         page: search.page,
-        sort: search.sort,
-        ...urlFilter.value
+        sort: search.sort
     };
+    if (search.name) query.name = search.name.toLowerCase();
+    if (search.city) query.city = search.city;
+    if (search.city && search.radius) query.radius = search.radius;
+    if (!_.isEmpty(search.genres)) query.genres = search.genres;
+    if (search.following) query.following = true;
+
+    return query;
 });
 
 const requestQuery = computed(() => {
     let fields = $api.collection.getCollectionFields('dj', 'default');
+    fields = fields.filter((field: string) => field !== 'follows');
 
-    if (true) {
-        // if (authStatus.value === 'authenticated') {
-        fields = fields.filter((field: string) => field !== 'follows');
-    }
     return {
         fields,
         limit: search.perPage,
@@ -229,79 +194,55 @@ const requestQuery = computed(() => {
 });
 
 const requestFilter = computed(() => {
-    if (
-        !search.name &&
-        !search.city &&
-        _.isEmpty(search.genres) &&
-        !search.following
-    )
-        return {};
-
-    const requestFilterObj: RequestFilterObj = { _and: [] };
+    const filterObj: any = { _and: [] };
 
     if (search.name) {
-        requestFilterObj._and.push({
-            name: {
-                _contains: String(search.name).toLowerCase().trim()
-            }
+        filterObj._and.push({
+            name: { _contains: search.name.toLowerCase().trim() }
         });
     }
     if (search.city) {
-        let cityFilter;
-        const cityDirectFilter = {
-            city: {
-                id: {
-                    _eq: search.city
-                }
-            }
-        };
+        const cityId = search.city;
+        const cityDirectFilter = { city: { id: { _eq: cityId } } };
 
         if (search.radius === 0) {
-            cityFilter = cityDirectFilter;
+            filterObj._and.push(cityDirectFilter);
         } else {
-            cityFilter = {
+            filterObj._and.push({
                 _or: [
                     cityDirectFilter,
                     {
                         city: {
                             gps: {
                                 _intersects: $geo.getPointRadius(
-                                    formStore.getCityCoordinates(search.city),
+                                    formStore.getCityCoordinates(parseInt(cityId)),
                                     search.radius
                                 )
                             }
                         }
                     }
                 ]
-            };
+            });
         }
-
-        requestFilterObj._and.push(cityFilter);
     }
 
     if (!_.isEmpty(search.genres)) {
-        requestFilterObj._and.push({
+        filterObj._and.push({
             genres: {
-                genre_id: {
-                    _in: search.genres.map((genre: Genre) => genre.id)
-                }
+                genre_id: { _in: search.genres }
             }
         });
     }
 
-    if (search.following === true && getUser()?.email) {
-        requestFilterObj._and.push({
+    if (search.following && getUser()?.email) {
+        filterObj._and.push({
             follows: {
-                user_created: {
-                    email: {
-                        _contains: getUser()?.email
-                    }
-                }
+                user_created: { email: { _contains: getUser()?.email } }
             }
         });
     }
 
-    return requestFilterObj;
+    return filterObj._and.length > 0 ? filterObj : {};
 });
 
 const {
@@ -309,41 +250,38 @@ const {
     pending: fetchPending,
     refresh,
     error: fetchError
-} = useAsyncData('djsPageQuery', async function () {
+} = useAsyncData('djsPageQuery', async () => {
     const data = await $directus.request(readItems('dj', requestQuery.value));
     const meta = await $directus.request(
         aggregate('dj', { aggregate: { count: '*' }, ...requestQuery.value })
     );
-
     return { data, meta: meta[0] };
+}, {
+    watch: [() => search.page, () => search.sort] // Add any other triggers if needed, but we call refresh manually too
 });
-
-function pushRouterQuery() {
-    router.push({
-        path: '/djs',
-        query: _.isEmpty(urlQuery.value) ? null : urlQuery.value
-    });
-}
 
 function onSearch() {
     search.page = 1;
-    pushRouterQuery();
+    router.push({ query: urlQuery.value });
     refresh();
 }
+
 function onPageChange(pageNumber: number) {
     search.page = pageNumber;
-    pushRouterQuery();
+    router.push({ query: urlQuery.value });
     refresh();
 }
 
 function resetSearch() {
-    search.name = '';
-    search.city = null;
-    search.radius = 0;
-    search.genres = [];
-    search.sort = 'name';
-    search.following = false;
-
+    Object.assign(search, {
+        name: '',
+        city: null,
+        radius: 0,
+        genres: [],
+        sort: 'name',
+        following: false,
+        page: 1
+    });
     onSearch();
 }
 
@@ -351,15 +289,10 @@ onMounted(() => {
     formStore.fetchCities();
     formStore.fetchGenres();
 
-    // Fill in genres
     if (route.query.genres) {
-        const urlGenres = Array.isArray(route.query.genres)
-            ? route.query.genres.map((genreId) => parseInt(String(genreId)))
-            : [parseInt(route.query.genres)];
-
-        search.genres = formStore.genresOptions.filter((genreOption: Genre) =>
-            urlGenres.includes(genreOption.id)
-        );
+        search.genres = Array.isArray(route.query.genres)
+            ? (route.query.genres as string[])
+            : [String(route.query.genres)];
     }
 });
 </script>

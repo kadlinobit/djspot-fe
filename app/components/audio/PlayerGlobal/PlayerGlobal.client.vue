@@ -1,28 +1,35 @@
 <template>
-    <div class="o-player is-relative">
-        <o-slider
-            :tooltip="false"
-            :model-value="playerStore.currentSeconds"
-            :max="playerStore.durationSeconds"
-            :disabled="!playerStore.isLoaded || playerStore.isError"
-            variant="secondary mb-0 mt-0"
-            @change="(value) => seek(value)"
-            @dragstart="isSeeking = true"
-            @dragend="isSeeking = false"
-        />
-        <div v-if="playerStore.currentSound" class="p-2 is-hidden-tablet">
+    <div class="relative bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg">
+        <!-- Progress Bar at top edge -->
+        <div class="absolute top-0 left-0 right-0 -mt-2">
+            <USlider
+                :model-value="playerStore.currentSeconds"
+                :max="playerStore.durationSeconds"
+                :disabled="!playerStore.isLoaded || playerStore.isError"
+                color="primary"
+                size="sm"
+                class="w-full cursor-pointer"
+                @update:model-value="(value) => { playerStore.setCurrentSeconds(value); isSeeking = true; }"
+                @change="(event) => { seek(playerStore.currentSeconds); isSeeking = false; }"
+                @mousedown="isSeeking = true"
+                @mouseup="isSeeking = false"
+                @touchstart="isSeeking = true"
+                @touchend="isSeeking = false"
+            />
+        </div>
+        
+        <div v-if="playerStore.currentSound" class="p-2 md:hidden">
             <sound-info />
         </div>
-        <div class="columns is-gapless is-vcentered is-mobile mb-1 mt-1">
-            <div class="column is-narrow-tablet is-6-mobile ml-2">
+        
+        <div class="flex items-center justify-between px-4 py-3 gap-4">
+            <div class="flex-shrink-0 w-1/2 md:w-auto">
                 <play-controls :html-audio-ref="htmlAudio" />
             </div>
-            <div class="column is-hidden-mobile is-text-ellipsis">
+            <div class="hidden md:block flex-1 min-w-0">
                 <sound-info />
             </div>
-            <div
-                class="column is-6-mobile is-4-tablet is-3-desktop is-2-widescreen"
-            >
+            <div class="flex-shrink-0 w-1/2 md:w-auto md:min-w-[200px] lg:min-w-[300px]">
                 <volume-controls />
             </div>
         </div>

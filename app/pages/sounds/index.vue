@@ -1,145 +1,140 @@
 <template>
-    <section class="section">
-        <div class="container">
-            <div class="columns is-mobile is-vcentered">
-                <div class="column">
-                    <h1 class="title">
-                        {{ $i18n.t('sound.sounds') }}
-                    </h1>
-                </div>
-                <div v-if="getIsLoggedIn()" class="column is-narrow">
-                    <o-field>
-                        <o-switch
-                            v-model="search.liked"
-                            position="left"
-                            @update:model-value="onSearch"
-                            >{{ $i18n.t('sound.liked_by_me') }}</o-switch
-                        >
-                    </o-field>
-                </div>
-                <div v-if="getIsLoggedIn()" class="column is-narrow">
-                    <o-field>
-                        <o-switch
-                            v-model="search.following"
-                            position="left"
-                            @update:model-value="onSearch"
-                            >{{ $i18n.t('dj.followed_by_me') }}</o-switch
-                        >
-                    </o-field>
-                </div>
-            </div>
-            <o-field>
-                <o-input
-                    v-model="search.name"
-                    placeholder="Search in Sound or DJ name"
-                    type="search"
-                    expanded
-                />
-                <p class="control">
-                    <o-button
-                        variant="primary"
-                        :label="$i18n.t('form.search')"
-                        @click="onSearch"
-                    />
-                </p>
-            </o-field>
-            <o-field class="no-label" horizontal>
-                <o-select v-model="search.sort" expanded @input="onSearch">
-                    <option
-                        v-for="option in formStore.soundsPageSortOptions"
-                        :key="option.value"
-                        :value="option.value"
-                    >
-                        {{ $i18n.t(option.label) }}
-                    </option>
-                </o-select>
-
-                <o-select v-model="search.type" expanded @input="onSearch">
-                    <option value="">
-                        {{ $i18n.t('sound.all_types') }}
-                    </option>
-                    <option
-                        v-for="option in formStore.soundTypeOptions"
-                        :key="option.value"
-                        :value="option.value"
-                    >
-                        {{ $i18n.t(option.label) }}
-                    </option>
-                </o-select>
-                <client-only>
-                    <o-validated-tag-input
-                        v-model="search.genres"
-                        name="genres"
-                        :tags="formStore.genresOptions"
-                        :is-validation-on="false"
-                        field="name"
-                        :max-tags="3"
-                        expanded
-                        :placeholder="$i18n.t('dj.select_3_genres')"
+    <UContainer class="py-10">
+        <!-- Header -->
+        <div class="mb-8 flex items-center justify-between">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                {{ $i18n.t('sound.sounds') }}
+            </h1>
+            <div v-if="getIsLoggedIn()" class="flex items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ $i18n.t('sound.liked_by_me') }}
+                    </span>
+                    <USwitch
+                        v-model="search.liked"
                         @update:model-value="onSearch"
                     />
-                </client-only>
-            </o-field>
-
-            <o-loading
-                v-if="fetchPending"
-                :full-page="false"
-                :active="fetchPending"
-                :can-cancel="true"
-            />
-            <div v-else-if="fetchError">
-                {{ fetchError }}
-            </div>
-            <div v-else-if="!fetchPending && Number(sounds?.meta?.count) === 0">
-                <section class="hero is-secondary is-medium">
-                    <div class="hero-body">
-                        <p class="title">
-                            {{ $i18n.t('sound.no_sounds_found') }}
-                        </p>
-                        <p class="subtitle">
-                            <a @click="resetSearch">{{
-                                $i18n.t('form.reset_search')
-                            }}</a>
-                        </p>
-                    </div>
-                </section>
-            </div>
-            <div v-else-if="!fetchPending && Number(sounds?.meta?.count) > 0">
-                <sounds-page-list :sounds="sounds?.data" />
-                <div class="block">
-                    <div class="tag is-secondary is-medium">
-                        {{
-                            $i18n.t('sound.total_found', [
-                                Number(sounds?.meta?.count) || 0
-                            ])
-                        }}
-                    </div>
                 </div>
-                <o-pagination
-                    :current="search.page"
-                    :total="sounds?.meta?.count"
-                    :range-before="1"
-                    :range-after="1"
-                    order="centered"
-                    size="small"
-                    :per-page="search.perPage"
-                    aria-next-label="Next page"
-                    aria-previous-label="Previous page"
-                    aria-page-label="Page"
-                    aria-current-label="Current page"
-                    @change="onPageChange"
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ $i18n.t('dj.followed_by_me') }}
+                    </span>
+                    <USwitch
+                        v-model="search.following"
+                        @update:model-value="onSearch"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="mb-8 space-y-4">
+            <!-- Search Bar -->
+            <div class="flex gap-2">
+                <UInput
+                    v-model="search.name"
+                    icon="i-heroicons-magnifying-glass"
+                    placeholder="Search in Sound or DJ name"
+                    class="flex-1"
+                    size="lg"
+                    @keyup.enter="onSearch"
+                />
+                <UButton
+                    size="lg"
+                    color="neutral"
+                    variant="solid"
+                    @click="onSearch"
+                >
+                    {{ $i18n.t('form.search') }}
+                </UButton>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <USelectMenu
+                    v-model="search.sort"
+                    :items="soundsPageSortOptionsTranslated"
+                    value-key="value"
+                    @update:model-value="onSearch"
+                />
+
+                <USelectMenu
+                    v-model="search.type"
+                    :items="soundTypeOptionsWithAll"
+                    value-key="value"
+                    @update:model-value="onSearch"
+                />
+
+                <UInputMenu
+                    v-model="search.genres"
+                    :items="formStore.genresOptions"
+                    multiple
+                    value-key="value"
+                    label-key="label"
+                    :placeholder="$i18n.t('dj.select_3_genres')"
+                    @update:model-value="onSearch"
                 />
             </div>
         </div>
-    </section>
+
+        <!-- Content -->
+        <div v-if="fetchPending" class="space-y-6">
+            <UProgress animation="carousel" color="neutral" />
+            <sounds-page-list />
+        </div>
+        
+        <div v-else-if="fetchError" class="py-12 text-center">
+            <UAlert
+                icon="i-heroicons-exclamation-triangle"
+                color="error"
+                variant="subtle"
+                :title="fetchError.message"
+            />
+        </div>
+
+        <div v-else-if="!fetchPending && sounds?.data.length === 0" class="py-20">
+            <div class="text-center">
+                <UIcon name="i-heroicons-musical-note" class="mx-auto h-12 w-12 text-gray-400" />
+                <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">
+                    {{ $i18n.t('sound.no_sounds_found') }}
+                </h3>
+                <div class="mt-6">
+                    <UButton
+                        color="neutral"
+                        variant="soft"
+                        @click="resetSearch"
+                    >
+                        {{ $i18n.t('form.reset_search') }}
+                    </UButton>
+                </div>
+            </div>
+        </div>
+
+        <div v-else class="space-y-8">
+            <sounds-page-list v-if="sounds?.data" :sounds="sounds.data" />
+            
+            <div class="flex items-center justify-between border-t border-gray-200 pt-6 dark:border-gray-800">
+                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    {{ $i18n.t('sound.total_found', [sounds?.meta?.count || 0]) }}
+                </span>
+                
+                <UPagination
+                    v-model="search.page"
+                    :total="sounds?.meta?.count"
+                    :page-count="search.perPage"
+                    @update:model-value="onPageChange"
+                />
+            </div>
+        </div>
+    </UContainer>
 </template>
 
 <script setup lang="ts">
 import _ from 'lodash';
-import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue';
 import SoundsPageList from '~/components/sound/SoundsPageList.vue';
 import { useFormStore, useUserStore } from '~/stores';
 import { readItems, aggregate } from '@directus/sdk';
+import type { Genre } from '~/plugins/directus/types';
 
 const { $i18n, $api, $directus } = useNuxtApp();
 const route = useRoute();
@@ -148,54 +143,47 @@ const formStore = useFormStore();
 
 const { getIsLoggedIn, getUser } = useUserStore();
 
-interface UrlFilterObj {
-    name?: string;
-    city?: string;
-    type?: string;
-    genres?: Array<any>;
-    liked?: boolean;
-    following?: boolean;
-}
-
-interface RequestFilterObj {
-    _and: Array<object>;
-}
-
 const search = reactive({
     name: route.query.name ? String(route.query.name) : '',
     type: route.query.type ? String(route.query.type) : '',
-    genres: [], // FILLED IN OnMounte,
+    genres: [] as string[],
     sort: route.query.sort ? String(route.query.sort) : 'name',
     perPage: 20,
     page: route.query.page ? parseInt(String(route.query.page)) : 1,
-
-    liked: false,
-    following: false
-
-    // liked: route.query.liked === 'true' && auth.loggedIn.value ? true : false,
-    // following:
-    //     route.query.following === 'true' && auth.loggedIn.value ? true : false
+    liked: route.query.liked === 'true' && getIsLoggedIn(),
+    following: route.query.following === 'true' && getIsLoggedIn()
 });
 
-const urlFilter = computed(() => {
-    const urlFilterObj: UrlFilterObj = {};
-    if (search.name) urlFilterObj.name = search.name;
-    if (search.type) urlFilterObj.type = search.type;
-    if (!_.isEmpty(search.genres))
-        urlFilterObj.genres = search.genres.map((genre: Genre) => genre.id);
-    if (!_.isNil(search.liked)) urlFilterObj.liked = search.liked;
-    if (!_.isNil(search.following)) urlFilterObj.following = search.following;
+const soundsPageSortOptionsTranslated = computed(() => {
+    return formStore.soundsPageSortOptions.map(opt => ({
+        ...opt,
+        label: $i18n.t(opt.label)
+    }));
+});
 
-    return !_.isEmpty(urlFilterObj) ? urlFilterObj : null;
+const soundTypeOptionsWithAll = computed(() => {
+    return [
+        { value: '', label: $i18n.t('sound.all_types') },
+        ...formStore.soundTypeOptions.map(opt => ({
+            ...opt,
+            label: $i18n.t(opt.label)
+        }))
+    ];
 });
 
 const urlQuery = computed(() => {
-    return {
+    const query: any = {
         limit: search.perPage,
         page: search.page,
-        sort: search.sort,
-        ...urlFilter.value
+        sort: search.sort
     };
+    if (search.name) query.name = search.name;
+    if (search.type) query.type = search.type;
+    if (!_.isEmpty(search.genres)) query.genres = search.genres;
+    if (search.liked) query.liked = true;
+    if (search.following) query.following = true;
+
+    return query;
 });
 
 const requestQuery = computed(() => {
@@ -206,7 +194,6 @@ const requestQuery = computed(() => {
     }
 
     return {
-        meta: '*',
         fields,
         limit: search.perPage,
         page: search.page,
@@ -216,80 +203,49 @@ const requestQuery = computed(() => {
 });
 
 const requestFilter = computed(() => {
-    if (
-        !search.name &&
-        !search.type &&
-        _.isEmpty(search.genres) &&
-        !search.liked &&
-        !search.following
-    )
-        return {};
-
-    const requestFilterObj: RequestFilterObj = { _and: [] };
+    const filterObj: any = { _and: [] };
 
     if (search.name) {
-        requestFilterObj._and.push({
+        filterObj._and.push({
             _or: [
-                {
-                    name: {
-                        _contains: String(search.name).toLowerCase().trim()
-                    }
-                },
-                {
-                    dj: {
-                        name: {
-                            _contains: String(search.name).toLowerCase().trim()
-                        }
-                    }
-                }
+                { name: { _contains: search.name.toLowerCase().trim() } },
+                { dj: { name: { _contains: search.name.toLowerCase().trim() } } }
             ]
         });
     }
     if (search.type) {
-        requestFilterObj._and.push({
-            type: {
-                _eq: search.type.toLowerCase().trim()
-            }
+        filterObj._and.push({
+            type: { _eq: search.type.toLowerCase().trim() }
         });
     }
 
     if (!_.isEmpty(search.genres)) {
-        requestFilterObj._and.push({
+        filterObj._and.push({
             genres: {
-                genre_id: {
-                    _in: search.genres.map((genre: Genre) => genre.id)
-                }
+                genre_id: { _in: search.genres }
             }
         });
     }
 
-    if (search.liked === true && getUser()?.email) {
-        requestFilterObj._and.push({
+    if (search.liked && getUser()?.email) {
+        filterObj._and.push({
             likes: {
-                user_created: {
-                    email: {
-                        _contains: getUser()?.email
-                    }
-                }
+                user_created: { email: { _contains: getUser()?.email } }
             }
         });
     }
 
-    if (search.following === true && getUser()?.email) {
-        requestFilterObj._and.push({
+    if (search.following && getUser()?.email) {
+        filterObj._and.push({
             dj: {
                 follows: {
-                    user_created: {
-                        email: {
-                            _contains: getUser()?.email
-                        }
-                    }
+                    user_created: { email: { _contains: getUser()?.email } }
                 }
             }
         });
     }
 
-    return requestFilterObj;
+    return filterObj._and.length > 0 ? filterObj : {};
 });
 
 const {
@@ -297,63 +253,50 @@ const {
     pending: fetchPending,
     refresh,
     error: fetchError
-} = useLazyAsyncData('soundsPageQuery', async function () {
-    const data = await $directus.request(
-        readItems('sound', requestQuery.value)
-    );
+} = useAsyncData('soundsPageQuery', async () => {
+    const data = await $directus.request(readItems('sound', requestQuery.value));
     const meta = await $directus.request(
-        aggregate('sound', {
-            aggregate: { count: '*' },
-            ...requestQuery.value
-        })
+        aggregate('sound', { aggregate: { count: '*' }, ...requestQuery.value })
     );
 
     return { data, meta: meta[0] };
+}, {
+    watch: [() => search.page, () => search.sort]
 });
-
-function pushRouterQuery() {
-    router.push({
-        path: '/sounds',
-        query: _.isEmpty(urlQuery.value) ? null : urlQuery.value
-    });
-}
 
 function onSearch() {
     search.page = 1;
-    pushRouterQuery();
-    refresh();
-}
-function onPageChange(pageNumber: number) {
-    search.page = pageNumber;
-    pushRouterQuery();
+    router.push({ query: urlQuery.value });
     refresh();
 }
 
-onMounted(async () => {
-    console.log('isLoggedIn', getIsLoggedIn());
+function onPageChange(pageNumber: number) {
+    search.page = pageNumber;
+    router.push({ query: urlQuery.value });
+    refresh();
+}
+
+function resetSearch() {
+    Object.assign(search, {
+        name: '',
+        type: '',
+        genres: [],
+        sort: 'name',
+        liked: false,
+        following: false,
+        page: 1
+    });
+    onSearch();
+}
+
+onMounted(() => {
     formStore.fetchCities();
     formStore.fetchGenres();
 
-    // Fill in genres
     if (route.query.genres) {
-        const urlGenres = Array.isArray(route.query.genres)
-            ? route.query.genres.map((genreId) => parseInt(String(genreId)))
-            : [parseInt(route.query.genres)];
-
-        search.genres = formStore.genresOptions.filter((genreOption: Genre) =>
-            urlGenres.includes(genreOption.id)
-        );
+        search.genres = Array.isArray(route.query.genres)
+            ? (route.query.genres as string[])
+            : [String(route.query.genres)];
     }
 });
-
-function resetSearch() {
-    search.name = '';
-    search.type = '';
-    search.genres = [];
-    search.sort = 'name';
-    search.liked = false;
-    search.following = false;
-
-    onSearch();
-}
 </script>

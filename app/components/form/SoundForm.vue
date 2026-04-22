@@ -1,174 +1,186 @@
 <template>
-    <section class="section">
-        <o-loading :active="isLoading" />
-        <o-notification v-if="successMessage" variant="success">
-            {{ $i18n.t(successMessage) }}
-        </o-notification>
+    <div class="sound-form">
+        <UAlert
+            v-if="successMessage"
+            icon="i-heroicons-check-circle"
+            color="success"
+            variant="subtle"
+            :title="$i18n.t(successMessage)"
+            class="mb-6"
+        />
 
-        <o-notification v-if="errorMessage" variant="danger">
-            {{ $i18n.t(errorMessage) }}
-        </o-notification>
+        <UAlert
+            v-if="errorMessage"
+            icon="i-heroicons-exclamation-triangle"
+            color="error"
+            variant="subtle"
+            :title="$i18n.t(errorMessage)"
+            class="mb-6"
+        />
 
-        <form v-if="!successMessage" method="post" @submit.prevent>
-            <div class="columns is-tablet">
-                <div class="column is-half-tablet is-three-fifths-desktop">
-                    <o-validated-select
-                        v-model="formData.type"
-                        name="type"
-                        :label="$i18n.t('sound.type')"
-                        :options="soundTypeOptions"
-                        :expanded="true"
-                        :placeholder="$i18n.t('sound.select_sound_type')"
-                        :validation-rules="validationSchema.type"
-                    />
-                    <o-validated-field
-                        v-model="formData.name"
+        <UForm
+            v-if="!successMessage"
+            ref="formRef"
+            :schema="schema"
+            :state="state"
+            class="space-y-6"
+            @submit="onSubmit"
+        >
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
+                <!-- Left Column -->
+                <div class="space-y-4 lg:col-span-3">
+                    <UFormField :label="$i18n.t('sound.type')" name="type">
+                        <USelectMenu
+                            v-model="state.type"
+                            :items="soundTypeOptions"
+                            value-key="value"
+                            :placeholder="$i18n.t('sound.select_sound_type')"
+                            class="w-full"
+                        />
+                    </UFormField>
+
+                    <UFormField
+                        :label="$i18n.t(`${state.type}.name`)"
                         name="name"
-                        type="text"
-                        :label="$i18n.t(`${formData.type}.name`)"
-                        :placeholder="$i18n.t(`${formData.type}.name`)"
-                        :validation-rules="validationSchema.name"
-                    />
-                    <o-validated-field
-                        v-model="formData.slug"
+                    >
+                        <UInput
+                            v-model="state.name"
+                            :placeholder="$i18n.t(`${state.type}.name`)"
+                            class="w-full"
+                        />
+                    </UFormField>
+
+                    <UFormField
+                        :label="$i18n.t(`${state.type}.slug`)"
                         name="slug"
-                        type="text"
-                        :label="$i18n.t(`${formData.type}.slug`)"
-                        :control-button="true"
-                        :control-button-label="'form.generate'"
-                        :custom-message="slugChangedMessage"
-                        :validation-rules="validationSchema.slug"
-                        :help="$i18n.t('sound.slug_help')"
-                        @control-button-clicked="
-                            formData.slug = $api.tools.generateUrlSlug(
-                                formData.name
-                            )
-                        "
-                    />
-                    <o-validated-field
-                        v-model="formData.url"
-                        name="url"
-                        type="url"
+                        :help="slugChangedMessage || $i18n.t('sound.slug_help')"
+                    >
+                        <div class="flex gap-2">
+                            <UInput v-model="state.slug" class="flex-1" />
+                            <UButton
+                                color="neutral"
+                                variant="outline"
+                                icon="i-heroicons-arrow-path"
+                                @click="generateSlug"
+                            >
+                                {{ $i18n.t('form.generate') }}
+                            </UButton>
+                        </div>
+                    </UFormField>
+
+                    <UFormField
                         :label="$i18n.t('sound.url')"
-                        :placeholder="$i18n.t('sound.url_placeholder')"
+                        name="url"
                         :help="$i18n.t('sound.url_help')"
-                        :validation-rules="validationSchema.url"
-                    />
-                    <o-validated-field
-                        v-model="audioLoadState"
-                        vid="audioLoadState"
-                        name="audioLoadState"
-                        :hidden="true"
-                    />
-                    <div class="field">
+                    >
+                        <UInput
+                            v-model="state.url"
+                            type="url"
+                            :placeholder="$i18n.t('sound.url_placeholder')"
+                            class="w-full"
+                        />
+                    </UFormField>
+
+                    <div class="my-4">
                         <Player
                             v-if="audioUrl"
                             :file="audioUrl"
                             @audio-load-error="onAudioLoadError"
-                            @audio-load-success="
-                                (data) => onAudioLoadSuccess(data)
-                            "
+                            @audio-load-success="onAudioLoadSuccess"
                         />
                     </div>
-                    <o-validated-tag-input
-                        v-model="formData.genres"
-                        name="genres"
-                        :label="$i18n.t('dj.genres')"
-                        :tags="availableGenres"
-                        field="name"
-                        :max-tags="3"
-                        expanded
-                        :placeholder="$i18n.t('dj.select_3_genres')"
-                        :validation-rules="validationSchema.genres"
-                    />
+
+                    <UFormField :label="$i18n.t('dj.genres')" name="genres">
+                        <UInputMenu
+                            v-model="state.genres"
+                            :items="formStore.genresOptions"
+                            multiple
+                            value-key="value"
+                            label-key="label"
+                            :placeholder="$i18n.t('dj.select_3_genres')"
+                            class="w-full"
+                        />
+                    </UFormField>
                 </div>
-                <div class="column is-half-tablet is-two-fifths-desktop">
-                    <o-validated-image-crop-upload
-                        v-model="formData.photo"
-                        name="photo"
-                        :label="$i18n.t('dj.photo')"
-                        :current-image="initialData ? initialData.photo : null"
-                        :validation-rules="validationSchema.photo"
-                    />
+
+                <!-- Right Column -->
+                <div class="lg:col-span-2">
+                    <UFormField :label="$i18n.t('dj.photo')" name="photo">
+                        <u-image-crop-upload
+                            v-model="state.photo"
+                            :current-image="currentPhoto"
+                        />
+                    </UFormField>
                 </div>
             </div>
 
-            <o-validated-bm-editor
-                v-model="formData.description"
+            <!-- Description -->
+            <UFormField
+                :label="$i18n.t(`${state.type}.description`)"
                 name="description"
-                :label="$i18n.t(`${formData.type}.description`)"
-                :placeholder="
-                    $i18n.t(`${formData.type}.description_placeholder`)
-                "
-            />
+            >
+                <u-bm-editor
+                    v-model="state.description"
+                    :placeholder="
+                        $i18n.t(`${state.type}.description_placeholder`)
+                    "
+                />
+            </UFormField>
 
-            <div class="field is-grouped is-grouped-right">
-                <div class="control">
-                    <o-button variant="light" @click="onCancel">
-                        {{ $i18n.t('form.cancel') }}
-                    </o-button>
-                </div>
-                <div class="control">
-                    <o-button
-                        :disabled="props.isLoading"
-                        variant="dark"
-                        @click="onSave"
-                    >
-                        {{
-                            initialData
-                                ? $i18n.t(`${formData.type}.save`)
-                                : $i18n.t(`${formData.type}.add`)
-                        }}
-                    </o-button>
-                </div>
-                <div
-                    v-if="initialData && initialData.status === 'draft'"
-                    class="control"
+            <!-- Buttons -->
+            <div
+                class="flex justify-end gap-3 border-t border-gray-200 pt-6 dark:border-gray-800"
+            >
+                <UButton color="neutral" variant="ghost" @click="onCancel">
+                    {{ $i18n.t('form.cancel') }}
+                </UButton>
+
+                <UButton
+                    :loading="isLoading"
+                    color="neutral"
+                    variant="solid"
+                    @click="onSave"
                 >
-                    <o-button
-                        :disabled="props.isLoading"
-                        variant="primary"
-                        @click="onSaveAndPublish"
-                    >
-                        {{ $i18n.t(`${formData.type}.save_and_publish`) }}
-                    </o-button>
-                </div>
+                    {{
+                        initialData
+                            ? $i18n.t(`${state.type}.save`)
+                            : $i18n.t(`${state.type}.add`)
+                    }}
+                </UButton>
+
+                <UButton
+                    v-if="initialData && state.status === 'draft'"
+                    :loading="isLoading"
+                    color="primary"
+                    variant="solid"
+                    @click="onSaveAndPublish"
+                >
+                    {{ $i18n.t(`${state.type}.save_and_publish`) }}
+                </UButton>
             </div>
-        </form>
-    </section>
+        </UForm>
+    </div>
 </template>
 
 <script setup lang="ts">
+import { z } from 'zod';
+import type { FormSubmitEvent } from '@nuxt/ui';
 import _ from 'lodash';
-import * as yup from 'yup';
-import { useOruga } from '@oruga-ui/oruga';
-import { useForm } from 'vee-validate';
 import { useUserStore, useFormStore } from '@/stores';
 import type { ISoundForm } from '@/plugins/directus/collection';
-
 import Player from '~/components/audio/Player.client.vue';
-import OValidatedField from '~/components/form/OValidatedField.vue';
-import OValidatedTagInput from '~/components/form/OValidatedTagInput.vue';
-import OValidatedSelect from '~/components/form/OValidatedSelect.vue';
-import OValidatedImageCropUpload, {
+import UImageCropUpload, {
     type CropUploadModelValue
-} from '~/components/form/OValidatedImageCropUpload.vue';
-import OValidatedBmEditor from '~/components/form/OValidatedBmEditor.vue';
+} from '~/components/form/UImageCropUpload.vue';
+import UBmEditor from '~/components/form/UBmEditor.vue';
 
 const { $i18n, $audio, $api } = useNuxtApp();
-const $oruga = useOruga();
 const router = useRouter();
-
 const { getUser } = useUserStore();
 const formStore = useFormStore();
 
-export interface SoundFormSubmitData {
-    formData: ISoundFormData;
-    successMessage: string;
-}
-
 const emit = defineEmits<{
-    (e: 'formSubmit', formSubmitData: SoundFormSubmitData): void;
+    (e: 'formSubmit', formSubmitData: any): void;
 }>();
 
 interface Props {
@@ -178,41 +190,33 @@ interface Props {
     isLoading?: boolean;
 }
 
-export type ISoundFormData = Omit<ISoundForm, 'photo' | 'id' | 'genres'> & {
-    photo?: CropUploadModelValue;
-    genres: number[];
-};
-
-export interface ISoundFormSubmitData {
-    formData: ISoundFormData;
-    successMessage?: string;
-}
-
 const props = withDefaults(defineProps<Props>(), {
     isLoading: false
 });
 
-const formData = reactive<ISoundFormData>({
+const formRef = ref();
+const isLoading = ref(false);
+const audioUrl = ref<string | null>(null);
+const audioLoadState = ref<'success' | 'error' | null>(null);
+const currentPhoto = ref<string | null>(null);
+
+const state = reactive({
     name: '',
     url: '',
     slug: '',
     description: '',
-    genres: [],
+    genres: [] as string[],
     dj: getUser()?.djs?.[0].id || '',
-    type: 'mix',
+    type: 'mix' as 'mix' | 'track',
     duration: 0,
-    photo: undefined,
+    photo: null as CropUploadModelValue,
     status: 'draft'
 });
 
-const availableGenres = ref(formStore.genresOptions);
-const audioUrl = ref();
-const audioLoadState = ref<string | null>(null);
-const currentPhoto = ref<string>();
-const isLoading = ref(false);
-
+// Uniqueness helpers
 async function verifyUniqueSlug(value: string) {
-    return $api.tools.verifyUnique(
+    if (!value) return true;
+    return await $api.tools.verifyUnique(
         'sound',
         'slug',
         value,
@@ -221,10 +225,12 @@ async function verifyUniqueSlug(value: string) {
 }
 const debounceVerifyUniqueSlug = $api.tools.asyncDebounce(
     verifyUniqueSlug,
-    1500
+    1000
 );
+
 async function verifyUniqueName(value: string) {
-    return $api.tools.verifyUnique(
+    if (!value) return true;
+    return await $api.tools.verifyUnique(
         'sound',
         'name',
         value,
@@ -233,74 +239,71 @@ async function verifyUniqueName(value: string) {
 }
 const debounceVerifyUniqueName = $api.tools.asyncDebounce(
     verifyUniqueName,
-    1500
+    1000
 );
 
-async function verifyAudioUrl(value: string) {
-    if (audioLoadState.value === 'error') return false;
-    return true;
-}
-
-const validationSchema = {
-    type: yup.string().required(),
-    name: yup
+const schema = z.object({
+    type: z.string().min(1),
+    name: z
         .string()
-        .required('validation.required')
-        .matches(
+        .min(1, $i18n.t('validation.required'))
+        .regex(
             $api.tools.regEx.profileName,
-            'validation.alpha_num_dash_space'
+            $i18n.t('validation.alpha_num_dash_space')
         )
-        .test('verified', 'validation.unique_sound_name', async (value) => {
-            const verified = await debounceVerifyUniqueName(value as string);
-            return verified as boolean;
-        }),
-    slug: yup
+        .refine(async (val) => {
+            return (await debounceVerifyUniqueName(val)) as boolean;
+        }, $i18n.t('validation.unique_sound_name')),
+    slug: z
         .string()
-        .required('validation.required')
-        .matches($api.tools.regEx.urlSlug, 'validation.alpha_num_dash_space')
-        .test('verified', 'validation.unique_slug', async (value) => {
-            const verified = await debounceVerifyUniqueSlug(value as string);
-            return verified as boolean;
-        }),
-    url: yup
+        .min(1, $i18n.t('validation.required'))
+        .regex($api.tools.regEx.urlSlug, $i18n.t('validation.url_slug'))
+        .refine(async (val) => {
+            return (await debounceVerifyUniqueSlug(val)) as boolean;
+        }, $i18n.t('validation.unique_slug')),
+    url: z
         .string()
-        .required('validation.required')
-        .test('verified', 'validation.wrong_audio_url', async (value) => {
-            const verified = await verifyAudioUrl(value as string);
-            return verified as boolean;
-        }),
-    photo: yup
-        .mixed()
-        .test('photo', 'validation.image_type', (val) => {
+        .min(1, $i18n.t('validation.required'))
+        .refine(() => {
+            return audioLoadState.value !== 'error';
+        }, $i18n.t('validation.wrong_audio_url')),
+    genres: z
+        .array(z.string())
+        .min(1, $i18n.t('validation.genres_min_max'))
+        .max(3, $i18n.t('validation.genres_min_max')),
+    photo: z
+        .any()
+        .refine((val) => {
+            if (!val || val === 'keep-current') return true;
             const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-            if (val === null) return true;
-            if (typeof val === 'string' && val === 'keep-current') return true;
-            if (val?.file && allowedTypes.includes(val?.file?.type))
-                return true;
-            return false;
-        })
+            return val?.file && allowedTypes.includes(val?.file?.type);
+        }, $i18n.t('validation.image_type'))
+        .optional()
         .nullable(),
-    genres: yup
-        .array()
-        .min(1, 'validation.genres_min_max')
-        .max(3, 'validation.genres_min_max')
-};
-
-const { errors: formErrors, validate, validateField } = useForm();
-
-const soundTypeOptions = computed(() => {
-    return [
-        { value: 'mix', label: $i18n.t('mix.mix') },
-        { value: 'track', label: $i18n.t('track.track') }
-    ];
+    description: z.string().optional().nullable()
 });
 
-const debouncedGetAudioUrl = _.debounce(getAudioUrl, 500);
+type Schema = z.infer<typeof schema>;
 
-watch(
-    () => formData.url,
-    (val) => debouncedGetAudioUrl()
-);
+const soundTypeOptions = computed(() => [
+    { value: 'mix', label: $i18n.t('mix.mix') },
+    { value: 'track', label: $i18n.t('track.track') }
+]);
+
+const debouncedGetAudioUrl = _.debounce(async () => {
+    if (!state.url) {
+        audioUrl.value = null;
+        return;
+    }
+    const audioUrls = await $audio.getAudioUrls(state.url);
+    if (audioUrls && audioUrls.stream) {
+        audioUrl.value = audioUrls.stream;
+    } else {
+        audioUrl.value = 'http://nonexistent/';
+    }
+}, 500);
+
+watch(() => state.url, debouncedGetAudioUrl);
 
 watch(
     () => props.isLoading,
@@ -310,80 +313,77 @@ watch(
 );
 
 onMounted(async () => {
-    formStore.fetchCities();
     formStore.fetchGenres();
     if (!props.initialData) return;
 
-    // OBJECT assign needed for keeping reactivity when using reactive type from Vue
-    Object.assign(formData, props.initialData);
-    const { photo, genres } = props.initialData;
+    Object.assign(state, {
+        name: props.initialData.name,
+        url: props.initialData.url,
+        slug: props.initialData.slug,
+        description: props.initialData.description || '',
+        genres:
+            props.initialData.genres?.map(
+                (g: any) => g.genre_id?.id || g.genre_id || g
+            ) || [],
+        dj:
+            props.initialData.dj?.id ||
+            props.initialData.dj ||
+            getUser()?.djs?.[0].id,
+        type: props.initialData.type,
+        duration: props.initialData.duration,
+        status: props.initialData.status
+    });
 
-    if (photo) {
-        formData.photo = 'keep-current';
-        currentPhoto.value = photo;
+    if (props.initialData.photo) {
+        state.photo = 'keep-current';
+        currentPhoto.value = props.initialData.photo;
     }
-
-    if (genres) formData.genres = genres.map((genre) => genre.genre_id);
 });
 
-function onSave() {
-    onSubmit({ ...formData }, `${formData.type}.edit_success`);
+function generateSlug() {
+    state.slug = $api.tools.generateUrlSlug(state.name);
 }
-function onSaveAndPublish() {
-    onSubmit(
-        {
-            ...formData,
-            status: 'published'
-        },
-        `${formData.type}.save_and_publish_success`
-    );
-}
-async function onSubmit(formDataObj: ISoundFormData, successMessage: string) {
-    isLoading.value = true;
-    await validate().then((result) => {
-        if (!result.valid) {
-            $oruga.notification.open({
-                message: $i18n.t('validation.form_validation_error'),
-                variant: 'danger'
-            });
-            isLoading.value = false;
-            return;
-        }
-        isLoading.value = false;
-        emit('formSubmit', { formData: formDataObj, successMessage });
-    });
-}
+
 function onCancel() {
     router.back();
 }
+
+function onSave() {
+    formRef.value?.submit();
+}
+
+function onSaveAndPublish() {
+    state.status = 'published';
+    formRef.value?.submit();
+}
+
+async function onSubmit(_event: FormSubmitEvent<Schema>) {
+    emit('formSubmit', {
+        formData: { ...state },
+        successMessage: `${state.type}.edit_success`
+    });
+}
+
 function onAudioLoadError() {
     audioLoadState.value = 'error';
-    validateField('url');
+    formRef.value?.validate('url');
 }
+
 function onAudioLoadSuccess(data: any) {
     audioLoadState.value = 'success';
-    validateField('url');
-    if (data && data.duration) formData.duration = data.duration;
-}
-
-async function getAudioUrl() {
-    const audioUrls = await $audio.getAudioUrls(formData.url);
-
-    if (audioUrls && audioUrls.stream) {
-        audioUrl.value = audioUrls.stream;
-    } else {
-        audioUrl.value = 'http://nonexistent/';
-    }
+    formRef.value?.validate('url');
+    if (data && data.duration) state.duration = data.duration;
 }
 
 const slugChangedMessage = computed(() => {
     if (
         !_.isNil(props?.initialData?.slug) &&
-        formData.slug !== props?.initialData?.slug
-    )
+        state.slug !== props?.initialData?.slug
+    ) {
         return $i18n.t('validation.slug_changed_warning', [
             props?.initialData?.slug
         ]);
+    }
     return null;
 });
 </script>

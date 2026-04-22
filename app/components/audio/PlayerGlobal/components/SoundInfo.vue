@@ -1,30 +1,22 @@
 <template>
-    <o-notification
+    <UAlert
         v-if="playerStore.isError"
-        variant="danger pt-3 pb-3"
-        role="alert"
-    >
-        {{ $i18n.t('player.error_loading_file') }}
-    </o-notification>
-    <div v-else class="columns is-vcentered is-mobile is-relative">
-        <!--  -->
-        <div class="column is-narrow">
-            <div class="tag is-secondary">
+        color="error"
+        variant="subtle"
+        :title="$i18n.t('player.error_loading_file')"
+    />
+    <div v-else class="flex items-center gap-4 relative">
+        <div class="flex-shrink-0">
+            <UBadge color="neutral" variant="soft">
                 {{ $audio.convertTimeHHMMSS(playerStore.currentSeconds) }}
-            </div>
+            </UBadge>
         </div>
-        <div v-if="playerStore.isLoading" class="column">
-            <o-loading
-                v-model:active="playerStore.isLoading"
-                :full-page="false"
-                :overlay="false"
-                :can-cancel="false"
-                icon-size="small"
-            />
+        <div v-if="playerStore.isLoading" class="flex-1 flex justify-center">
+            <UIcon name="i-heroicons-arrow-path" class="w-5 h-5 animate-spin text-gray-500" />
         </div>
         <div
             v-else
-            class="column has-text-centered has-text-weight-semibold is-text-ellipsis"
+            class="flex-1 text-center font-semibold truncate"
         >
             <span v-if="playerStore.currentSound">
                 {{
@@ -32,10 +24,10 @@
                 }}
             </span>
         </div>
-        <div class="column is-narrow">
-            <div class="tag is-secondary">
+        <div class="flex-shrink-0">
+            <UBadge color="neutral" variant="soft">
                 {{ $audio.convertTimeHHMMSS(playerStore.durationSeconds) }}
-            </div>
+            </UBadge>
         </div>
     </div>
 </template>

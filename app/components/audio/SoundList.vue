@@ -1,5 +1,5 @@
 <template>
-    <ul>
+    <ul class="flex flex-col gap-2">
         <SoundListItem v-for="sound in sounds" :key="sound.id" :sound="sound" />
     </ul>
 </template>

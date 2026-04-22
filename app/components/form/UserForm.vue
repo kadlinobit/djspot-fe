@@ -1,196 +1,194 @@
 <template>
-    <div class="form user-form">
-        <o-notification
+    <div class="user-form">
+        <UAlert
             v-if="successMessage"
-            variant="success"
-            :closable="false"
+            icon="i-heroicons-check-circle"
+            color="success"
+            variant="subtle"
+            :title="$i18n.t(successMessage)"
+            class="mb-4"
+        />
+
+        <UAlert
+            v-if="errorMessage"
+            icon="i-heroicons-exclamation-triangle"
+            color="error"
+            variant="subtle"
+            :title="$i18n.t(errorMessage)"
+            class="mb-4"
+        />
+
+        <UForm
+            v-if="!successMessage"
+            :schema="schema"
+            :state="state"
+            class="space-y-4"
+            @submit="onSubmit"
         >
-            {{ $i18n.t(successMessage) }}
-        </o-notification>
-
-        <o-notification v-if="errorMessage" variant="danger" :closable="false">
-            {{ $i18n.t(errorMessage) }}
-        </o-notification>
-
-        <form v-if="!successMessage" method="post" @submit.prevent>
-            <div class="columns">
-                <div class="column">
-                    <o-validated-field
-                        v-model="formData.first_name"
-                        name="first_name"
-                        type="text"
-                        :label="$i18n.t('user.first_name')"
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <UFormField
+                    :label="$i18n.t('user.first_name')"
+                    name="first_name"
+                >
+                    <UInput
+                        v-model="state.first_name"
                         :placeholder="$i18n.t('user.first_name')"
+                        class="w-full"
                     />
-                </div>
-                <div class="column">
-                    <o-validated-field
-                        v-model="formData.last_name"
-                        name="last_name"
-                        type="text"
-                        :label="$i18n.t('user.last_name')"
-                        :placeholder="$i18n.t('user.first_name')"
+                </UFormField>
+
+                <UFormField :label="$i18n.t('user.last_name')" name="last_name">
+                    <UInput
+                        v-model="state.last_name"
+                        :placeholder="$i18n.t('user.last_name')"
+                        class="w-full"
                     />
-                </div>
+                </UFormField>
             </div>
-            <o-validated-field
-                v-model="formData.email"
-                name="email"
-                type="email"
-                :label="$i18n.t('user.email')"
-                :disabled="true"
-            />
-            <o-validated-select
-                v-model="formData.location"
-                name="city"
-                :label="$i18n.t('user.location')"
-                :options="formStore.citiesOptions"
-                :expanded="true"
-                :placeholder="$i18n.t('dj.select_city')"
-            />
 
-            <o-validated-select
-                v-model="formData.language"
-                name="language"
+            <UFormField :label="$i18n.t('user.email')" name="email">
+                <UInput
+                    v-model="state.email"
+                    type="email"
+                    disabled
+                    class="w-full"
+                />
+            </UFormField>
+
+            <UFormField :label="$i18n.t('user.location')" name="location">
+                <USelectMenu
+                    v-model="state.location"
+                    :items="formStore.citiesOptions"
+                    value-key="value"
+                    :placeholder="$i18n.t('dj.select_city')"
+                    class="w-full"
+                />
+            </UFormField>
+
+            <UFormField
                 :label="$i18n.t('user.preffered_language')"
-                :options="languagesOptions"
-                :expanded="true"
-            />
-            <o-validated-field
-                v-model="formData.password_check"
-                name="password_check"
-                type="password"
+                name="language"
+            >
+                <USelectMenu
+                    v-model="state.language"
+                    :items="languagesOptions"
+                    value-key="value"
+                    class="w-full"
+                />
+            </UFormField>
+
+            <UFormField
                 :label="$i18n.t('user.password_check')"
-            />
-            <div class="field is-grouped is-grouped-right">
-                <div class="control">
-                    <o-button
-                        :disabled="isLoading"
-                        variant="dark"
-                        @click="onSubmit"
-                    >
-                        {{ $i18n.t('user.save_profile') }}
-                    </o-button>
-                </div>
+                name="password_check"
+            >
+                <UInput
+                    v-model="state.password_check"
+                    type="password"
+                    class="w-full"
+                />
+            </UFormField>
+
+            <div class="flex justify-end pt-2">
+                <UButton
+                    type="submit"
+                    :loading="isLoading"
+                    color="neutral"
+                    variant="solid"
+                >
+                    {{ $i18n.t('user.save_profile') }}
+                </UButton>
             </div>
-        </form>
+        </UForm>
     </div>
 </template>
 
 <script setup lang="ts">
-// TODO - password check na backendu nefunguje při updateu uživatele
-import * as yup from 'yup'
-import { useOruga } from '@oruga-ui/oruga'
-import { useForm } from 'vee-validate'
-import { useFormStore } from '~/stores'
-import OValidatedField from '~/components/form/OValidatedField.vue'
-import OValidatedSelect from '~/components/form/OValidatedSelect.vue'
+import { z } from 'zod';
+import type { FormSubmitEvent } from '@nuxt/ui';
+import { useFormStore } from '~/stores';
 
-const { $i18n } = useNuxtApp()
-const $oruga = useOruga()
-const formStore = useFormStore()
+const { $i18n } = useNuxtApp();
+const formStore = useFormStore();
 
 const emit = defineEmits<{
-    (e: 'formSubmit', formSubmitData: FormSubmitData): void
-}>()
+    (e: 'formSubmit', formSubmitData: any): void;
+}>();
 
 interface InitialData {
-    name?: string
-    slug?: string
-    email?: string
-    bio?: string
-    photo?: string
-    city?: string
-    genres?: Array<string>
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    location?: string;
+    language?: string;
+    password_check?: string;
 }
 
 interface Props {
-    initialData?: InitialData
-    errorMessage?: string
-    successMessage?: string
-    isLoading?: boolean
+    initialData?: InitialData;
+    errorMessage?: string;
+    successMessage?: string;
+    isLoading?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    initialData: null,
-    errorMessage: null,
-    successMessage: null,
     isLoading: false
-})
+});
 
-const formData = ref({
-    first_name: null,
-    last_name: null,
-    email: null,
-    location: null,
-    language: null,
-    password_check: null
-})
+const state = reactive({
+    first_name: '',
+    last_name: '',
+    email: '',
+    location: '',
+    language: '',
+    password_check: ''
+});
 
-const nameRegEx = /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi
+const nameRegEx = /^$|^[a-z\d\-\sáčďéěíňóřšťúůýž]+$/gi;
 
-const validationSchema = yup.object({
-    first_name: yup
+const schema = z.object({
+    first_name: z
         .string()
-        .required('validation.required')
-        .matches(nameRegEx, 'validation.alpha_num_dash_space'),
-    last_name: yup
+        .min(1, $i18n.t('validation.required'))
+        .regex(nameRegEx, $i18n.t('validation.alpha_num_dash_space')),
+    last_name: z
         .string()
-        .required('validation.required')
-        .matches(nameRegEx, 'validation.alpha_num_dash_space'),
-    email: yup
+        .min(1, $i18n.t('validation.required'))
+        .regex(nameRegEx, $i18n.t('validation.alpha_num_dash_space')),
+    email: z
         .string()
-        .required('validation.required')
-        .email('validation.email'),
-    password_check: yup.string().required('validation.required').nullable()
-})
+        .email($i18n.t('validation.email'))
+        .min(1, $i18n.t('validation.required')),
+    password_check: z.string().min(1, $i18n.t('validation.required'))
+});
 
-const {
-    errors: formErrors,
-    validate,
-    resetForm
-} = useForm({ validationSchema })
+type Schema = z.infer<typeof schema>;
 
 const languagesOptions = computed(() => {
-    return $i18n.locales.value
+    return ($i18n.locales.value as any[])
         .map((locale) => ({ value: locale.iso, label: locale.name }))
-        .sort((a, b) => a.value.localeCompare(b.value))
-})
+        .sort((a, b) => a.value.localeCompare(b.value));
+});
 
 onMounted(() => {
     if (props.initialData) {
-        formData.value = {
-            ...props.initialData
-        }
+        Object.assign(state, props.initialData);
     }
-})
+});
 
 watch(
     () => props.initialData,
     (val) => {
         if (val) {
-            formData.value = {
-                ...props.initialData
-            }
+            Object.assign(state, val);
         }
-    }
-)
+    },
+    { deep: true }
+);
 
-async function onSubmit() {
-    await validate().then((result) => {
-        if (!result.valid) {
-            $oruga.notification.open({
-                message: $i18n.t('validation.form_validation_error'),
-                variant: 'danger'
-            })
-            return
-        }
-        emit('formSubmit', {
-            formData: { ...formData.value },
-            successMessage: 'user.profile_update_success'
-        })
-        formData.value.password_check = null
-        resetForm()
-    })
+async function onSubmit(_event: FormSubmitEvent<Schema>) {
+    emit('formSubmit', {
+        formData: { ...state },
+        successMessage: 'user.profile_update_success'
+    });
 }
 </script>

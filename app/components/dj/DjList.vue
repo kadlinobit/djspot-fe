@@ -1,15 +1,24 @@
 <template>
-    <div v-if="isDjListEmpty">
-        <dj-list-item-skeleton v-for="i in 5" :key="i" />
-    </div>
-    <div v-else class="columns is-mobile is-multiline dj-list">
-        <div
-            v-for="dj in djs"
-            :key="dj.id"
-            class="column is-2-widescreen is-3-desktop is-4-tablet is-6-mobile"
+    <div class="dj-list">
+        <!-- Loading State Skeletons -->
+        <UPageGrid
+            v-if="isDjListEmpty"
+            class="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
         >
-            <dj-list-item :dj="dj" />
-        </div>
+            <dj-list-item-skeleton v-for="i in 12" :key="i" />
+        </UPageGrid>
+
+        <!-- Result Grid -->
+        <UPageGrid
+            v-else
+            class="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+        >
+            <dj-list-item
+                v-for="dj in djs"
+                :key="dj.id"
+                :dj="dj"
+            />
+        </UPageGrid>
     </div>
 </template>
 
@@ -17,9 +26,10 @@
 import _ from 'lodash';
 import DjListItem from '~/components/dj/DjListItem.vue';
 import DjListItemSkeleton from '~/components/dj/DjListItemSkeleton.vue';
+import type { Dj } from '~/plugins/directus/types';
 
 interface Props {
-    djs: Array<object>;
+    djs: Dj[];
 }
 
 const props = withDefaults(defineProps<Props>(), {

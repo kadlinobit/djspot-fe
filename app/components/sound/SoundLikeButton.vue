@@ -1,33 +1,38 @@
 <template>
-    <o-button
-        icon-left="heart"
+    <UButton
+        icon="i-heroicons-heart"
+        :color="likeButtonColor"
         :variant="likeButtonVariant"
-        :disabled="isToggleLikeLoading"
-        size="responsive"
+        :loading="isToggleLikeLoading"
+        size="md"
         @click="onToggleLike"
     >
         {{ likeButtonLabel }}
-    </o-button>
+    </UButton>
 </template>
 
 <script setup lang="ts">
 import _ from 'lodash';
 import { useUserStore, useMainStore } from '@/stores';
-import { useOruga } from '@oruga-ui/oruga';
 import type { ISoundDefault } from '~/plugins/directus/collection';
 import { createItem, deleteItem } from '@directus/sdk';
 
 const { $i18n, $directus } = useNuxtApp();
-const $oruga = useOruga();
+const toast = useToast();
 const mainStore = useMainStore();
 const { getIsLoggedIn } = useUserStore();
 
 const sound = defineModel<ISoundDefault>('sound');
 const isToggleLikeLoading = ref(false);
 
+const likeButtonColor = computed(() => {
+    if (!getIsLoggedIn()) return 'neutral';
+    return sound?.value?.likes?.length ? 'primary' : 'neutral';
+});
+
 const likeButtonVariant = computed(() => {
-    if (!getIsLoggedIn()) return 'light';
-    return sound?.value?.likes?.length ? 'dark' : 'light';
+    if (!getIsLoggedIn()) return 'soft';
+    return sound?.value?.likes?.length ? 'solid' : 'soft';
 });
 
 async function onToggleLike() {
@@ -42,11 +47,15 @@ async function onToggleLike() {
             ? await createLike()
             : await deleteLike();
     } catch (e: any) {
-        throw new Error(e?.message || e);
+        toast.add({
+            title: e?.message || String(e),
+            color: 'error'
+        });
     } finally {
         isToggleLikeLoading.value = false;
     }
 }
+
 async function createLike() {
     if (!sound?.value?.id) return;
     try {
@@ -58,14 +67,14 @@ async function createLike() {
             sound.value.likes = [result.id];
             sound.value.like_count++;
         }
-    } catch (e) {
-        $oruga.notification.open({
-            message: e,
-            variant: 'danger',
-            duration: 7000
+    } catch (e: any) {
+        toast.add({
+            title: e?.message || String(e),
+            color: 'error'
         });
     }
 }
+
 async function deleteLike() {
     if (!sound.value?.likes?.length) return;
     try {
@@ -74,11 +83,10 @@ async function deleteLike() {
         );
         sound.value.likes = [];
         sound.value.like_count--;
-    } catch (e) {
-        $oruga.notification.open({
-            message: e,
-            variant: 'danger',
-            duration: 7000
+    } catch (e: any) {
+        toast.add({
+            title: e?.message || String(e),
+            color: 'error'
         });
     }
 }
