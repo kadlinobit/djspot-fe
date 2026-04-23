@@ -111,7 +111,7 @@ export const useFormStore = defineStore('form', () => {
         setCities(citiesData);
     }
 
-    function getCityCoordinates(id: number) {
+    function getCityCoordinates(id: string) {
         const city = _.find(cities.value, (city) => {
             return city.id === id;
         });

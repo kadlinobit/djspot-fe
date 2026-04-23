@@ -65,9 +65,6 @@ export default defineNuxtConfig({
         '@nuxt/eslint'
     ],
     content: {
-        navigation: {
-            fields: ['description']
-        },
         watch: {
             ws: {
                 hostname: '127.0.0.1'
@@ -77,8 +74,7 @@ export default defineNuxtConfig({
     i18n: {
         defaultLocale: 'cs',
         strategy: 'no_prefix',
-        vueI18n: './config/i18n.config.ts',
-        detectBrowserLanguage: {
+detectBrowserLanguage: {
             useCookie: true,
             cookieKey: 'i18n_locale',
             alwaysRedirect: false,

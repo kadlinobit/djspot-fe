@@ -7,7 +7,9 @@
             </h1>
             <div v-if="getIsLoggedIn()" class="flex items-center gap-6">
                 <div class="flex items-center gap-3">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                         {{ $i18n.t('sound.liked_by_me') }}
                     </span>
                     <USwitch
@@ -16,7 +18,9 @@
                     />
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
                         {{ $i18n.t('dj.followed_by_me') }}
                     </span>
                     <USwitch
@@ -58,11 +62,10 @@
                     @update:model-value="onSearch"
                 />
 
-                <USelectMenu
+                <sound-type-selector
                     v-model="search.type"
-                    :items="soundTypeOptionsWithAll"
-                    value-key="value"
                     @update:model-value="onSearch"
+                    @clear="onClearType"
                 />
 
                 <UInputMenu
@@ -82,7 +85,7 @@
             <UProgress animation="carousel" color="neutral" />
             <sounds-page-list />
         </div>
-        
+
         <div v-else-if="fetchError" class="py-12 text-center">
             <UAlert
                 icon="i-heroicons-exclamation-triangle"
@@ -92,10 +95,18 @@
             />
         </div>
 
-        <div v-else-if="!fetchPending && sounds?.data.length === 0" class="py-20">
+        <div
+            v-else-if="!fetchPending && sounds?.data.length === 0"
+            class="py-20"
+        >
             <div class="text-center">
-                <UIcon name="i-heroicons-musical-note" class="mx-auto h-12 w-12 text-gray-400" />
-                <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">
+                <UIcon
+                    name="i-heroicons-musical-note"
+                    class="mx-auto h-12 w-12 text-gray-400"
+                />
+                <h3
+                    class="mt-2 text-lg font-medium text-gray-900 dark:text-white"
+                >
                     {{ $i18n.t('sound.no_sounds_found') }}
                 </h3>
                 <div class="mt-6">
@@ -112,17 +123,23 @@
 
         <div v-else class="space-y-8">
             <sounds-page-list v-if="sounds?.data" :sounds="sounds.data" />
-            
-            <div class="flex items-center justify-between border-t border-gray-200 pt-6 dark:border-gray-800">
-                <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    {{ $i18n.t('sound.total_found', [sounds?.meta?.count || 0]) }}
+
+            <div
+                class="flex items-center justify-between border-t border-gray-200 pt-6 dark:border-gray-800"
+            >
+                <span
+                    class="text-sm font-medium text-gray-500 dark:text-gray-400"
+                >
+                    {{
+                        $i18n.t('sound.total_found', [sounds?.meta?.count || 0])
+                    }}
                 </span>
-                
+
                 <UPagination
-                    v-model="search.page"
+                    :page="search.page"
                     :total="Number(sounds?.meta?.count)"
-                    :page-count="search.perPage"
-                    @update:model-value="onPageChange"
+                    :items-per-page="search.perPage"
+                    @update:page="onPageChange"
                 />
             </div>
         </div>
@@ -132,6 +149,7 @@
 <script setup lang="ts">
 import _ from 'lodash';
 import SoundsPageList from '~/components/sound/SoundsPageList.vue';
+import SoundTypeSelector from '~/components/selectors/soundType.USelectMenu.vue';
 import { useFormStore, useUserStore } from '~/stores';
 import { readItems, aggregate } from '@directus/sdk';
 import type { Genre } from '~/plugins/directus/types';
@@ -145,7 +163,9 @@ const { getIsLoggedIn, getUser } = useUserStore();
 
 const search = reactive({
     name: route.query.name ? String(route.query.name) : '',
-    type: route.query.type ? String(route.query.type) : '',
+    type: route.query.type
+        ? String(route.query.type)
+        : (undefined as string | undefined),
     genres: [] as string[],
     sort: route.query.sort ? String(route.query.sort) : 'name',
     perPage: 20,
@@ -155,20 +175,10 @@ const search = reactive({
 });
 
 const soundsPageSortOptionsTranslated = computed(() => {
-    return formStore.soundsPageSortOptions.map(opt => ({
+    return formStore.soundsPageSortOptions.map((opt) => ({
         ...opt,
         label: $i18n.t(opt.label)
     }));
-});
-
-const soundTypeOptionsWithAll = computed(() => {
-    return [
-        { value: '', label: $i18n.t('sound.all_types') },
-        ...formStore.soundTypeOptions.map(opt => ({
-            ...opt,
-            label: $i18n.t(opt.label)
-        }))
-    ];
 });
 
 const urlQuery = computed(() => {
@@ -208,8 +218,8 @@ const requestFilter = computed(() => {
     if (search.name) {
         filterObj._and.push({
             _or: [
-                { name: { _contains: search.name.toLowerCase().trim() } },
-                { dj: { name: { _contains: search.name.toLowerCase().trim() } } }
+                { name: { _icontains: search.name.trim() } },
+                { dj: { name: { _icontains: search.name.trim() } } }
             ]
         });
     }
@@ -253,16 +263,29 @@ const {
     pending: fetchPending,
     refresh,
     error: fetchError
-} = useAsyncData('soundsPageQuery', async () => {
-    const data = await $directus.request(readItems('sound', requestQuery.value));
-    const meta = await $directus.request(
-        aggregate('sound', { aggregate: { count: '*' }, ...requestQuery.value })
-    );
+} = useAsyncData(
+    'soundsPageQuery',
+    async () => {
+        const [data, meta] = await Promise.all([
+            $directus.request(readItems('sound', requestQuery.value)),
+            $directus.request(
+                aggregate('sound', {
+                    aggregate: { count: '*' },
+                    query: { filter: requestFilter.value }
+                })
+            )
+        ]);
+        return { data, meta: meta[0] };
+    },
+    {
+        watch: [() => search.page, () => search.sort]
+    }
+);
 
-    return { data, meta: meta[0] };
-}, {
-    watch: [() => search.page, () => search.sort]
-});
+function onClearType() {
+    search.type = undefined;
+    onSearch();
+}
 
 function onSearch() {
     search.page = 1;
@@ -279,7 +302,7 @@ function onPageChange(pageNumber: number) {
 function resetSearch() {
     Object.assign(search, {
         name: '',
-        type: '',
+        type: undefined,
         genres: [],
         sort: 'name',
         liked: false,

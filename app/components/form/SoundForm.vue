@@ -30,10 +30,8 @@
                 <!-- Left Column -->
                 <div class="space-y-4 lg:col-span-3">
                     <UFormField :label="$i18n.t('sound.type')" name="type">
-                        <USelectMenu
+                        <sound-type-selector
                             v-model="state.type"
-                            :items="soundTypeOptions"
-                            value-key="value"
                             :placeholder="$i18n.t('sound.select_sound_type')"
                             class="w-full"
                         />
@@ -168,11 +166,13 @@ import type { FormSubmitEvent } from '@nuxt/ui';
 import _ from 'lodash';
 import { useUserStore, useFormStore } from '@/stores';
 import type { ISoundForm } from '@/plugins/directus/collection';
-import Player from '~/components/audio/Player.client.vue';
+
 import UImageCropUpload, {
     type CropUploadModelValue
 } from '~/components/form/UImageCropUpload.vue';
 import UBmEditor from '~/components/form/UBmEditor.vue';
+import SoundTypeSelector from '~/components/selectors/soundType.USelectMenu.vue';
+import Player from '~/components/audio/Player.client.vue';
 
 const { $i18n, $audio, $api } = useNuxtApp();
 const router = useRouter();
@@ -284,11 +284,6 @@ const schema = z.object({
 });
 
 type Schema = z.infer<typeof schema>;
-
-const soundTypeOptions = computed(() => [
-    { value: 'mix', label: $i18n.t('mix.mix') },
-    { value: 'track', label: $i18n.t('track.track') }
-]);
 
 const debouncedGetAudioUrl = _.debounce(async () => {
     if (!state.url) {

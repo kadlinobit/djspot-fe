@@ -2,14 +2,14 @@
     <section class="section">
         <div class="container">
             <Breadcrumbs
-                v-if="navObject.navPath.length > 1"
+                v-if="navObject?.navPath?.length > 1"
                 :nav-path="navObject.navPath"
             />
-            <div v-if="data.article._path === path && !data.article._id">
-                <h1 class="title">{{ data.article._dir.title }}</h1>
-                <p class="subtitle">{{ data.article._dir.description }}</p>
+            <div v-if="!data?.article">
+                <h1 class="title">{{ navObject?.currentNav?.title }}</h1>
+                <p class="subtitle">{{ navObject?.currentNav?.description }}</p>
                 <article
-                    v-for="child in navObject.navChildren"
+                    v-for="child in navObject?.navChildren"
                     :key="child.path"
                     class="media"
                 >
@@ -26,7 +26,7 @@
                 </article>
             </div>
             <article v-else class="content">
-                <ContentDoc />
+                <ContentRenderer :value="data.article" />
             </article>
         </div>
     </section>
@@ -34,50 +34,44 @@
 
 <script setup>
 import Breadcrumbs from '~/components/content/Breadcrumbs.vue'
+
 const route = useRoute()
 const { path } = route
 
 const { data } = await useAsyncData(`content-${path}`, async () => {
-    // fetch document where the document path matches with the cuurent route
-    const article = queryContent().where({ _path: path }).findOne()
-
-    // get the surround information,
-    // which is an array of documeents that come before and after the current document
-    const surround = queryContent()
-        .only(['_path', 'title', 'description'])
-        .sort({ date: 1 })
-        .findSurround(path)
-    return {
-        article: await article,
-        surround: await surround
-    }
+    const article = await queryCollection('docs').path(path).first()
+    return { article }
 })
 
+const { data: navigation } = await useAsyncData('navigation', () =>
+    queryCollectionNavigation('docs')
+)
+
 const navObject = computed(() => {
-    if (!data.value.article._path || !navigation?.value) return null
-    const { navPath, navChildren } = getNavObject(
-        navigation.value[0],
-        data.value.article._path
-    )
+    if (!navigation?.value) return null
+    const result = getNavObject(navigation.value[0], path)
+    if (!result) return null
     return {
-        navPath: navPath.reverse(),
-        navChildren
+        navPath: result.navPath.reverse(),
+        navChildren: result.navChildren,
+        currentNav: result.currentNav
     }
 })
 
 function getNavObject(element, matchingPath, navPath = []) {
-    if (element._path.replace(/\/$/, '') === matchingPath.replace(/\/$/, '')) {
+    if (element.path.replace(/\/$/, '') === matchingPath.replace(/\/$/, '')) {
         navPath.push({
             title: element.title,
-            path: element._path,
+            path: element.path,
             description: element.description
         })
         return {
             navPath,
+            currentNav: element,
             navChildren: element.children
                 ? element.children.map((child) => ({
                       title: child.title,
-                      path: child._path,
+                      path: child.path,
                       description: child.description
                   }))
                 : null
@@ -89,23 +83,11 @@ function getNavObject(element, matchingPath, navPath = []) {
         }
         navPath.push({
             title: element.title,
-            path: element._path,
+            path: element.path,
             description: element.description
         })
         return result
     }
     return null
 }
-
-const { data: navigation } = await useAsyncData('navigation', async () =>
-    fetchContentNavigation()
-)
-
-console.log('data.value.article')
-console.log(data.value.article)
-
-// console.log('navigation.value')
-// console.log(navigation.value)
-
-// console.log(getNavObject(navigation.value[0], data.value.article._path))
 </script>

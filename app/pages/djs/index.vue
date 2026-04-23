@@ -48,31 +48,23 @@
                 />
                 
                 <div class="flex gap-2">
-                    <USelectMenu
+                    <city-selector
                         v-model="search.city"
-                        :items="citiesOptionsWithWholeCzechia"
-                        value-key="value"
                         class="flex-1"
                         @update:model-value="onSearch"
+                        @clear="onClearCity"
                     />
-                    <USelectMenu
+                    <city-radius-selector
                         v-if="search.city"
                         v-model="search.radius"
-                        :items="radiusOptionsTranslated"
-                        value-key="value"
                         class="w-24"
                         @update:model-value="onSearch"
                     />
                 </div>
 
                 <div class="lg:col-span-2">
-                    <UInputMenu
+                    <genre-selector
                         v-model="search.genres"
-                        :items="formStore.genresOptions"
-                        multiple
-                        value-key="value"
-                        label-key="label"
-                        :placeholder="$i18n.t('dj.select_3_genres')"
                         @update:model-value="onSearch"
                     />
                 </div>
@@ -124,10 +116,10 @@
                 </span>
                 
                 <UPagination
-                    v-model="search.page"
+                    :page="search.page"
                     :total="Number(djs?.meta?.count)"
-                    :page-count="search.perPage"
-                    @update:model-value="onPageChange"
+                    :items-per-page="search.perPage"
+                    @update:page="onPageChange"
                 />
             </div>
         </div>
@@ -137,6 +129,9 @@
 <script setup lang="ts">
 import _ from 'lodash';
 import DjList from '~/components/dj/DjList.vue';
+import CitySelector from '~/components/selectors/city.USelectMenu.vue';
+import CityRadiusSelector from '~/components/selectors/cityRadius.USelectMenu.vue';
+import GenreSelector from '~/components/selectors/genre.UInputMenu.vue';
 import { useFormStore, useUserStore } from '~/stores';
 import { readItems, aggregate } from '@directus/sdk';
 import type { Genre } from '~/plugins/directus/types';
@@ -149,7 +144,7 @@ const { getIsLoggedIn, getUser } = useUserStore();
 
 const search = reactive({
     name: route.query.name ? String(route.query.name) : '',
-    city: route.query.city ? String(route.query.city) : null,
+    city: route.query.city ? String(route.query.city) : undefined as string | undefined,
     radius: route.query.radius ? parseInt(String(route.query.radius)) : 0,
     genres: [] as string[],
     sort: route.query.sort ? String(route.query.sort) : 'name',
@@ -158,22 +153,8 @@ const search = reactive({
     following: route.query.following === 'true' && getIsLoggedIn()
 });
 
-const citiesOptionsWithWholeCzechia = computed(() => {
-    return [
-        { value: null, label: $i18n.t('dj.whole_czechia') },
-        ...formStore.citiesOptions
-    ];
-});
-
 const djsPageSortOptionsTranslated = computed(() => {
     return formStore.djsPageSortOptions.map(opt => ({
-        ...opt,
-        label: $i18n.t(opt.label)
-    }));
-});
-
-const radiusOptionsTranslated = computed(() => {
-    return formStore.radiusOptions.map(opt => ({
         ...opt,
         label: $i18n.t(opt.label)
     }));
@@ -212,14 +193,18 @@ const requestFilter = computed(() => {
 
     if (search.name) {
         filterObj._and.push({
-            name: { _contains: search.name.toLowerCase().trim() }
+            name: { _icontains: search.name.trim() }
         });
     }
     if (search.city) {
         const cityId = search.city;
         const cityDirectFilter = { city: { id: { _eq: cityId } } };
 
-        if (search.radius === 0) {
+        const coordinates = search.radius > 0
+            ? formStore.getCityCoordinates(cityId)
+            : null;
+
+        if (!coordinates) {
             filterObj._and.push(cityDirectFilter);
         } else {
             filterObj._and.push({
@@ -228,10 +213,7 @@ const requestFilter = computed(() => {
                     {
                         city: {
                             gps: {
-                                _intersects: $geo.getPointRadius(
-                                    formStore.getCityCoordinates(parseInt(cityId)),
-                                    search.radius
-                                )
+                                _intersects: $geo.getPointRadius(coordinates, search.radius)
                             }
                         }
                     }
@@ -265,10 +247,10 @@ const {
     refresh,
     error: fetchError
 } = useAsyncData('djsPageQuery', async () => {
-    const data = await $directus.request(readItems('dj', requestQuery.value));
-    const meta = await $directus.request(
-        aggregate('dj', { aggregate: { count: '*' }, ...requestQuery.value })
-    );
+    const [data, meta] = await Promise.all([
+        $directus.request(readItems('dj', requestQuery.value)),
+        $directus.request(aggregate('dj', { aggregate: { count: '*' }, query: { filter: requestFilter.value } }))
+    ]);
     return { data, meta: meta[0] };
 }, {
     watch: [() => search.page, () => search.sort] // Add any other triggers if needed, but we call refresh manually too
@@ -286,10 +268,16 @@ function onPageChange(pageNumber: number) {
     refresh();
 }
 
+function onClearCity() {
+    search.city = undefined;
+    search.radius = 0;
+    onSearch();
+}
+
 function resetSearch() {
     Object.assign(search, {
         name: '',
-        city: null,
+        city: undefined,
         radius: 0,
         genres: [],
         sort: 'name',
@@ -300,9 +288,6 @@ function resetSearch() {
 }
 
 onMounted(() => {
-    formStore.fetchCities();
-    formStore.fetchGenres();
-
     if (route.query.genres) {
         search.genres = Array.isArray(route.query.genres)
             ? (route.query.genres as string[])
