@@ -1,53 +1,43 @@
 <template>
-    <client-only>
-        <div class="button-play-pause">
-            <o-button
-                v-if="
-                    !playerStore.currentSound ||
-                    playerStore.currentSound.id !== sound.id
-                "
-                :disabled="playerStore.isLoading"
-                :variant="variant"
-                :size="size"
-                icon-left="play"
-                @click.prevent="() => onPlayNewSound(sound)"
-            />
-            <o-button
-                v-if="
-                    playerStore.currentSound &&
-                    playerStore.currentSound.id === sound.id
-                "
-                :disabled="playerStore.isLoading"
-                :variant="variant"
-                :size="size"
-                :icon-left="playerStore.isPlaying ? 'pause' : 'play'"
-                @click.prevent="
-                    () => playerStore.setIsPlaying(!playerStore.isPlaying)
-                "
-            />
-        </div>
-    </client-only>
+    <UButton
+        v-if="
+            !playerStore.currentSound ||
+            playerStore.currentSound.id !== sound.id
+        "
+        v-bind="$attrs"
+        :disabled="playerStore.isLoading"
+        variant="ghost"
+        icon="i-heroicons-play"
+        @click.prevent="() => onPlayNewSound(sound)"
+    />
+    <UButton
+        v-if="
+            playerStore.currentSound && playerStore.currentSound.id === sound.id
+        "
+        v-bind="$attrs"
+        :disabled="playerStore.isLoading"
+        variant="ghost"
+        :icon="playerStore.isPlaying ? 'i-heroicons-pause' : 'i-heroicons-play'"
+        @click.prevent="() => playerStore.setIsPlaying(!playerStore.isPlaying)"
+    />
 </template>
 
 <script setup lang="ts">
-import { usePlayerStore, usePlaylistStore } from '~/stores'
-const playerStore = usePlayerStore()
-const playlistStore = usePlaylistStore()
+import { usePlayerStore, usePlaylistStore } from '~/stores';
+
+import type { ISoundDefault } from '~/plugins/directus/collection';
+const playerStore = usePlayerStore();
+const playlistStore = usePlaylistStore();
 
 interface Props {
-    sound: Sound
-    size?: string
-    variant?: string
+    sound: ISoundDefault;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    sound: null,
-    size: null,
-    variant: 'text'
-})
+defineOptions({ inheritAttrs: false });
+const props = defineProps<Props>();
 
-function onPlayNewSound(sound) {
-    playlistStore.handlePlaySound(sound)
-    playerStore.loadNewAudio(sound)
+function onPlayNewSound(sound: ISoundDefault) {
+    playlistStore.handlePlaySound(sound);
+    playerStore.loadNewAudio(sound);
 }
 </script>

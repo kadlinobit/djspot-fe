@@ -120,7 +120,7 @@
                 
                 <UPagination
                     v-model="search.page"
-                    :total="sounds?.meta?.count"
+                    :total="Number(sounds?.meta?.count)"
                     :page-count="search.perPage"
                     @update:model-value="onPageChange"
                 />

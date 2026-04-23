@@ -1,105 +1,101 @@
 <template>
     <client-only>
-        <section class="section">
-            <div class="container">
-                <div class="columns">
-                    <div class="column is-4 is-offset-4">
-                        <h2 class="title has-text-centered">
-                            {{ $i18n.t('user.reset_password') }}
-                        </h2>
+        <div class="flex min-h-[60vh] items-center justify-center px-4">
+            <div class="w-full max-w-md space-y-4">
+                <h2 class="text-center text-2xl font-bold">
+                    {{ $i18n.t('user.reset_password') }}
+                </h2>
 
-                        <o-notification
-                            v-if="success"
-                            variant="success"
-                            :closable="false"
-                        >
-                            {{ $i18n.t(success) }}
-                        </o-notification>
-                        <o-notification
-                            v-if="errorMessage"
-                            variant="danger"
-                            :closable="false"
-                        >
-                            {{ $i18n.t(errorMessage) }}
-                        </o-notification>
+                <UAlert
+                    v-if="success"
+                    icon="i-heroicons-check-circle"
+                    color="success"
+                    variant="subtle"
+                    :title="$i18n.t(success)"
+                />
+                <UAlert
+                    v-if="errorMessage"
+                    icon="i-heroicons-exclamation-triangle"
+                    color="error"
+                    variant="subtle"
+                    :title="$i18n.t(errorMessage)"
+                />
 
-                        <form v-if="!success" method="post" @submit.prevent>
-                            <o-validated-field
-                                v-model="password"
-                                vid="password"
-                                name="password"
-                                type="password"
-                                :label="$i18n.t('user.new_password')"
-                                rules="required"
-                            />
+                <UForm
+                    v-if="!success"
+                    :schema="schema"
+                    :state="state"
+                    class="space-y-4"
+                    @submit="onSubmit"
+                >
+                    <UFormField :label="$i18n.t('user.new_password')" name="password">
+                        <UInput
+                            v-model="state.password"
+                            type="password"
+                            class="w-full"
+                        />
+                    </UFormField>
 
-                            <o-validated-field
-                                v-model="password_check"
-                                name="password_check"
-                                type="password"
-                                :label="$i18n.t('user.password_again')"
-                                rules="required|confirmed:password"
-                            />
-                            <div class="field">
-                                <div class="control">
-                                    <o-button
-                                        :disabled="isLoading"
-                                        variant="dark is-fullwidth"
-                                        @click="onSubmit"
-                                    >
-                                        {{ $i18n.t('user.do_reset_password') }}
-                                    </o-button>
-                                </div>
-                            </div>
-                        </form>
+                    <UFormField :label="$i18n.t('user.password_again')" name="password_check">
+                        <UInput
+                            v-model="state.password_check"
+                            type="password"
+                            class="w-full"
+                        />
+                    </UFormField>
 
-                        <div
-                            v-if="success"
-                            class="has-text-centered"
-                            style="margin-top: 20px"
-                        >
-                            <p>
-                                <nuxt-link :to="{ path: '/user/login' }">
-                                    {{ $i18n.t('user.go_to_login_page') }}
-                                </nuxt-link>
-                            </p>
-                        </div>
-                    </div>
+                    <UButton
+                        type="submit"
+                        :loading="isLoading"
+                        color="neutral"
+                        variant="solid"
+                        class="w-full"
+                    >
+                        {{ $i18n.t('user.do_reset_password') }}
+                    </UButton>
+                </UForm>
+
+                <div v-if="success" class="text-center">
+                    <nuxt-link :to="{ path: '/user/login' }">
+                        {{ $i18n.t('user.go_to_login_page') }}
+                    </nuxt-link>
                 </div>
             </div>
-        </section>
+        </div>
     </client-only>
 </template>
 
 <script setup lang="ts">
-import * as yup from 'yup'
-import { onMounted } from 'vue'
-import { useForm } from 'vee-validate'
+import { z } from 'zod'
+import type { FormSubmitEvent } from '@nuxt/ui'
 import useDirectus from '~/composables/directus'
-import OValidatedField from '~/components/form/OValidatedField.vue'
 
-const { $oruga, $i18n, $api } = useNuxtApp()
+const { $i18n, $api } = useNuxtApp()
 const route = useRoute()
 const router = useRouter()
 const directus = useDirectus()
 
-const password = ref('')
-const password_check = ref('')
 const success = ref(null)
 const error = ref(null)
 const isLoading = ref(false)
 const token = ref(null)
 
-const validationSchema = yup.object({
-    password: yup.string().required('validation.required'),
-    password_check: yup
-        .string()
-        .test('passwords-match', 'validation.confirmed', function (val) {
-            return this.parent.password === val
-        })
-})
+const schema = z
+    .object({
+        password: z.string().min(1, $i18n.t('validation.required')),
+        password_check: z.string().min(1, $i18n.t('validation.required'))
+    })
+    .refine((data) => data.password === data.password_check, {
+        message: $i18n.t('validation.confirmed'),
+        path: ['password_check']
+    })
 
-const { errors: formErrors, validate } = useForm({ validationSchema })
+type Schema = z.infer<typeof schema>
+
+const state = reactive<Schema>({
+    password: '',
+    password_check: ''
+})
 
 const errorMessage = computed(() => {
     const errorMessage = $api.tools.parseErrorMessage(error.value)
@@ -115,28 +111,16 @@ onMounted(() => {
     }
 })
 
-async function onSubmit() {
-    await validate().then((result) => {
-        if (!result.valid) {
-            $oruga.notification.open({
-                message: $i18n.t('validation.form_validation_error'),
-                variant: 'danger'
-            })
-            return
-        }
-        resetPassword()
-    })
+async function onSubmit(_event: FormSubmitEvent<Schema>) {
+    await resetPassword()
 }
+
 async function resetPassword() {
     error.value = null
     try {
         isLoading.value = true
 
-        await directus.auth.password.reset(token.value, password.value)
-        // await $axios.post('auth/password/reset', {
-        //     token: token.value,
-        //     password: password.value
-        // })
+        await directus.auth.password.reset(token.value, state.password)
 
         success.value = 'user.password_reset_success'
     } catch (e) {

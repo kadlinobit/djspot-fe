@@ -42,7 +42,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <USelectMenu
                     v-model="search.sort"
-                    :items="formStore.djsPageSortOptions"
+                    :items="djsPageSortOptionsTranslated"
                     value-key="value"
                     @update:model-value="onSearch"
                 />
@@ -58,7 +58,7 @@
                     <USelectMenu
                         v-if="search.city"
                         v-model="search.radius"
-                        :items="formStore.radiusOptions"
+                        :items="radiusOptionsTranslated"
                         value-key="value"
                         class="w-24"
                         @update:model-value="onSearch"
@@ -125,7 +125,7 @@
                 
                 <UPagination
                     v-model="search.page"
-                    :total="djs?.meta?.count"
+                    :total="Number(djs?.meta?.count)"
                     :page-count="search.perPage"
                     @update:model-value="onPageChange"
                 />
@@ -163,6 +163,20 @@ const citiesOptionsWithWholeCzechia = computed(() => {
         { value: null, label: $i18n.t('dj.whole_czechia') },
         ...formStore.citiesOptions
     ];
+});
+
+const djsPageSortOptionsTranslated = computed(() => {
+    return formStore.djsPageSortOptions.map(opt => ({
+        ...opt,
+        label: $i18n.t(opt.label)
+    }));
+});
+
+const radiusOptionsTranslated = computed(() => {
+    return formStore.radiusOptions.map(opt => ({
+        ...opt,
+        label: $i18n.t(opt.label)
+    }));
 });
 
 const urlQuery = computed(() => {

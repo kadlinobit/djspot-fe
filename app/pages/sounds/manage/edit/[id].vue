@@ -1,53 +1,24 @@
-<!-- 
+<!--
 TODO:
 - check if sound belongs to a user, if not, do not allow to see the form
 -->
 <template>
     <section class="section">
-        <o-loading
-            v-if="fetchPending"
-            :full-page="false"
-            :active="fetchPending"
-            :can-cancel="true"
-        />
+        <div v-if="fetchPending" class="flex justify-center py-12">
+            <UIcon name="i-heroicons-arrow-path" class="size-8 animate-spin text-gray-400" />
+        </div>
         <div v-else class="container">
-            <div class="columns is-gapless is-vcentered">
-                <div class="column">
-                    <h1 class="title">
-                        {{
-                            `${initialData?.name} - ${$i18n.t(
-                                `${initialData?.type}.edit`
-                            )}`
-                        }}
-                    </h1>
-                </div>
-                <div class="column is-narrow">
-                    <o-dropdown aria-role="list" position="bottom-left">
-                        <template #trigger="{ active }">
-                            <o-button variant="danger">
-                                <o-icon
-                                    :icon="
-                                        active ? 'chevron-up' : 'chevron-down'
-                                    "
-                                />
-                            </o-button>
-                        </template>
-
-                        <o-dropdown-item
-                            aria-role="listitem"
-                            @click="onDeleteSound"
-                        >
-                            {{ $i18n.t(`${initialData?.type}.delete`) }}
-                        </o-dropdown-item>
-                        <o-dropdown-item
-                            v-if="initialData?.status === 'published'"
-                            aria-role="listitem"
-                            @click="onUnpublishSound"
-                        >
-                            {{ $i18n.t(`${initialData?.type}.unpublish`) }}
-                        </o-dropdown-item>
-                    </o-dropdown>
-                </div>
+            <div class="mb-4 flex items-center justify-between">
+                <h1 class="text-2xl font-bold">
+                    {{
+                        `${initialData?.name} - ${$i18n.t(
+                            `${initialData?.type}.edit`
+                        )}`
+                    }}
+                </h1>
+                <UDropdownMenu :items="dropdownItems">
+                    <UButton color="error" variant="subtle" trailing-icon="i-heroicons-chevron-down" />
+                </UDropdownMenu>
             </div>
             <sound-form
                 :error-message="errorMessage"
@@ -66,13 +37,13 @@ import SoundForm, {
     type ISoundFormSubmitData
 } from '~/components/form/SoundForm.vue';
 import ConfirmModal from '~/components/form/ConfirmModal.vue';
-import { useOruga } from '@oruga-ui/oruga';
 import { readItem, updateItem, deleteItem } from '@directus/sdk';
 import { soundFieldSets, type ISoundForm } from '~/plugins/directus/collection';
 import { useUserStore } from '@/stores';
 
 const { $i18n, $api, $directus } = useNuxtApp();
-const $oruga = useOruga();
+const toast = useToast();
+const modal = useModal();
 const router = useRouter();
 const route = useRoute();
 const { getUser } = useUserStore();
@@ -84,6 +55,22 @@ const isLoading = ref(false);
 const errorMessage = computed(() => {
     const errorMessage = $api.tools.parseErrorMessage(error.value);
     return errorMessage;
+});
+
+const dropdownItems = computed(() => {
+    const items = [
+        {
+            label: $i18n.t(`${initialData.value?.type}.delete`),
+            onSelect: onDeleteSound
+        }
+    ];
+    if (initialData.value?.status === 'published') {
+        items.push({
+            label: $i18n.t(`${initialData.value?.type}.unpublish`),
+            onSelect: onUnpublishSound
+        });
+    }
+    return items;
 });
 
 const {
@@ -108,7 +95,6 @@ async function editSound({
     if (!initialData.value) return;
     try {
         isLoading.value = true;
-        // #1 Handle photo update || delete
         const photo = await editPhoto(formData, initialData.value.photo);
         delete formData.photo;
 
@@ -130,10 +116,9 @@ async function editSound({
             `/djs/${getUser()?.djs?.[0].slug}/sounds/${updatedSound.slug}`
         );
 
-        $oruga.notification.open({
-            message: $i18n.t(successMessage, [formData.name]),
-            variant: 'success',
-            duration: 7000
+        toast.add({
+            title: $i18n.t(successMessage, [formData.name]),
+            color: 'success'
         });
     } catch (e: any) {
         error.value = e;
@@ -150,7 +135,6 @@ async function editPhoto(
     const newPhotoMeta = {
         title: `sound_${formData.name}`,
         filename_download: `sound_${formData.name}`
-        // folder: 'TBD - ADD FOLDER LATER'
     };
     const photoResult = await $api.file.handleCoverPhotoUpdate(
         newPhoto,
@@ -169,40 +153,36 @@ function onUnpublishSound() {
         status: 'draft',
         photo: 'keep-current',
         name
-    } as unknown as ISoundFormData; //TODO - remove this cast
+    } as unknown as ISoundFormData;
 
-    $oruga.modal.open({
-        active: true,
-        component: ConfirmModal,
-        props: {
-            title: $i18n.t(`${type}.unpublish`),
-            message: $i18n.t(`${type}.unpublish_confirm_message`, [name]),
-            confirmText: $i18n.t(`${type}.unpublish`),
-            cancelText: $i18n.t('form.cancel'),
-            onConfirm: () =>
-                editSound({
-                    formData,
-                    successMessage: `${type}.unpublish_success`
-                })
-        }
+    modal.open(ConfirmModal, {
+        title: $i18n.t(`${type}.unpublish`),
+        message: $i18n.t(`${type}.unpublish_confirm_message`, [name]),
+        confirmText: $i18n.t(`${type}.unpublish`),
+        cancelText: $i18n.t('form.cancel'),
+        onConfirm: () =>
+            editSound({
+                formData,
+                successMessage: `${type}.unpublish_success`
+            }),
+        onClose: () => modal.close()
     });
 }
+
 function onDeleteSound() {
     if (!initialData.value) return;
     const { type, name } = initialData.value;
 
-    $oruga.modal.open({
-        active: true,
-        component: ConfirmModal,
-        props: {
-            title: $i18n.t(`${type}.delete`),
-            message: $i18n.t(`${type}.delete_confirm_message`, [name]),
-            confirmText: $i18n.t(`${type}.delete`),
-            cancelText: $i18n.t('form.cancel'),
-            onConfirm: () => deleteSound()
-        }
+    modal.open(ConfirmModal, {
+        title: $i18n.t(`${type}.delete`),
+        message: $i18n.t(`${type}.delete_confirm_message`, [name]),
+        confirmText: $i18n.t(`${type}.delete`),
+        cancelText: $i18n.t('form.cancel'),
+        onConfirm: () => deleteSound(),
+        onClose: () => modal.close()
     });
 }
+
 async function deleteSound() {
     if (!initialData.value) return;
     try {
@@ -213,10 +193,9 @@ async function deleteSound() {
 
         router.push(`/djs/${getUser()?.djs?.[0].slug}`);
 
-        $oruga.notification.open({
-            message: $i18n.t(`${type}.delete_success`, [name]),
-            variant: 'success',
-            duration: 7000
+        toast.add({
+            title: $i18n.t(`${type}.delete_success`, [name]),
+            color: 'success'
         });
     } catch (e) {
         error.value = $api.tools.parseErrorMessage(e);

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__nuxt__get-documentation-page"
+    ]
+  }
+}

@@ -6,11 +6,11 @@
                 class="bottom-bar-switch"
                 @click="mainStore.toggleIsBottomBarOpen"
             >
-                <o-icon
-                    :icon="
+                <UIcon
+                    :name="
                         mainStore.isBottomBarOpen
-                            ? 'chevron-down'
-                            : 'playlist-play'
+                            ? 'i-heroicons-chevron-down'
+                            : 'i-heroicons-queue-list'
                     "
                 />
             </div>

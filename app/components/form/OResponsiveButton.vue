@@ -1,24 +1,23 @@
 <template>
     <nuxt-link v-if="props.to" :to="props.to">
-        <o-button size="small is-responsive" v-bind="$attrs">
+        <UButton size="sm" class="sm:hidden" v-bind="$attrs">
             <slot />
-        </o-button>
-        <o-button class="is-hidden-mobile" v-bind="$attrs">
+        </UButton>
+        <UButton class="hidden sm:inline-flex" v-bind="$attrs">
             <slot />
-        </o-button>
+        </UButton>
     </nuxt-link>
     <div v-else>
-        <o-button size="small" class="is-hidden-tablet" v-bind="$attrs">
+        <UButton size="sm" class="sm:hidden" v-bind="$attrs">
             <slot />
-        </o-button>
-        <o-button class="is-hidden-mobile" v-bind="$attrs">
+        </UButton>
+        <UButton class="hidden sm:inline-flex" v-bind="$attrs">
             <slot />
-        </o-button>
+        </UButton>
     </div>
 </template>
 
 <script setup lang="ts">
-//TODO - handle nuxt link better
 interface Props {
     to?: string | object
 }

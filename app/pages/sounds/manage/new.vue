@@ -1,7 +1,7 @@
 <template>
     <section class="section">
         <div class="container">
-            <h1 class="title">
+            <h1 class="mb-6 text-2xl font-bold">
                 {{ $i18n.t('sound.add') }}
             </h1>
             <sound-form
@@ -23,11 +23,9 @@ import SoundForm, {
     type ISoundFormData,
     type SoundFormSubmitData
 } from '@/components/form/SoundForm.vue';
-import { useOruga } from '@oruga-ui/oruga';
-
 const { $i18n, $api, $media, $directus } = useNuxtApp();
 const router = useRouter();
-const $oruga = useOruga();
+const toast = useToast();
 const { getUser } = useUserStore();
 
 // TODO - find out why definePageMeta is not working
@@ -66,12 +64,11 @@ async function createSound({ formData }: SoundFormSubmitData) {
                 `/djs/${getUser()?.djs?.[0].slug}/sounds/${newSound.slug}`
             );
 
-            $oruga.notification.open({
-                message: $i18n.t(`${formData.type}.add_success`, [
+            toast.add({
+                title: $i18n.t(`${formData.type}.add_success`, [
                     formData.name
                 ]),
-                variant: 'success',
-                duration: 7000
+                color: 'success'
             });
         }
     } catch (e) {

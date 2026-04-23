@@ -1,32 +1,22 @@
 <template>
-    <div class="modal-card animation-content">
-        <header class="modal-card-head is-link">
-            <p class="modal-card-title">{{ title }}</p>
-        </header>
-        <section class="modal-card-body is-flex">
-            <div class="media">
-                <div v-if="hasIcon" class="media-left">
-                    <o-icon :icon="icon" size="large" variant="primary" />
-                </div>
-                <div class="media-content">
-                    <p>
-                        <span>{{ message }}</span>
-                    </p>
-                </div>
-            </div>
-        </section>
-        <footer class="modal-card-foot">
-            <button type="button" class="button is-light" @click="close">
-                <span>{{ cancelText }}</span>
-            </button>
-            <button
-                type="button"
-                class="button is-dark"
-                @click="confirmAndClose"
-            >
-                <span>{{ confirmText }}</span>
-            </button>
-        </footer>
+    <div>
+        <div class="flex items-start gap-4 p-4">
+            <UIcon
+                v-if="hasIcon"
+                name="i-heroicons-exclamation-circle"
+                class="mt-0.5 size-6 shrink-0 text-primary"
+            />
+            <p>{{ message }}</p>
+        </div>
+
+        <div class="flex justify-end gap-2 border-t border-gray-200 p-4 dark:border-gray-800">
+            <UButton color="neutral" variant="subtle" @click="close">
+                {{ cancelText }}
+            </UButton>
+            <UButton color="neutral" variant="solid" @click="confirmAndClose">
+                {{ confirmText }}
+            </UButton>
+        </div>
     </div>
 </template>
 
@@ -36,7 +26,6 @@ const emit = defineEmits(['close'])
 interface Props {
     title?: string
     hasIcon?: boolean
-    icon?: string
     message?: string
     cancelText?: string
     confirmText?: string
@@ -46,7 +35,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     title: 'Confirm',
     hasIcon: true,
-    icon: 'alert-circle',
     message: 'Are you sure you want to do this?',
     cancelText: 'Cancel',
     confirmText: 'Confirm',
