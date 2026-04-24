@@ -1,20 +1,20 @@
 <template>
     <div class="bm-editor">
-        <div class="columns is-gapless editor-content">
+        <div class="editor-content flex">
             <div
-                class="column edit-content-wrapper"
+                class="edit-content-wrapper flex-1"
                 @mouseover="handleMouseOver('edit')"
             >
                 <textarea
                     ref="editContent"
                     v-model="innerValue"
-                    class="edit-content textarea is-danger"
+                    class="edit-content textarea"
                     :placeholder="placeholder"
                     @scroll="handleScroll"
                 />
             </div>
             <div
-                class="column preview-content-wrapper"
+                class="preview-content-wrapper flex-1"
                 @mouseover="handleMouseOver('preview')"
             >
                 <div
@@ -127,40 +127,104 @@ function handleMouseOver(type) {
         .edit-content-wrapper {
             height: 100%;
 
-            // @include mobile {
-            //     height: 50%;
-            // }
-
             .textarea {
                 height: 100%;
                 width: 100%;
                 resize: none;
                 border: none;
+                outline: none;
                 box-shadow: none;
-                border-top-right-radius: 0;
-                border-bottom-right-radius: 0;
+                border-radius: 0;
+                background: transparent;
+                padding: $control-padding-horizontal;
                 border-right: 1px solid;
                 border-right-color: $grey-lighter;
-
-                // @include mobile {
-                //     border-right: none;
-                //     border-bottom: 2px solid;
-                //     border-bottom-color: $grey-lighter;
-                // }
             }
         }
 
         .preview-content-wrapper {
             height: 100%;
 
-            // @include mobile {
-            //     height: 50%;
-            // }
-
             .preview-content {
                 height: 100%;
                 overflow: auto;
                 padding: $control-padding-horizontal;
+
+                :deep(h1),
+                :deep(h2),
+                :deep(h3),
+                :deep(h4),
+                :deep(h5),
+                :deep(h6) {
+                    font-weight: 700;
+                    margin-top: 0.75em;
+                    margin-bottom: 0.25em;
+                    line-height: 1.25;
+                }
+                :deep(h1) { font-size: 1.75em; }
+                :deep(h2) { font-size: 1.4em; }
+                :deep(h3) { font-size: 1.2em; }
+
+                :deep(p) {
+                    margin-bottom: 0.75em;
+                }
+
+                :deep(strong) { font-weight: 700; }
+                :deep(em) { font-style: italic; }
+
+                :deep(ul) {
+                    list-style-type: disc;
+                    margin-left: 1.5em;
+                    margin-bottom: 0.75em;
+                }
+                :deep(ol) {
+                    list-style-type: decimal;
+                    margin-left: 1.5em;
+                    margin-bottom: 0.75em;
+                }
+                :deep(li) { margin-bottom: 0.25em; }
+
+                :deep(code) {
+                    font-family: monospace;
+                    background: rgba(127, 127, 127, 0.15);
+                    padding: 0.1em 0.3em;
+                    border-radius: 3px;
+                    font-size: 0.9em;
+                    color: #e06c75;
+                }
+
+                :deep(pre) {
+                    background: rgba(127, 127, 127, 0.1);
+                    padding: 0.75em;
+                    border-radius: 4px;
+                    overflow-x: auto;
+                    margin-bottom: 0.75em;
+
+                    code {
+                        background: none;
+                        padding: 0;
+                        color: inherit;
+                    }
+                }
+
+                :deep(blockquote) {
+                    border-left: 3px solid $grey-lighter;
+                    padding-left: 0.75em;
+                    margin-left: 0;
+                    margin-bottom: 0.75em;
+                    opacity: 0.8;
+                }
+
+                :deep(a) {
+                    color: #3273dc;
+                    text-decoration: underline;
+                }
+
+                :deep(hr) {
+                    border: none;
+                    border-top: 1px solid $grey-lighter;
+                    margin: 1em 0;
+                }
             }
         }
     }

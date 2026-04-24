@@ -17,7 +17,7 @@
                 icon="i-lucide-user"
                 variant="ghost"
                 color="neutral"
-                @click="mainStore.isSidebarOpen = true"
+                @click="mainStore.isSidebarOpen = !mainStore.isSidebarOpen"
             />
 
             <ThemeSwitch />

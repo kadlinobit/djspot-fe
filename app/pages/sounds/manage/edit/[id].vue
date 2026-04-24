@@ -3,13 +3,13 @@ TODO:
 - check if sound belongs to a user, if not, do not allow to see the form
 -->
 <template>
-    <section class="section">
+    <UContainer class="py-10">
         <div v-if="fetchPending" class="flex justify-center py-12">
             <UIcon name="i-heroicons-arrow-path" class="size-8 animate-spin text-gray-400" />
         </div>
-        <div v-else class="container">
-            <div class="mb-4 flex items-center justify-between">
-                <h1 class="text-2xl font-bold">
+        <template v-else>
+            <div class="mb-8 flex items-center justify-between">
+                <h1 class="text-3xl font-bold">
                     {{
                         `${initialData?.name} - ${$i18n.t(
                             `${initialData?.type}.edit`
@@ -27,8 +27,8 @@ TODO:
                 :initial-data="initialData || undefined"
                 @form-submit="editSound"
             />
-        </div>
-    </section>
+        </template>
+    </UContainer>
 </template>
 
 <script setup lang="ts">
@@ -43,7 +43,7 @@ import { useUserStore } from '@/stores';
 
 const { $i18n, $api, $directus } = useNuxtApp();
 const toast = useToast();
-const modal = useModal();
+const overlay = useOverlay();
 const router = useRouter();
 const route = useRoute();
 const { getUser } = useUserStore();
@@ -75,9 +75,7 @@ const dropdownItems = computed(() => {
 
 const {
     data: initialData,
-    pending: fetchPending,
-    refresh,
-    error: fetchError
+    pending: fetchPending
 } = useAsyncData('soundFormQuery', async function () {
     const id = route.params.id;
 
@@ -100,8 +98,9 @@ async function editSound({
 
         const soundData: Omit<ISoundForm, 'id'> = {
             ...formData,
+            description: formData.description ?? '',
             genres: formData.genres
-                ? formData.genres.map((genre) => ({
+                ? formData.genres.map((genre: string) => ({
                       genre_id: genre
                   }))
                 : null,
@@ -113,7 +112,7 @@ async function editSound({
         );
 
         router.push(
-            `/djs/${getUser()?.djs?.[0].slug}/sounds/${updatedSound.slug}`
+            `/djs/${getUser()?.djs?.[0]?.slug}/sounds/${updatedSound.slug}`
         );
 
         toast.add({
@@ -144,9 +143,18 @@ async function editPhoto(
     return photoResult;
 }
 
-function onUnpublishSound() {
+async function onUnpublishSound() {
     if (!initialData.value) return;
     const { id, type, name } = initialData.value;
+
+    const modal = overlay.create(ConfirmModal, { destroyOnClose: true });
+    const confirmed = await modal.open({
+        title: $i18n.t(`${type}.unpublish`),
+        message: $i18n.t(`${type}.unpublish_confirm_message`, [name]),
+        confirmText: $i18n.t(`${type}.unpublish`),
+        cancelText: $i18n.t('form.cancel')
+    });
+    if (!confirmed) return;
 
     const formData = {
         id,
@@ -155,32 +163,21 @@ function onUnpublishSound() {
         name
     } as unknown as ISoundFormData;
 
-    modal.open(ConfirmModal, {
-        title: $i18n.t(`${type}.unpublish`),
-        message: $i18n.t(`${type}.unpublish_confirm_message`, [name]),
-        confirmText: $i18n.t(`${type}.unpublish`),
-        cancelText: $i18n.t('form.cancel'),
-        onConfirm: () =>
-            editSound({
-                formData,
-                successMessage: `${type}.unpublish_success`
-            }),
-        onClose: () => modal.close()
-    });
+    await editSound({ formData, successMessage: `${type}.unpublish_success` });
 }
 
-function onDeleteSound() {
+async function onDeleteSound() {
     if (!initialData.value) return;
     const { type, name } = initialData.value;
 
-    modal.open(ConfirmModal, {
+    const modal = overlay.create(ConfirmModal, { destroyOnClose: true });
+    const confirmed = await modal.open({
         title: $i18n.t(`${type}.delete`),
         message: $i18n.t(`${type}.delete_confirm_message`, [name]),
         confirmText: $i18n.t(`${type}.delete`),
-        cancelText: $i18n.t('form.cancel'),
-        onConfirm: () => deleteSound(),
-        onClose: () => modal.close()
+        cancelText: $i18n.t('form.cancel')
     });
+    if (confirmed) await deleteSound();
 }
 
 async function deleteSound() {
@@ -191,7 +188,7 @@ async function deleteSound() {
 
         await $directus.request(deleteItem('sound', id));
 
-        router.push(`/djs/${getUser()?.djs?.[0].slug}`);
+        router.push(`/djs/${getUser()?.djs?.[0]?.slug}`);
 
         toast.add({
             title: $i18n.t(`${type}.delete_success`, [name]),

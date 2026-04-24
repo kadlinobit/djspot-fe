@@ -1,15 +1,34 @@
 <template>
-    <div class="p-5">
-        <UNavigationMenu
-            :items="items"
-            orientation="vertical"
-            class="w-full"
-            @select="closeSidebar"
-            :ui="{
-                root: 'flex flex-col gap-4'
-            }"
-        />
-    </div>
+    <USlideover v-model:open="mainStore.isSidebarOpen" side="left">
+        <template #header>
+            <UDropdownMenu
+                :items="userMenuItems"
+                :content="{ align: 'center', collisionPadding: 12 }"
+                :ui="{ content: 'w-(--reka-dropdown-menu-trigger-width) min-w-48' }"
+            >
+                <UButton
+                    icon="i-lucide-user"
+                    :label="userLabel"
+                    trailing-icon="i-lucide-chevrons-up-down"
+                    color="neutral"
+                    variant="ghost"
+                    square
+                    class="w-full data-[state=open]:bg-elevated overflow-hidden"
+                    :ui="{ trailingIcon: 'text-dimmed ms-auto' }"
+                />
+            </UDropdownMenu>
+        </template>
+
+        <template #body>
+            <UNavigationMenu
+                :items="items"
+                :ui="{ root: 'flex flex-col gap-4' }"
+                orientation="vertical"
+                class="w-full"
+                @select="closeSidebar"
+            />
+        </template>
+    </USlideover>
 </template>
 
 <script setup lang="ts">
@@ -20,25 +39,31 @@ const { getUser } = useUserStore();
 const { $i18n, $logout } = useNuxtApp();
 const toast = useToast();
 
-const items = computed(() => {
-    const user = getUser();
-    const menuGroups = [];
+const userLabel = computed(() => {
+    const u = getUser();
+    if (u?.first_name || u?.last_name) return [u.first_name, u.last_name].filter(Boolean).join(' ');
+    return u?.email ?? 'User';
+});
 
-    // Group 1: General Menu
-    menuGroups.push([
+const userMenuItems = computed(() => [
+    [
         {
-            label: 'User',
+            label: 'User Profile',
             icon: 'i-lucide-user',
-            to: '/user/account'
+            to: '/user/profile/'
         },
         {
             label: 'Logout',
             icon: 'i-lucide-log-out',
             onSelect: logout
         }
-    ]);
+    ]
+]);
 
-    // Group 2: Deejay Section
+const items = computed(() => {
+    const user = getUser();
+    const menuGroups = [];
+
     const deejayGroup = [];
     if (!user?.djs?.length) {
         deejayGroup.push({

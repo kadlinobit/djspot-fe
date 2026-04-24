@@ -13,18 +13,12 @@
             </template>
         </UModal>
 
-        <USlideover
-            v-if="getIsLoggedIn()"
-            v-model:open="mainStore.isSidebarOpen"
-            side="left"
-        >
-            <template #content>
-                <SidebarMenu />
-            </template>
-        </USlideover>
+        <SidebarMenu v-if="getIsLoggedIn()" />
 
         <Navbar />
-        <slot style="margin-bottom: 100px" />
+        <div class="pb-24">
+            <slot />
+        </div>
         <BottomBar />
     </UApp>
 </template>

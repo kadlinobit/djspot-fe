@@ -165,6 +165,7 @@ type Schema = z.infer<typeof schema>;
 
 const languagesOptions = computed(() => {
     return ($i18n.locales.value as any[])
+        .filter((locale) => locale.iso)
         .map((locale) => ({ value: locale.iso, label: locale.name }))
         .sort((a, b) => a.value.localeCompare(b.value));
 });

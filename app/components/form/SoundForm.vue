@@ -174,13 +174,31 @@ import UBmEditor from '~/components/form/UBmEditor.vue';
 import SoundTypeSelector from '~/components/selectors/soundType.USelectMenu.vue';
 import Player from '~/components/audio/Player.client.vue';
 
+export type ISoundFormData = {
+    name: string;
+    url: string;
+    slug: string;
+    description?: string;
+    genres: string[];
+    dj: string;
+    type: 'mix' | 'track';
+    duration: number;
+    photo?: CropUploadModelValue;
+    status: string;
+};
+
+export interface ISoundFormSubmitData {
+    formData: ISoundFormData;
+    successMessage?: string;
+}
+
 const { $i18n, $audio, $api } = useNuxtApp();
 const router = useRouter();
 const { getUser } = useUserStore();
 const formStore = useFormStore();
 
 const emit = defineEmits<{
-    (e: 'formSubmit', formSubmitData: any): void;
+    (e: 'formSubmit', formSubmitData: ISoundFormSubmitData): void;
 }>();
 
 interface Props {
