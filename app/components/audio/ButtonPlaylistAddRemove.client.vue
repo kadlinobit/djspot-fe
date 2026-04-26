@@ -1,29 +1,28 @@
 <template>
     <client-only>
         <div class="button-playlist-add-remove">
-            <o-button
+            <UButton
                 v-if="
                     !playerStore.currentSound ||
                     playerStore.currentSound.id !== sound.id
                 "
                 :disabled="playerStore.isLoading"
-                :variant="variant"
+                :color="color"
                 :size="size"
-                :icon-left="
+                variant="ghost"
+                :icon="
                     playlistStore.isSoundInPlaylist(sound)
-                        ? 'delete-sweep'
-                        : 'playlist-plus'
+                        ? 'i-heroicons-trash'
+                        : 'i-heroicons-queue-list'
                 "
                 @click="
                     () => playlistStore.handleAddOrRemovePlaylistSound(sound)
                 "
             />
-            <o-icon
+            <UIcon
                 v-else
-                custom-class="level-item"
-                icon="checkbox-blank-circle"
-                variant="success m-3"
-                size="small"
+                name="i-heroicons-check-circle"
+                class="m-3 size-4 text-success-500"
             />
         </div>
     </client-only>
@@ -37,12 +36,12 @@ const playlistStore = usePlaylistStore()
 interface Props {
     sound: Sound
     size?: string
-    variant?: string
+    color?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
     sound: null,
     size: null,
-    variant: 'text'
+    color: 'neutral'
 })
 </script>

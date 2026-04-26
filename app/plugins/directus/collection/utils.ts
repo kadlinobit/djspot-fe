@@ -1,4 +1,4 @@
-import {
+import type {
     readItems,
     type RestCommand,
     type Query,

@@ -3,11 +3,11 @@
         <div class="container">
             <h1 class="title">{{ $i18n.t('help') }}</h1>
             <ContentList path="/help">
-                <template v-slot="{ list }">
+                <template #default="{ list }">
                     <article
-                        class="media"
                         v-for="article in list"
                         :key="article._path"
+                        class="media"
                     >
                         <div class="media-content">
                             <div class="content">

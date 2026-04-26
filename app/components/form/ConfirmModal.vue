@@ -1,63 +1,46 @@
 <template>
-    <div class="modal-card animation-content">
-        <header class="modal-card-head is-link">
-            <p class="modal-card-title">{{ title }}</p>
-        </header>
-        <section class="modal-card-body is-flex">
-            <div class="media">
-                <div v-if="hasIcon" class="media-left">
-                    <o-icon :icon="icon" size="large" variant="primary" />
-                </div>
-                <div class="media-content">
-                    <p>
-                        <span>{{ message }}</span>
-                    </p>
-                </div>
+    <UModal :title="title" :dismissible="false">
+        <template #body>
+            <div class="flex items-start gap-4">
+                <UIcon
+                    v-if="hasIcon"
+                    name="i-heroicons-exclamation-circle"
+                    class="mt-0.5 size-6 shrink-0 text-primary"
+                />
+                <p>{{ message }}</p>
             </div>
-        </section>
-        <footer class="modal-card-foot">
-            <button type="button" class="button is-light" @click="close">
-                <span>{{ cancelText }}</span>
-            </button>
-            <button
-                type="button"
-                class="button is-dark"
-                @click="confirmAndClose"
-            >
-                <span>{{ confirmText }}</span>
-            </button>
-        </footer>
-    </div>
+        </template>
+        <template #footer>
+            <div class="flex w-full justify-end gap-2">
+                <UButton color="neutral" variant="subtle" @click="emit('close', false)">
+                    {{ cancelText }}
+                </UButton>
+                <UButton color="neutral" variant="solid" @click="emit('close', true)">
+                    {{ confirmText }}
+                </UButton>
+            </div>
+        </template>
+    </UModal>
 </template>
 
 <script setup lang="ts">
-const emit = defineEmits(['close'])
+const emit = defineEmits<{
+    close: [value: boolean]
+}>()
 
 interface Props {
     title?: string
     hasIcon?: boolean
-    icon?: string
     message?: string
     cancelText?: string
     confirmText?: string
-    onConfirm?: Function
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
     title: 'Confirm',
     hasIcon: true,
-    icon: 'alert-circle',
     message: 'Are you sure you want to do this?',
     cancelText: 'Cancel',
     confirmText: 'Confirm',
-    onConfirm: () => {}
 })
-
-function confirmAndClose() {
-    props.onConfirm()
-    close()
-}
-function close() {
-    emit('close')
-}
 </script>

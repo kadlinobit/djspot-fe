@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia';
 import { usePlayerStore } from './player';
-import { useOruga } from '@oruga-ui/oruga';
 
 export const usePlaylistStore = defineStore(
     'playlist',
     () => {
         const { $audio, $i18n } = useNuxtApp();
-        const $oruga = useOruga();
+        const toast = useToast();
         const playerStore = usePlayerStore();
 
         const playlist = ref([]);
@@ -35,11 +34,11 @@ export const usePlaylistStore = defineStore(
             playlist.value = playlist.value.filter(
                 (playlistSound) => playlistSound.id !== sound.id
             );
-            $oruga.notification.open({
-                message: $i18n.t('playlist.removed_from_playlist', [
+            toast.add({
+                title: $i18n.t('playlist.removed_from_playlist', [
                     `${sound.dj.name} – ${sound.name}`
                 ]),
-                variant: 'warning'
+                color: 'warning'
             });
         }
 
@@ -72,11 +71,11 @@ export const usePlaylistStore = defineStore(
 
                 addSoundToIndex(sound, index);
 
-                $oruga.notification.open({
-                    message: $i18n.t('playlist.added_to_playlist', [
+                toast.add({
+                    title: $i18n.t('playlist.added_to_playlist', [
                         `${sound.dj.name} – ${sound.name}`
                     ]),
-                    variant: 'success'
+                    color: 'success'
                 });
             }
         }
@@ -89,11 +88,11 @@ export const usePlaylistStore = defineStore(
             ) {
                 addSoundToEnd(sound);
 
-                $oruga.notification.open({
-                    message: $i18n.t('playlist.added_to_playlist', [
+                toast.add({
+                    title: $i18n.t('playlist.added_to_playlist', [
                         `${sound.dj.name} – ${sound.name}`
                     ]),
-                    variant: 'success'
+                    color: 'success'
                 });
             } else {
                 deleteSound(sound);

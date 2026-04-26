@@ -1,27 +1,16 @@
 <template>
-    <section class="section">
-        <o-loading
-            v-if="fetchPending"
-            :full-page="false"
-            :active="fetchPending"
-            :can-cancel="true"
-        />
-        <div v-else class="container">
-            <div class="columns is-gapless is-vcentered">
-                <div class="column">
-                    <h1 class="title">
-                        {{
-                            `${initialData?.name} - ${$i18n.t(
-                                'dj.edit_profile'
-                            )}`
-                        }}
-                    </h1>
-                </div>
-                <div class="column is-narrow">
-                    <o-button variant="danger" @click="onDeleteDj()">
-                        {{ $i18n.t('dj.delete_profile') }}
-                    </o-button>
-                </div>
+    <UContainer class="py-10">
+        <div v-if="fetchPending" class="flex justify-center py-12">
+            <UIcon name="i-heroicons-arrow-path" class="size-8 animate-spin text-gray-400" />
+        </div>
+        <template v-else>
+            <div class="mb-8 flex items-center justify-between">
+                <h1 class="text-3xl font-bold">
+                    {{ `${initialData?.name} - ${$i18n.t('dj.edit_profile')}` }}
+                </h1>
+                <UButton color="error" variant="subtle" @click="onDeleteDj()">
+                    {{ $i18n.t('dj.delete_profile') }}
+                </UButton>
             </div>
             <dj-form
                 v-if="initialData"
@@ -31,8 +20,8 @@
                 :is-loading="isLoading"
                 @form-submit="editDj"
             />
-        </div>
-    </section>
+        </template>
+    </UContainer>
 </template>
 
 <script setup lang="ts">
@@ -40,7 +29,6 @@
  * TBD
  * - try to handle genres so there is no new dj_genre creation for each DJ update
  */
-// import _ from 'lodash'
 import DjForm, {
     type IDjFormSubmitData,
     type IDjFormData
@@ -49,9 +37,9 @@ import ConfirmModal from '~/components/form/ConfirmModal.vue';
 import { deleteItem, readItem, updateItem } from '@directus/sdk';
 import { useUserStore } from '@/stores';
 import { djFieldSets, type IDjForm } from '~/plugins/directus/collection';
-import { useOruga } from '@oruga-ui/oruga';
 
-const $oruga = useOruga();
+const toast = useToast();
+const overlay = useOverlay();
 const { getUser } = useUserStore();
 
 const { $i18n, $api, $directus, $updateUser } = useNuxtApp();
@@ -68,14 +56,9 @@ const errorMessage = computed(() => {
 
 const {
     data: initialData,
-    pending: fetchPending,
-    refresh,
-    error: fetchError
+    pending: fetchPending
 } = useAsyncData('IDjFormQuery', async function () {
-    // // PROMISE TO SET TIMEOUT FOR TESTING (TODO - REMOVE)
-    // await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    const djID = getUser()?.djs?.[0].id;
+    const djID = getUser()?.djs?.[0]?.id;
     if (!djID) return;
 
     const data = await $directus.request(
@@ -91,15 +74,14 @@ async function editDj({ formData }: IDjFormSubmitData) {
         isLoading.value = true;
         error.value = null;
 
-        // // // PROMISE TO SET TIMEOUT FOR TESTING (TODO - REMOVE)
-        // await new Promise((resolve) => setTimeout(resolve, 2000))
-
-        // #1 Handle photo update || delete
         const photo = await editPhoto(formData, initialData.value.photo);
         delete formData.photo;
 
         const djData: Omit<IDjForm, 'id'> = {
             ...formData,
+            city: formData.city ?? '',
+            email: formData.email ?? '',
+            bio: formData.bio ?? '',
             genres: formData.genres
                 ? formData.genres.map((genre) => ({
                       genre_id: genre
@@ -115,10 +97,9 @@ async function editDj({ formData }: IDjFormSubmitData) {
         await $updateUser();
         router.push(`/djs/${updatedDj.slug}`);
 
-        $oruga.notification.open({
-            message: $i18n.t('dj.updated_successfully'),
-            variant: 'success',
-            duration: 7000
+        toast.add({
+            title: $i18n.t('dj.updated_successfully'),
+            color: 'success'
         });
     } catch (e) {
         error.value = e;
@@ -126,12 +107,12 @@ async function editDj({ formData }: IDjFormSubmitData) {
         isLoading.value = false;
     }
 }
+
 async function editPhoto(formData: IDjFormData, prevPhoto: IDjForm['photo']) {
     const newPhoto = formData.photo;
     const newPhotoMeta = {
         title: `dj_${formData.slug}_photo`,
         filename_download: `dj_${formData.slug}_photo`
-        // folder: 'TODO - ADD FOLDER LATER'
     };
     const photoResult = await $api.file.handleCoverPhotoUpdate(
         newPhoto,
@@ -141,18 +122,15 @@ async function editPhoto(formData: IDjFormData, prevPhoto: IDjForm['photo']) {
     return photoResult;
 }
 
-function onDeleteDj() {
-    $oruga.modal.open({
-        active: true,
-        component: ConfirmModal,
-        props: {
-            title: $i18n.t('dj.delete_profile'),
-            message: $i18n.t('dj.delete_profile_confirm_message'),
-            confirmText: $i18n.t('dj.delete_profile'),
-            cancelText: $i18n.t('form.cancel'),
-            onConfirm: () => deleteDj()
-        }
+async function onDeleteDj() {
+    const modal = overlay.create(ConfirmModal, { destroyOnClose: true });
+    const confirmed = await modal.open({
+        title: $i18n.t('dj.delete_profile'),
+        message: $i18n.t('dj.delete_profile_confirm_message'),
+        confirmText: $i18n.t('dj.delete_profile'),
+        cancelText: $i18n.t('form.cancel')
     });
+    if (confirmed) await deleteDj();
 }
 
 async function deleteDj() {
@@ -164,10 +142,9 @@ async function deleteDj() {
         await $updateUser();
         router.push(`/`);
 
-        $oruga.notification.open({
-            message: $i18n.t('dj.deleted_successfully'),
-            variant: 'success',
-            duration: 7000
+        toast.add({
+            title: $i18n.t('dj.deleted_successfully'),
+            color: 'success'
         });
     } catch (e) {
         error.value = e;

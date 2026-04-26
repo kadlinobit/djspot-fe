@@ -1,87 +1,106 @@
 <template>
-    <div class="form-login page-register">
-        <o-notification v-if="success" variant="success" :closable="false">
-            {{ $i18n.t(success) }}
-        </o-notification>
+    <div>
+        <UAlert
+            v-if="success"
+            icon="i-heroicons-check-circle"
+            color="success"
+            variant="subtle"
+            :title="$i18n.t(success)"
+            class="mb-4"
+        />
 
-        <o-notification v-if="errorMessage" variant="danger" :closable="false">
-            {{ $i18n.t(errorMessage) }}
-        </o-notification>
+        <UAlert
+            v-if="errorMessage"
+            icon="i-heroicons-exclamation-triangle"
+            color="error"
+            variant="subtle"
+            :title="$i18n.t(errorMessage)"
+            class="mb-4"
+        />
 
-        <form v-if="!success" method="post" @submit.prevent>
-            <o-validated-field
-                v-model="formData.first_name"
-                name="first_name"
-                type="text"
-                :label="$i18n.t('user.first_name')"
-            />
+        <UForm
+            v-if="!success"
+            :schema="schema"
+            :state="state"
+            class="space-y-4"
+            @submit="onSubmit"
+        >
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <UFormField :label="$i18n.t('user.first_name')" name="first_name">
+                    <UInput v-model="state.first_name" class="w-full" />
+                </UFormField>
 
-            <o-validated-field
-                v-model="formData.last_name"
-                name="last_name"
-                type="text"
-                :label="$i18n.t('user.last_name')"
-            />
-
-            <o-validated-field
-                v-model="formData.email"
-                name="email"
-                type="email"
-                :label="$i18n.t('user.email')"
-            />
-
-            <o-validated-field
-                v-model="formData.password"
-                name="password"
-                type="password"
-                :label="$i18n.t('user.password')"
-            />
-
-            <o-validated-field
-                v-model="password_check"
-                name="password_check"
-                type="password"
-                :label="$i18n.t('user.password_again')"
-            />
-            <div class="field">
-                <div class="control">
-                    <o-button
-                        :disabled="isLoading"
-                        variant="primary is-fullwidth"
-                        @click="onSubmit"
-                    >
-                        {{ $i18n.t('user.do_register') }}
-                    </o-button>
-                </div>
+                <UFormField :label="$i18n.t('user.last_name')" name="last_name">
+                    <UInput v-model="state.last_name" class="w-full" />
+                </UFormField>
             </div>
-        </form>
 
-        <div class="has-text-centered" style="margin-top: 20px">
-            {{ $i18n.t('user.already_got_an_account') }}
-            <nuxt-link v-if="displayType === 'page'" to="/user/login">
-                {{ $i18n.t('user.do_login') }}
-            </nuxt-link>
-            <a
-                v-if="displayType === 'modal'"
-                @click="() => mainStore.setLoginActiveComponent('login')"
+            <UFormField :label="$i18n.t('user.email')" name="email">
+                <UInput
+                    v-model="state.email"
+                    type="email"
+                    placeholder="email@example.com"
+                    class="w-full"
+                />
+            </UFormField>
+
+            <UFormField :label="$i18n.t('user.password')" name="password">
+                <UInput
+                    v-model="state.password"
+                    type="password"
+                    class="w-full"
+                />
+            </UFormField>
+
+            <UFormField :label="$i18n.t('user.password_again')" name="password_check">
+                <UInput
+                    v-model="state.password_check"
+                    type="password"
+                    class="w-full"
+                />
+            </UFormField>
+
+            <UButton
+                type="submit"
+                :loading="isLoading"
+                block
+                color="primary"
+                variant="solid"
             >
-                {{ $i18n.t('user.do_login') }}
-            </a>
+                {{ $i18n.t('user.do_register') }}
+            </UButton>
+        </UForm>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                {{ $i18n.t('user.already_got_an_account') }}
+                <nuxt-link
+                    v-if="displayType === 'page'"
+                    to="/user/login"
+                    class="font-medium text-primary hover:underline"
+                >
+                    {{ $i18n.t('user.do_login') }}
+                </nuxt-link>
+                <a
+                    v-if="displayType === 'modal'"
+                    class="cursor-pointer font-medium text-primary hover:underline"
+                    @click="() => mainStore.setLoginActiveComponent('login')"
+                >
+                    {{ $i18n.t('user.do_login') }}
+                </a>
+            </p>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { z } from 'zod';
+import type { FormSubmitEvent } from '@nuxt/ui';
 import { registerUser } from '@directus/sdk';
-import * as yup from 'yup';
-import OValidatedField from '~/components/form/OValidatedField.vue';
 import { useMainStore } from '~/stores';
-import { useOruga } from '@oruga-ui/oruga';
-import { useForm } from 'vee-validate';
 
-const { $i18n, $axios, $api, $directus } = useNuxtApp();
+const { $i18n, $api, $directus } = useNuxtApp();
 const mainStore = useMainStore();
-const $oruga = useOruga();
 
 interface Props {
     displayType?: string;
@@ -90,72 +109,57 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     displayType: 'page'
 });
-const formData = ref({
+
+const state = reactive({
     first_name: '',
     last_name: '',
     email: '',
-    password: ''
+    password: '',
+    password_check: ''
 });
 
-const password_check = ref('');
+const schema = z
+    .object({
+        first_name: z
+            .string()
+            .min(1, $i18n.t('validation.required'))
+            .regex($api.tools.regEx.userName, $i18n.t('validation.alpha_num_dash_space')),
+        last_name: z
+            .string()
+            .min(1, $i18n.t('validation.required'))
+            .regex($api.tools.regEx.userName, $i18n.t('validation.alpha_num_dash_space')),
+        email: z
+            .string()
+            .email($i18n.t('validation.email'))
+            .min(1, $i18n.t('validation.required')),
+        password: z.string().min(1, $i18n.t('validation.required')),
+        password_check: z.string().min(1, $i18n.t('validation.required'))
+    })
+    .refine((data) => data.password === data.password_check, {
+        message: $i18n.t('validation.confirmed'),
+        path: ['password_check']
+    });
+
+type Schema = z.infer<typeof schema>;
+
 const success = ref<string | null>(null);
 const error = ref<any>(null);
 const isLoading = ref(false);
 
-const languagesOptions = computed(() => {
-    return ($i18n.locales.value as any[])
-        .map((locale) => ({ value: locale.iso as string, label: locale.name as string }))
-        .sort((a, b) => a.value.localeCompare(b.value));
-});
-
-const validationSchema = yup.object({
-    first_name: yup
-        .string()
-        .required('validation.required')
-        .matches($api.tools.regEx.userName, 'validation.alpha_num_dash_space'),
-    last_name: yup
-        .string()
-        .required('validation.required')
-        .matches($api.tools.regEx.userName, 'validation.alpha_num_dash_space'),
-    email: yup
-        .string()
-        .required('validation.required')
-        .email('validation.email'),
-    password: yup.string().required('validation.required'),
-    password_check: yup
-        .string()
-        .test('passwords-match', 'validation.confirmed', function (val) {
-            return this.parent.password === val;
-        })
-});
-
-const { errors: formErrors, validate } = useForm({ validationSchema });
-
-async function onSubmit() {
+async function onSubmit(event: FormSubmitEvent<Schema>) {
     error.value = null;
-    await validate().then((result) => {
-        if (!result.valid) {
-            $oruga.notification.open({
-                message: $i18n.t('validation.form_validation_error'),
-                variant: 'danger'
-            });
-            return;
-        }
-        register();
-    });
-}
-async function register() {
     try {
         isLoading.value = true;
         await $directus.request(
-            registerUser(formData.value.email, formData.value.password, {
-                first_name: formData.value.first_name,
-                last_name: formData.value.last_name,
+            registerUser(event.data.email, event.data.password, {
+                first_name: event.data.first_name,
+                last_name: event.data.last_name,
                 verification_url: 'http://localhost:3000/user/account-activation'
             } as any)
         );
         success.value = 'user.register_success_message';
     } catch (e) {
+        console.error(e);
         error.value = e;
     } finally {
         isLoading.value = false;
@@ -163,7 +167,6 @@ async function register() {
 }
 
 const errorMessage = computed(() => {
-    const errorMessage = $api.tools.parseErrorMessage(error.value);
-    return errorMessage;
+    return $api.tools.parseErrorMessage(error.value);
 });
 </script>

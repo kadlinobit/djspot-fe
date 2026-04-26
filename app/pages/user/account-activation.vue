@@ -1,37 +1,32 @@
 <template>
-    <section class="section">
-        <div class="container">
-            <div class="columns">
-                <div class="column is-4 is-offset-4">
-                    <h2 class="title has-text-centered">
-                        {{ $i18n.t('user.account_activation') }}
-                    </h2>
-                    <o-notification
-                        v-if="errorMessage"
-                        variant="danger"
-                        :closable="false"
-                    >
-                        {{ $i18n.t(errorMessage) }}
-                    </o-notification>
-                    <o-notification
-                        v-if="successMessage"
-                        variant="success"
-                        :closable="false"
-                    >
-                        {{ $i18n.t(successMessage) }}
-                    </o-notification>
-
-                    <o-notification
-                        v-if="progressMessage"
-                        variant="warning"
-                        :closable="false"
-                    >
-                        {{ $i18n.t(progressMessage) }}
-                    </o-notification>
-                </div>
-            </div>
+    <div class="flex min-h-[60vh] items-center justify-center px-4">
+        <div class="w-full max-w-md space-y-4">
+            <h2 class="text-center text-2xl font-bold">
+                {{ $i18n.t('user.account_activation') }}
+            </h2>
+            <UAlert
+                v-if="errorMessage"
+                icon="i-heroicons-exclamation-triangle"
+                color="error"
+                variant="subtle"
+                :title="$i18n.t(errorMessage)"
+            />
+            <UAlert
+                v-if="successMessage"
+                icon="i-heroicons-check-circle"
+                color="success"
+                variant="subtle"
+                :title="$i18n.t(successMessage)"
+            />
+            <UAlert
+                v-if="progressMessage"
+                icon="i-heroicons-arrow-path"
+                color="warning"
+                variant="subtle"
+                :title="$i18n.t(progressMessage)"
+            />
         </div>
-    </section>
+    </div>
 </template>
 
 <script setup lang="ts">

@@ -1,9 +1,9 @@
 <template>
-    <div class="block">
-        <ul v-if="isSoundListEmpty">
-            <dj-list-item-skeleton v-for="i in 5" :key="i" />
+    <div class="space-y-4">
+        <ul v-if="isSoundListEmpty" class="flex flex-col gap-2">
+            <sound-list-item-skeleton v-for="i in 5" :key="i" />
         </ul>
-        <ul v-else class="sound-list">
+        <ul v-else class="flex flex-col gap-2">
             <sound-list-item
                 v-for="sound in sounds"
                 :key="sound.id"
@@ -16,8 +16,8 @@
 <script setup lang="ts">
 import _ from 'lodash';
 import SoundListItem from '~/components/sound/SoundListItem.vue';
-import DjListItemSkeleton from '~/components/dj/DjListItemSkeleton.vue';
-import { type ISoundDefault } from '~/plugins/directus/collection';
+import SoundListItemSkeleton from '~/components/sound/SoundListItemSkeleton.vue';
+import type { ISoundDefault } from '~/plugins/directus/collection';
 
 interface Props {
     sounds?: Array<ISoundDefault>;

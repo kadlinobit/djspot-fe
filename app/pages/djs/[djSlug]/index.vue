@@ -1,102 +1,93 @@
 <template>
-    <o-loading
-        v-if="fetchPending"
-        :full-page="false"
-        :active="fetchPending"
-        :can-cancel="true"
-    />
-    <div v-else-if="fetchError">
-        {{ fetchError }}
+    <div v-if="fetchPending" class="py-12 flex justify-center">
+        <UProgress animation="carousel" color="neutral" class="max-w-md w-full" />
     </div>
-    <div v-else>
-        <section class="hero is-dark">
-            <div class="hero-body">
-                <div class="container is-max-desktop">
-                    <div class="columns is-mobile">
-                        <div class="column">
-                            <div class="columns is-mobile is-vcentered">
-                                <div class="column">
-                                    <h1
-                                        class="title is-size-3-mobile is-size-2-desktop"
-                                    >
-                                        {{ dj?.name }}
-                                    </h1>
-                                    <h2 class="subtitle">
-                                        {{ dj?.city?.name }}
-                                    </h2>
-                                </div>
-                                <div class="column is-hidden-tablet is-narrow">
-                                    <cover-image
-                                        :name="dj?.name"
-                                        quality="small"
-                                        cover-type="dj"
-                                        :pixel-size="100"
-                                        :cover-image="dj?.photo || null"
-                                    />
-                                </div>
+    <div v-else-if="fetchError" class="py-12 text-center">
+        <UContainer class="max-w-2xl">
+            <UAlert
+                icon="i-heroicons-exclamation-triangle"
+                color="error"
+                variant="subtle"
+                :title="fetchError.message || String(fetchError)"
+            />
+        </UContainer>
+    </div>
+    <div v-else-if="dj">
+        <div class="bg-gray-900 text-white py-12">
+            <UContainer class="max-w-4xl">
+                <div class="flex flex-col md:flex-row md:items-center gap-8 mb-6">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-6 mb-4">
+                            <div class="flex-1">
+                                <h1 class="text-3xl md:text-5xl font-bold mb-2">
+                                    {{ dj.name }}
+                                </h1>
+                                <h2 v-if="dj.city?.name" class="text-xl md:text-2xl text-gray-400">
+                                    {{ dj.city.name }}
+                                </h2>
                             </div>
-                            <div class="tags">
-                                <span
-                                    v-for="genre in dj?.genres"
-                                    :key="`genre-${genre.genre_id?.id}`"
-                                    class="tag is-dark is-size-5-desktop is-size-6-mobile is-size-6-tablet"
-                                >
-                                    {{ genre.genre_id?.name }}
-                                </span>
+                            <!-- Mobile Photo -->
+                            <div class="md:hidden flex-shrink-0">
+                                <cover-image
+                                    :name="dj.name"
+                                    quality="small"
+                                    cover-type="dj"
+                                    :pixel-size="100"
+                                    :cover-image="dj.photo || undefined"
+                                    class="w-[100px] h-[100px] rounded-lg shadow-lg object-cover"
+                                />
                             </div>
                         </div>
-                        <div class="column is-hidden-mobile is-narrow">
-                            <cover-image
-                                :name="dj?.name"
-                                quality="small"
-                                cover-type="dj"
-                                :pixel-size="300"
-                                :cover-image="dj?.photo || undefined"
-                            />
+
+                        <div class="flex flex-wrap gap-2">
+                            <UBadge
+                                v-for="genre in dj.genres"
+                                :key="`genre-${genre.genre_id?.id}`"
+                                color="neutral"
+                                variant="soft"
+                                class="text-sm bg-gray-800 text-gray-200 border border-gray-700"
+                            >
+                                {{ genre.genre_id?.name }}
+                            </UBadge>
                         </div>
                     </div>
 
-                    <dj-control-box
-                        :dj="dj"
-                        :is-toggle-follow-loading="isToggleFollowLoading"
-                        v-model:dj="dj"
-                    />
-                </div>
-            </div>
-        </section>
-
-        <section class="section p-3">
-            <div class="container is-max-desktop">
-                <o-tabs
-                    v-if="
-                        dj.bio ||
-                        (mixes && mixes?.length > 0) ||
-                        (tracks && tracks?.length > 0)
-                    "
-                    v-model="activeTab"
-                    :expanded="true"
-                    :animated="true"
-                >
-                    <o-tab-item v-if="!!dj.bio" label="Bio">
-                        <div
-                            class="content"
-                            v-html="$marked.markdownToHtml(dj.bio)"
+                    <!-- Desktop Photo -->
+                    <div class="hidden md:block flex-shrink-0">
+                        <cover-image
+                            :name="dj.name"
+                            quality="small"
+                            cover-type="dj"
+                            :pixel-size="300"
+                            :cover-image="dj.photo || undefined"
+                            class="w-[300px] h-[300px] rounded-xl shadow-2xl object-cover"
                         />
-                    </o-tab-item>
+                    </div>
+                </div>
 
-                    <o-tab-item v-if="mixes && mixes?.length > 0" label="Sety">
-                        <SoundList :sounds="mixes" />
-                    </o-tab-item>
+                <dj-control-box
+                    v-model:dj="dj"
+                    :dj="dj"
+                    :is-toggle-follow-loading="isToggleFollowLoading"
+                />
+            </UContainer>
+        </div>
 
-                    <o-tab-item
-                        v-if="tracks && tracks?.length > 0"
-                        label="Tracky"
-                    >
-                        <SoundList :sounds="tracks" />
-                    </o-tab-item>
-                </o-tabs>
-            </div>
-        </section>
+        <div class="py-8">
+            <UContainer class="max-w-4xl">
+                <UTabs v-if="tabItems.length > 0" :items="tabItems" class="w-full">
+                    <template #content="{ item }">
+                        <div v-if="item.key === 'bio'" class="prose dark:prose-invert max-w-none pt-6" v-html="$marked.markdownToHtml(dj.bio)" />
+                        <div v-else-if="item.key === 'mixes'" class="pt-6">
+                            <SoundList :sounds="mixes" />
+                        </div>
+                        <div v-else-if="item.key === 'tracks'" class="pt-6">
+                            <SoundList :sounds="tracks" />
+                        </div>
+                    </template>
+                </UTabs>
+            </UContainer>
+        </div>
     </div>
 </template>
 
@@ -110,37 +101,29 @@
  */
 
 import _ from 'lodash';
-import { useOruga } from '@oruga-ui/oruga';
 import CoverImage from '~/components/media/CoverImage.vue';
 import SoundList from '~/components/audio/SoundList.vue';
 import DjControlBox from '~/components/dj/DjControlBox.vue';
-import { useMainStore, useUserStore } from '~/stores';
+import { useUserStore } from '~/stores';
 import { readItems } from '@directus/sdk';
 import { type IDjWithSounds, djFieldSets } from '~/plugins/directus/collection';
 
 const { $marked, $directus } = useNuxtApp();
-const $oruga = useOruga();
-const mainStore = useMainStore();
 const route = useRoute();
-const { getIsLoggedIn, getUser } = useUserStore();
+const { getUser } = useUserStore();
 
-const activeTab = ref(1);
 const isToggleFollowLoading = ref(false);
 
 const {
     data: dj,
     pending: fetchPending,
-    refresh: fetchRefresh,
     error: fetchError
 } = useAsyncData<IDjWithSounds>(
     'djProfilePageQuery',
     async function () {
-        // // PROMISE TO SET TIMEOUT FOR TESTING (TODO - REMOVE)
-        // await new Promise((resolve) => setTimeout(resolve, 2000))
-
         const slug = route.params.djSlug as string;
 
-        let fields = djFieldSets.withSounds;
+        const fields = djFieldSets.withSounds;
 
         const djs = await $directus.request(
             readItems('dj', {
@@ -161,7 +144,6 @@ const {
         if (!djs?.length) throw new Error('DJ not found');
         return djs[0];
     }
-    // { initialCache: false, watch: () => getIsLoggedIn() }
 );
 
 const mixes = computed(() => {
@@ -172,13 +154,18 @@ const tracks = computed(() => {
     if (!dj.value?.sounds) return [];
     return dj.value.sounds.filter((sound) => sound.type === 'track') || [];
 });
-</script>
 
-<style lang="scss" scoped>
-.dj-photo {
-    height: 300px;
-    width: 300px;
-    background-size: cover;
-    background-position: center center;
-}
-</style>
+const tabItems = computed(() => {
+    const items = [];
+    if (dj.value?.bio) {
+        items.push({ key: 'bio', label: 'Bio' });
+    }
+    if (mixes.value.length > 0) {
+        items.push({ key: 'mixes', label: 'Sety' });
+    }
+    if (tracks.value.length > 0) {
+        items.push({ key: 'tracks', label: 'Tracky' });
+    }
+    return items;
+});
+</script>

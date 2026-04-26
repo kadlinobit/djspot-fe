@@ -3,11 +3,11 @@ export {};
 declare global {
     // General form data shape
     interface FormSubmitData {
-        formData: Object;
+        formData: object;
         successMessage?: string;
     }
 
-    type FormInitialData = Object;
+    type FormInitialData = object;
 
     interface FormProps {
         initialData?: FormInitialData | null;
@@ -38,7 +38,7 @@ declare global {
         dj?: Dj | null;
         type?: string | null;
         duration?: number | null;
-        photo?: Object | string | null;
+        photo?: object | string | null;
         status?: string | null;
     }
 

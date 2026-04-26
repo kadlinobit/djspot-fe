@@ -1,33 +1,11 @@
 <template>
-    <li class="dj-list-item columns is-vcentered">
-        <div class="column is-narrow">
-            <o-skeleton
-                animated
-                rounded
-                height="64px"
-                width="64px"
-            ></o-skeleton>
+    <div class="h-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800">
+        <USkeleton class="aspect-square w-full" />
+        <div class="space-y-2 p-4">
+            <USkeleton class="h-5 w-3/4" />
+            <USkeleton class="h-4 w-1/2" />
         </div>
-        <div class="column">
-            <o-skeleton
-                animated
-                rounded
-                height="1.5em"
-                :width="randomWidth(18, 26)"
-            ></o-skeleton>
-            <o-skeleton
-                animated
-                rounded
-                :width="randomWidth(15, 22)"
-            ></o-skeleton>
-        </div>
-    </li>
+    </div>
 </template>
 
-<script setup lang="ts">
-import _ from 'lodash'
-
-const randomWidth = computed(() => {
-    return (lower, upper) => _.random(lower, upper, false) + '%'
-})
-</script>
+<script setup lang="ts"></script>

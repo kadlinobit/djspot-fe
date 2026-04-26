@@ -1,47 +1,39 @@
 <template>
-    <div class="columns is-vcentered is-mobile is-gapless">
-        <div class="column">
-            <o-button
-                :disabled="
-                    !playerStore.isLoaded ||
-                    playerStore.isError ||
-                    !canPlayPrevious
-                "
-                variant="primary"
-                size="size-6"
-                icon-left="skip-previous"
-                @click.stop="playPrevious"
-            />
-        </div>
-        <div class="column">
-            <o-button
-                :disabled="!playerStore.isLoaded || playerStore.isError"
-                variant="primary"
-                size="size-6"
-                icon-left="stop"
-                @click.stop="stop"
-            />
-        </div>
-        <div class="column">
-            <o-button
-                :disabled="!playerStore.isLoaded || playerStore.isError"
-                variant="primary"
-                size="size-6"
-                :icon-left="playerStore.isPlaying ? 'pause' : 'play'"
-                @click.stop="playerStore.setIsPlaying(!playerStore.isPlaying)"
-            />
-        </div>
-        <div class="column">
-            <o-button
-                :disabled="
-                    !playerStore.isLoaded || playerStore.isError || !canPlayNext
-                "
-                variant="primary"
-                size="size-6"
-                icon-left="skip-next"
-                @click.stop="playNext"
-            />
-        </div>
+    <div class="flex items-center gap-2">
+        <UButton
+            :disabled="
+                !playerStore.isLoaded ||
+                playerStore.isError ||
+                !canPlayPrevious
+            "
+            color="primary"
+            variant="soft"
+            icon="i-heroicons-backward"
+            @click.stop="playPrevious"
+        />
+        <UButton
+            :disabled="!playerStore.isLoaded || playerStore.isError"
+            color="primary"
+            variant="soft"
+            icon="i-heroicons-stop"
+            @click.stop="stop"
+        />
+        <UButton
+            :disabled="!playerStore.isLoaded || playerStore.isError"
+            color="primary"
+            variant="soft"
+            :icon="playerStore.isPlaying ? 'i-heroicons-pause' : 'i-heroicons-play'"
+            @click.stop="playerStore.setIsPlaying(!playerStore.isPlaying)"
+        />
+        <UButton
+            :disabled="
+                !playerStore.isLoaded || playerStore.isError || !canPlayNext
+            "
+            color="primary"
+            variant="soft"
+            icon="i-heroicons-forward"
+            @click.stop="playNext"
+        />
     </div>
 </template>
 
@@ -86,7 +78,7 @@ function stop() {
     htmlAudio.value.currentTime = 0
 }
 function playNext() {
-    if (canPlayNext)
+    if (canPlayNext.value)
         playerStore.loadNewAudio(
             playlistStore.playlist[
                 playlistStore.soundIndexInPlaylist(playerStore.currentSound) + 1
@@ -94,7 +86,7 @@ function playNext() {
         )
 }
 function playPrevious() {
-    if (canPlayPrevious)
+    if (canPlayPrevious.value)
         playerStore.loadNewAudio(
             playlistStore.playlist[
                 playlistStore.soundIndexInPlaylist(playerStore.currentSound) - 1

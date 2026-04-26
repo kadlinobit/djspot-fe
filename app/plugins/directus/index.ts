@@ -8,7 +8,7 @@ import {
 } from '@directus/sdk';
 
 import { useUserStore } from '#imports';
-import { type ApiCollections } from './types.js';
+import type { ApiCollections } from './types.js';
 import { userFieldSets } from './collection/index.js';
 
 export default defineNuxtPlugin(() => {

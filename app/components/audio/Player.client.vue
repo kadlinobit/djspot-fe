@@ -1,88 +1,68 @@
 <template>
-    <div class="o-player-preview" style="position: relative">
-        <o-loading
-            :full-page="false"
-            :active="isLoading"
-            :can-cancel="false"
-        ></o-loading>
-        <div class="columns is-vcentered is-mobile">
-            <div class="column is-narrow">
-                <div class="level is-mobile">
-                    <div class="level-item mr-1">
-                        <o-button
-                            :disabled="!loaded || isError"
-                            variant="text"
-                            size="size-6"
-                            icon-left="stop"
-                            @click.prevent="stop"
-                        />
-                    </div>
-                    <div class="level-item">
-                        <o-button
-                            :disabled="!loaded || isError"
-                            variant="text"
-                            size="size-6"
-                            :icon-left="playing ? 'pause' : 'play'"
-                            @click.prevent="playing = !playing"
-                        />
-                    </div>
-                </div>
+    <div class="relative bg-white dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-800">
+        <div v-if="isLoading" class="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-10 rounded-lg">
+            <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 animate-spin text-primary-500" />
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex-shrink-0 flex items-center gap-1">
+                <UButton
+                    :disabled="!loaded || isError"
+                    variant="ghost"
+                    color="primary"
+                    icon="i-heroicons-stop"
+                    @click.prevent="stop"
+                />
+                <UButton
+                    :disabled="!loaded || isError"
+                    variant="ghost"
+                    color="primary"
+                    :icon="playing ? 'i-heroicons-pause' : 'i-heroicons-play'"
+                    @click.prevent="playing = !playing"
+                />
             </div>
-            <div v-if="isError" class="column">
-                <o-notification
-                    variant="danger pt-3 pb-3"
-                    :closable="false"
-                    role="alert"
-                >
-                    {{ $i18n.t('player.error_loading_file') }}
-                </o-notification>
+            <div v-if="isError" class="flex-1">
+                <UAlert
+                    color="error"
+                    variant="subtle"
+                    :title="$i18n.t('player.error_loading_file')"
+                />
             </div>
-            <div v-if="!isError && !showVolume" class="column">
-                <o-slider
-                    :tooltip="false"
-                    :modelValue="currentSeconds"
+            <div v-if="!isError && !showVolume" class="flex-1 min-w-0 flex flex-col gap-1">
+                <USlider
+                    :model-value="currentSeconds"
                     :max="durationSeconds"
                     :disabled="!loaded || isError"
-                    variant="primary mb-2 mt-2"
-                    @change="(value) => seek(value)"
+                    color="primary"
+                    size="sm"
+                    class="cursor-pointer"
+                    @update:model-value="(value) => { currentSeconds = value; isSeeking = true; }"
+                    @change="() => { seek(currentSeconds); isSeeking = false; }"
+                    @mousedown="isSeeking = true"
+                    @mouseup="isSeeking = false"
+                    @touchstart="isSeeking = true"
+                    @touchend="isSeeking = false"
                 />
-                <div class="level is-mobile">
-                    <div class="level-left">
-                        <div class="level-item">
-                            <div class="tag is-light">
-                                {{ $audio.convertTimeHHMMSS(currentSeconds) }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="level-right">
-                        <div class="level-item">
-                            <div class="tag is-light">
-                                {{ $audio.convertTimeHHMMSS(durationSeconds) }}
-                            </div>
-                        </div>
-                    </div>
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span>{{ $audio.convertTimeHHMMSS(currentSeconds) }}</span>
+                    <span>{{ $audio.convertTimeHHMMSS(durationSeconds) }}</span>
                 </div>
             </div>
-            <div v-if="!isError && showVolume" class="column">
-                <o-slider
+            <div v-if="!isError && showVolume" class="flex-1 min-w-0 flex flex-col gap-1">
+                <USlider
                     v-model="volume"
-                    :tooltip="false"
                     :max="100"
                     :disabled="!loaded || isError"
-                    variant="success mb-2 mt-2"
+                    color="neutral"
+                    size="sm"
                 />
-                <div class="level is-mobile">
-                    <div class="level-item">
-                        <div class="tag is-light">Volume {{ volume }}</div>
-                    </div>
-                </div>
+                <div class="text-xs text-gray-500 text-center">Volume {{ volume }}</div>
             </div>
-            <div class="column is-narrow">
-                <o-button
+            <div class="flex-shrink-0">
+                <UButton
                     :disabled="!loaded || isError"
-                    :variant="showVolume ? 'success' : 'text'"
-                    size="size-6"
-                    :icon-left="volumeIcon"
+                    :variant="showVolume ? 'soft' : 'ghost'"
+                    :color="showVolume ? 'primary' : 'neutral'"
+                    :icon="volumeIcon"
                     @click.prevent="showVolume = !showVolume"
                 />
             </div>
@@ -98,7 +78,7 @@
             @pause="playing = false"
             @play="playing = true"
             @error="onError"
-        ></audio>
+        />
     </div>
 </template>
 
@@ -121,6 +101,7 @@ const currentSeconds = ref(0)
 const durationSeconds = ref(0)
 const loaded = ref(false)
 const playing = ref(false)
+const isSeeking = ref(false)
 const previousVolume = ref(35)
 const showVolume = ref(false)
 const volume = ref(100)
@@ -138,17 +119,10 @@ const volumeTitle = computed(() => {
     return `Volume (${volume.value}%)`
 })
 const volumeIcon = computed(() => {
-    let volumeIcon = 'volume-off'
-    if (volume.value > 0 && volume.value <= 30) {
-        volumeIcon = 'volume-low'
+    if (volume.value === 0) {
+        return 'i-heroicons-speaker-x-mark'
     }
-    if (volume.value > 30 && volume.value <= 60) {
-        volumeIcon = 'volume-medium'
-    }
-    if (volume.value > 60) {
-        volumeIcon = 'volume-high'
-    }
-    return volumeIcon
+    return 'i-heroicons-speaker-wave'
 })
 
 watch(playing, (val) => {
@@ -192,7 +166,9 @@ function stop() {
     audioPlayer.value.currentTime = 0
 }
 function update() {
-    currentSeconds.value = parseInt(audioPlayer.value.currentTime)
+    if (!isSeeking.value) {
+        currentSeconds.value = parseInt(audioPlayer.value.currentTime)
+    }
 }
 function onError() {
     isLoading.value = false

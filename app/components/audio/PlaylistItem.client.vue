@@ -1,27 +1,28 @@
 <template>
-    <li class="columns is-mobile is-vcentered is-gapless playlist-item">
-        <div class="column is-narrow playlist-item-handle mr-1">
-            <o-icon icon="swap-vertical" />
+    <li class="flex items-center gap-3 py-2 px-3 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors rounded-lg group">
+        <div class="flex-shrink-0 cursor-move text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 playlist-item-handle">
+            <UIcon name="i-heroicons-arrows-up-down" class="w-5 h-5" />
         </div>
-        <div class="column is-narrow mr-1">
-            <button-play-pause :sound="playlistItem" />
+        <div class="flex-shrink-0">
+            <button-play-pause :sound="playlistItem" variant="text" />
         </div>
-        <div class="column is-text-ellipsis">
+        <div class="flex-1 min-w-0 truncate">
             <span @click="mainStore.setIsPlaylistOpen(false)">
                 <nuxt-link
                     :to="`/djs/${playlistItem.dj.slug}/sounds/${playlistItem.id}`"
+                    class="font-medium text-gray-900 dark:text-white hover:text-primary-500 transition-colors"
                 >
                     {{ `${playlistItem.dj.name} – ${playlistItem.name}` }}
                 </nuxt-link>
             </span>
         </div>
 
-        <div class="column is-narrow">
-            <span :class="['tag', soundTagType]">{{
-                $i18n.t(`${playlistItem.type}.type`)
-            }}</span>
+        <div class="flex-shrink-0">
+            <UBadge :color="soundTagColor" variant="soft" class="text-xs capitalize">
+                {{ $i18n.t(`${playlistItem.type}.type`) }}
+            </UBadge>
         </div>
-        <div class="column is-narrow">
+        <div class="flex-shrink-0">
             <button-playlist-add-remove :sound="playlistItem" />
         </div>
     </li>
@@ -42,17 +43,15 @@ const props = defineProps({
     }
 })
 
-const soundTagType = computed(() => {
-    let tagType
+const soundTagColor = computed(() => {
     switch (props.playlistItem.type) {
         case 'mix':
-            tagType = 'is-primary'
-            break
+            return 'primary'
         case 'track':
-            tagType = 'is-success'
-            break
+            return 'success'
+        default:
+            return 'neutral'
     }
-    return tagType
 })
 </script>
 

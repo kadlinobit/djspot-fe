@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia';
 import { useMainStore } from '../stores';
+import type { ISoundDefault } from '~/plugins/directus/collection';
 
 export const usePlayerStore = defineStore(
     'player',
     () => {
         const { $audio } = useNuxtApp();
 
-        const currentSound = ref(null);
-        const file = ref(null);
+        const currentSound = ref<ISoundDefault>();
+        const file = ref<string | undefined>(undefined);
         const currentSeconds = ref(0);
         const durationSeconds = ref(0);
         const isLoaded = ref(false);
@@ -19,7 +20,9 @@ export const usePlayerStore = defineStore(
         const isError = ref(false);
         const isAutoplay = ref(false);
         const showCancelLoading = ref(false);
-        const cancelLoadingTimeout = ref(null);
+        const cancelLoadingTimeout = ref<
+            ReturnType<typeof setTimeout> | undefined
+        >(undefined);
         const showCancelLoadingButton = ref(false);
 
         // GETTERS
@@ -34,40 +37,40 @@ export const usePlayerStore = defineStore(
         });
 
         // ACTIONS
-        function setCurrentSound(value) {
+        function setCurrentSound(value: ISoundDefault) {
             currentSound.value = value;
         }
-        function setFile(value) {
+        function setFile(value: string) {
             file.value = value;
         }
 
-        function setCurrentSeconds(value) {
+        function setCurrentSeconds(value: number) {
             currentSeconds.value = value;
         }
-        function setDurationSeconds(value) {
+        function setDurationSeconds(value: number) {
             durationSeconds.value = value;
         }
-        function setIsLoaded(value) {
+        function setIsLoaded(value: boolean) {
             isLoaded.value = value;
         }
-        function setLooping(value) {
+        function setLooping(value: boolean) {
             looping.value = value;
         }
-        function setIsPlaying(value) {
+        function setIsPlaying(value: boolean) {
             if (value) {
                 const mainStore = useMainStore();
                 mainStore.setIsBottomBarOpen(true);
             }
             isPlaying.value = value;
         }
-        function setPreviousVolume(value) {
+        function setPreviousVolume(value: number) {
             previousVolume.value = value;
         }
-        function setVolume(value) {
+        function setVolume(value: number) {
             volume.value = value;
         }
-        function setIsLoading(value) {
-            /*  When loading begins, set timeout that will display 
+        function setIsLoading(value: boolean) {
+            /*  When loading begins, set timeout that will display
                 the "cancel loading" button after couple of seconds of loading */
             if (value) {
                 cancelLoadingTimeout.value = setTimeout(() => {
@@ -78,20 +81,20 @@ export const usePlayerStore = defineStore(
             if (!value) {
                 clearTimeout(cancelLoadingTimeout.value);
                 showCancelLoadingButton.value = false;
-                cancelLoadingTimeout.value = null;
+                cancelLoadingTimeout.value = undefined;
             }
 
             isLoading.value = value;
         }
-        function setIsError(value) {
+        function setIsError(value: boolean) {
             isError.value = value;
         }
-        function setIsAutoplay(value) {
+        function setIsAutoplay(value: boolean) {
             isAutoplay.value = value;
         }
         function resetAudio() {
-            currentSound.value = null;
-            file.value = null;
+            currentSound.value = undefined;
+            file.value = undefined;
             currentSeconds.value = 0;
             durationSeconds.value = 0;
             isLoaded.value = false;
@@ -99,18 +102,13 @@ export const usePlayerStore = defineStore(
             isLoading.value = false;
             isError.value = false;
             showCancelLoadingButton.value = false;
-            cancelLoadingTimeout.value = null;
+            cancelLoadingTimeout.value = undefined;
         }
-        /**
-         * Sets new audio for the player, fetches audio stream url
-         * @param {Object} newSound - object containing new sound data
-         */
-        async function loadNewAudio(newSound) {
+        async function loadNewAudio(newSound: ISoundDefault) {
             resetAudio();
-            // Set autoplay true as this is user called action for loading new audio
             setIsAutoplay(true);
 
-            if (newSound && newSound.url) {
+            if (newSound.url) {
                 const audioUrls = await $audio.getAudioUrls(newSound.url);
                 if (audioUrls && audioUrls.stream) {
                     setCurrentSound(newSound);

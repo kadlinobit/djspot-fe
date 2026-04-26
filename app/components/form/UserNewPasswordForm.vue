@@ -1,116 +1,122 @@
 <template>
-    <div class="form user-form">
-        <o-notification
+    <div class="user-form">
+        <UAlert
             v-if="successMessage"
-            variant="success"
-            :closable="false"
+            icon="i-heroicons-check-circle"
+            color="success"
+            variant="subtle"
+            :title="$i18n.t(successMessage)"
+            class="mb-4"
+        />
+
+        <UAlert
+            v-if="errorMessage"
+            icon="i-heroicons-exclamation-triangle"
+            color="error"
+            variant="subtle"
+            :title="$i18n.t(errorMessage)"
+            class="mb-4"
+        />
+
+        <UForm
+            v-if="!successMessage"
+            :schema="schema"
+            :state="state"
+            class="space-y-4"
+            @submit="onSubmit"
         >
-            {{ $i18n.t(successMessage) }}
-        </o-notification>
+            <UFormField :label="$i18n.t('user.new_password')" name="password">
+                <UInput
+                    v-model="state.password"
+                    type="password"
+                    class="w-full"
+                />
+            </UFormField>
 
-        <o-notification v-if="errorMessage" variant="danger" :closable="false">
-            {{ $i18n.t(errorMessage) }}
-        </o-notification>
-
-        <form v-if="!successMessage" method="post" @submit.prevent>
-            <o-validated-field
-                v-model="formData.password"
-                name="password"
-                type="password"
-                :label="$i18n.t('user.new_password')"
-            />
-
-            <o-validated-field
-                v-model="passwordAgain"
-                name="passwordAgain"
-                type="password"
+            <UFormField
                 :label="$i18n.t('user.new_password_again')"
-            />
-            <o-validated-field
-                v-model="formData.password_check"
-                name="password_check"
-                type="password"
+                name="passwordAgain"
+            >
+                <UInput
+                    v-model="state.passwordAgain"
+                    type="password"
+                    class="w-full"
+                />
+            </UFormField>
+
+            <UFormField
                 :label="$i18n.t('user.current_password_check')"
-            />
-            <div class="field is-grouped is-grouped-right">
-                <div class="control">
-                    <o-button
-                        :disabled="isLoading"
-                        variant="dark"
-                        @click="onSubmit"
-                    >
-                        {{ $i18n.t('user.do_change_password') }}
-                    </o-button>
-                </div>
+                name="password_check"
+            >
+                <UInput
+                    v-model="state.password_check"
+                    type="password"
+                    class="w-full"
+                />
+            </UFormField>
+
+            <div class="flex justify-end pt-2">
+                <UButton
+                    type="submit"
+                    :loading="isLoading"
+                    color="neutral"
+                    variant="solid"
+                >
+                    {{ $i18n.t('user.do_change_password') }}
+                </UButton>
             </div>
-        </form>
+        </UForm>
     </div>
 </template>
 
 <script setup lang="ts">
-import * as yup from 'yup'
-import { useOruga } from '@oruga-ui/oruga'
-import { useForm } from 'vee-validate'
-import OValidatedField from '~/components/form/OValidatedField.vue'
+import { z } from 'zod';
+import type { FormSubmitEvent } from '@nuxt/ui';
 
-const { $i18n } = useNuxtApp()
-const $oruga = useOruga()
+const { $i18n } = useNuxtApp();
 
 const emit = defineEmits<{
-    (e: 'formSubmit', formSubmitData: FormSubmitData): void
-}>()
+    (e: 'formSubmit', formSubmitData: any): void
+}>();
 
 interface Props {
-    errorMessage?: string
-    successMessage?: string
-    isLoading?: boolean
+    errorMessage?: string;
+    successMessage?: string;
+    isLoading?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     errorMessage: null,
     successMessage: null,
     isLoading: false
-})
+});
 
-const formData = ref({
-    password: null,
-    password_check: null
-})
-const passwordAgain = ref(null)
+const state = reactive({
+    password: '',
+    passwordAgain: '',
+    password_check: ''
+});
 
-const validationSchema = yup.object({
-    password: yup.string().required('validation.required').nullable(),
-    passwordAgain: yup
-        .string()
-        .required('validation.required')
-        .test('passwords-match', 'validation.confirmed', function (val) {
-            return this.parent.password === val
-        })
-        .nullable(),
-    password_check: yup.string().required('validation.required').nullable()
-})
-
-const {
-    errors: formErrors,
-    validate,
-    resetForm
-} = useForm({ validationSchema })
-
-function onSubmit() {
-    validate().then((result) => {
-        if (!result.valid) {
-            $oruga.notification.open({
-                message: $i18n.t('validation.form_validation_error'),
-                variant: 'danger'
-            })
-            return
-        }
-        emit('formSubmit', {
-            formData: { ...formData.value },
-            successMessage: 'user.password_change_success'
-        })
-        formData.value.password_check = null
-        resetForm()
+const schema = z
+    .object({
+        password: z.string().min(1, $i18n.t('validation.required')),
+        passwordAgain: z.string().min(1, $i18n.t('validation.required')),
+        password_check: z.string().min(1, $i18n.t('validation.required'))
     })
+    .refine((data) => data.password === data.passwordAgain, {
+        message: $i18n.t('validation.confirmed'),
+        path: ['passwordAgain']
+    });
+
+type Schema = z.infer<typeof schema>;
+
+async function onSubmit(_event: FormSubmitEvent<Schema>) {
+    emit('formSubmit', {
+        formData: {
+            password: state.password,
+            password_check: state.password_check
+        },
+        successMessage: 'user.password_change_success'
+    });
 }
 </script>

@@ -1,44 +1,41 @@
 <template>
-    <div v-if="playerStore.showCancelLoadingButton" class="has-text-centered">
-        <o-button variant="danger" @click.stop="playerStore.resetAudio">
+    <div v-if="playerStore.showCancelLoadingButton" class="text-center">
+        <UButton color="error" variant="soft" @click.stop="playerStore.resetAudio">
             {{ $t('player.cancel_loading') }}
-        </o-button>
+        </UButton>
     </div>
-    <div v-else class="columns is-vcentered is-mobile is-gapless">
-        <div class="column is-narrow mr-3">
-            <o-button
+    <div v-else class="flex items-center gap-3">
+        <div class="flex-shrink-0">
+            <UButton
                 :disabled="!playerStore.isLoaded || playerStore.isError"
-                variant="primary"
-                size="size-6"
-                :icon-left="volumeIcon"
+                color="primary"
+                variant="ghost"
+                :icon="volumeIcon"
                 @click.stop="() => onMute()"
             />
         </div>
-        <div class="column mr-4">
-            <o-slider
-                :modelValue="playerStore.volume"
-                :tooltip="false"
+        <div class="flex-1">
+            <USlider
+                :model-value="playerStore.volume"
                 :max="100"
                 :disabled="!playerStore.isLoaded || playerStore.isError"
-                variant="secondary"
-                @update:modelValue="
+                color="neutral"
+                @update:model-value="
                     (newVolume) => playerStore.setVolume(newVolume)
                 "
             />
         </div>
-        <div class="column is-narrow">
-            <o-button
-                variant="primary"
-                size="size-6"
-                icon-left="playlist-music"
+        <div class="flex-shrink-0 flex items-center gap-1">
+            <UButton
+                color="primary"
+                variant="ghost"
+                icon="i-heroicons-queue-list"
                 @click.stop="() => mainStore.setIsPlaylistOpen(true)"
             />
-        </div>
-        <div class="column is-narrow mr-2">
-            <o-button
-                variant="primary"
-                size="size-6"
-                icon-left="chevron-down"
+            <UButton
+                color="primary"
+                variant="ghost"
+                icon="i-heroicons-chevron-down"
                 @click.stop="() => mainStore.setIsBottomBarOpen(false)"
             />
         </div>
@@ -52,17 +49,10 @@ const playerStore = usePlayerStore()
 const playlistStore = usePlaylistStore()
 
 const volumeIcon = computed(() => {
-    let volumeIcon = 'volume-off'
-    if (playerStore.volume > 0 && playerStore.volume <= 30) {
-        volumeIcon = 'volume-low'
+    if (playerStore.volume === 0) {
+        return 'i-heroicons-speaker-x-mark'
     }
-    if (playerStore.volume > 30 && playerStore.volume <= 60) {
-        volumeIcon = 'volume-medium'
-    }
-    if (playerStore.volume > 60) {
-        volumeIcon = 'volume-high'
-    }
-    return volumeIcon
+    return 'i-heroicons-speaker-wave'
 })
 
 function onMute() {

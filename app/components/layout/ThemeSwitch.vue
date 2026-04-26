@@ -1,14 +1,20 @@
 <template>
-    <a class="navbar-item is-right" @click="toggleTheme">
-        <o-icon :icon="icon || 'white-balance-sunny'" />
-    </a>
+    <UButton
+        :icon="icon"
+        variant="ghost"
+        color="neutral"
+        @click="toggleTheme"
+    />
 </template>
 
 <script setup lang="ts">
-import { useTheme } from '~/composables/useTheme';
-const { theme, toggleTheme } = useTheme();
+const colorMode = useColorMode();
+
+function toggleTheme() {
+    colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
+}
 
 const icon = computed(() =>
-    theme.value === 'dark' ? 'white-balance-sunny' : 'moon-waxing-crescent'
+    colorMode.value === 'dark' ? 'i-lucide-sun' : 'i-lucide-moon'
 );
 </script>

@@ -1,16 +1,16 @@
 <template>
-    <section :class="`bottom-bar ${bottomBarHiddenClass}`">
+    <section :class="['bottom-bar', { collapsed: !mainStore.isBottomBarOpen }]">
         <div class="bottom-bar-inner">
             <PlayerGlobal />
             <div
                 class="bottom-bar-switch"
                 @click="mainStore.toggleIsBottomBarOpen"
             >
-                <o-icon
-                    :icon="
+                <UIcon
+                    :name="
                         mainStore.isBottomBarOpen
-                            ? 'chevron-down'
-                            : 'playlist-play'
+                            ? 'i-heroicons-chevron-down'
+                            : 'i-heroicons-queue-list'
                     "
                 />
             </div>
@@ -24,9 +24,6 @@ import PlayerGlobal from '~/components/audio/PlayerGlobal/PlayerGlobal.client.vu
 import { useMainStore } from '~/stores'
 const mainStore = useMainStore()
 
-const bottomBarHiddenClass = computed(() => {
-    return mainStore.isBottomBarOpen ? '' : 'hidden'
-})
 </script>
 
 <style lang="scss" scoped>
@@ -41,7 +38,7 @@ const bottomBarHiddenClass = computed(() => {
 
     transition: bottom 0.5s;
 
-    &.hidden {
+    &.collapsed {
         bottom: -50px;
 
         .bottom-bar-inner {
@@ -71,7 +68,7 @@ const bottomBarHiddenClass = computed(() => {
 
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;
-            z-index: -5;
+            z-index: 10;
 
             transition: right 0.5s;
             cursor: pointer;

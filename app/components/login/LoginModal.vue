@@ -1,19 +1,9 @@
 <template>
-    <o-modal
-        trap-focus
-        :destroy-on-hide="false"
-        width="400px"
-        content-class="modal-content"
-        aria-role="dialog"
-        aria-label="Login modal"
-        aria-modal
-        :active="mainStore.isLoginOpen"
-        @close="() => (mainStore.isLoginOpen = false)"
-    >
-        <template #default>
-            <div class="modal-card" style="width: auto">
-                <header class="modal-card-head">
-                    <h4 class="title is-4">
+    <UModal v-model:open="mainStore.isLoginOpen">
+        <template #content>
+            <div class="p-6">
+                <div class="mb-6 flex items-center justify-between">
+                    <h4 class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{
                             $i18n.t(
                                 `user.${mainStore.loginActiveComponent}`.replace(
@@ -23,51 +13,51 @@
                             )
                         }}
                     </h4>
-                </header>
-                <section class="modal-card-body">
+                    <UButton
+                        color="neutral"
+                        variant="ghost"
+                        icon="i-heroicons-x-mark-20-solid"
+                        class="-mr-2"
+                        @click="mainStore.setIsLoginOpen(false)"
+                    />
+                </div>
+
+                <div>
                     <login
                         v-if="mainStore.loginActiveComponent === 'login'"
                         display-type="modal"
-                        @loginSuccess="afterLoginSuccess"
+                        @login-success="afterLoginSuccess"
                     />
                     <forgot-password
-                        v-else-if="
-                            mainStore.loginActiveComponent === 'forgot-password'
-                        "
+                        v-else-if="mainStore.loginActiveComponent === 'forgot-password'"
                         display-type="modal"
                     />
                     <register
-                        v-else-if="
-                            mainStore.loginActiveComponent === 'register'
-                        "
+                        v-else-if="mainStore.loginActiveComponent === 'register'"
                         display-type="modal"
                     />
-                </section>
-                <footer class="modal-card-foot"></footer>
+                </div>
             </div>
         </template>
-    </o-modal>
+    </UModal>
 </template>
 
 <script setup lang="ts">
-import { useOruga } from '@oruga-ui/oruga';
 import Login from './Login.vue';
 import ForgotPassword from './ForgotPassword.vue';
 import Register from './Register.vue';
 import { useMainStore } from '~/stores';
 
-const $oruga = useOruga();
 const { $i18n } = useNuxtApp();
 const mainStore = useMainStore();
-
-const router = useRouter();
-const route = useRoute();
+const toast = useToast();
 
 function afterLoginSuccess() {
     mainStore.setIsLoginOpen(false);
-    $oruga.notification.open({
-        message: $i18n.t('user.login_success'),
-        variant: 'success'
+    toast.add({
+        title: $i18n.t('user.login_success'),
+        color: 'success',
+        icon: 'i-heroicons-check-circle'
     });
 }
 </script>
