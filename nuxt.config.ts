@@ -61,6 +61,7 @@ export default defineNuxtConfig({
         '@pinia/nuxt',
         'pinia-plugin-persistedstate/nuxt',
         '@nuxt/content',
+        '@nuxt/image',
         '@nuxt/devtools',
         '@nuxt/eslint'
     ],

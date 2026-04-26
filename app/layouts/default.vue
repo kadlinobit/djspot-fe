@@ -1,20 +1,8 @@
 <template>
     <UApp>
         <login-modal />
-        <UModal v-model:open="mainStore.isPlaylistOpen" title="Playlist">
-            <template #content>
-                <div class="modal-card" style="width: auto">
-                    <header class="modal-card-head">Playlist</header>
-                    <section class="modal-card-body">
-                        <Playlist />
-                    </section>
-                    <footer class="modal-card-foot">Footer</footer>
-                </div>
-            </template>
-        </UModal>
-
         <SidebarMenu v-if="getIsLoggedIn()" />
-
+        <PlaylistSlideover />
         <Navbar />
         <div class="pb-24">
             <slot />
@@ -26,8 +14,8 @@
 <script setup lang="ts">
 import Navbar from '~/components/layout/Navbar.vue';
 import SidebarMenu from '~/components/layout/SidebarMenu.client.vue';
+import PlaylistSlideover from '~/components/layout/PlaylistSlideover.client.vue';
 import BottomBar from '~/components/layout/BottomBar.client.vue';
-import Playlist from '~/components/audio/Playlist.client.vue';
 import LoginModal from '~/components/login/LoginModal.vue';
 
 import { useMainStore, useUserStore } from '~/stores';

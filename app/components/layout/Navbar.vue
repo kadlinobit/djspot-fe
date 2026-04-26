@@ -1,11 +1,14 @@
 <template>
     <UHeader title="djspot-fe">
         <template #title>
-            <img
-                src="https://bulma.io/images/bulma-logo.png"
-                width="112"
+            <NuxtImg
+                :src="
+                    colorMode.value === 'dark'
+                        ? '/images/djspot-logo-dark.png'
+                        : '/images/djspot-logo-light.png'
+                "
                 height="28"
-                alt="Logo"
+                alt="djspot logo"
             />
         </template>
 
@@ -50,6 +53,7 @@ import ThemeSwitch from '~/components/layout/ThemeSwitch.vue';
 import { useMainStore, useUserStore } from '~/stores';
 
 const { getIsLoggedIn } = useUserStore();
+const colorMode = useColorMode();
 const { $i18n } = useNuxtApp();
 const mainStore = useMainStore();
 
