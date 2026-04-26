@@ -7,7 +7,9 @@
                         ? '/images/djspot-logo-dark.png'
                         : '/images/djspot-logo-light.png'
                 "
+                width="111"
                 height="28"
+                style="height: 28px; width: auto;"
                 alt="djspot logo"
             />
         </template>
