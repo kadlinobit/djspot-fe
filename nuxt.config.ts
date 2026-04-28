@@ -40,7 +40,12 @@ export default defineNuxtConfig({
                 { key: 'description', name: 'description', content: '' },
                 { name: 'format-detection', content: 'telephone=no' }
             ],
-            link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
+            link: [
+                { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+                { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+                { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+                { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap' }
+            ]
         }
     },
     css: ['~/assets/css/main.css'],

@@ -41,9 +41,11 @@ async function onToggleFollow() {
     }
     isToggleFollowLoading.value = true;
     try {
-        _.isEmpty(dj?.value?.follows)
-            ? await createFollow()
-            : await deleteFollow();
+        if (_.isEmpty(dj?.value?.follows)) {
+            await createFollow();
+        } else {
+            await deleteFollow();
+        }
     } catch (e: any) {
         toast.add({
             title: $i18n.t('error.title'),
@@ -63,8 +65,7 @@ async function createFollow() {
         );
 
         if (result?.id) {
-            dj.value.follows = [result.id];
-            dj.value.follow_count++;
+            dj.value = { ...dj.value, follows: [result.id], follow_count: (dj.value.follow_count || 0) + 1 };
             toast.add({
                 title: $i18n.t('dj.follow_success'),
                 color: 'success'
@@ -85,8 +86,7 @@ async function deleteFollow() {
         await $directus.request(
             deleteItem('user_dj_follow', dj.value.follows[0])
         );
-        dj.value.follows = [];
-        dj.value.follow_count--;
+        dj.value = { ...dj.value, follows: [], follow_count: (dj.value.follow_count || 0) - 1 };
         toast.add({
             title: $i18n.t('dj.unfollow_success'),
             color: 'success'

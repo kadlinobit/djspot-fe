@@ -3,7 +3,8 @@
     "allow": [
       "mcp__nuxt__get-documentation-page",
       "mcp__nuxt-ui__get-documentation-page",
-      "mcp__nuxt-ui__search-documentation"
+      "mcp__nuxt-ui__search-documentation",
+      "Bash(jq --version)"
     ]
   }
 }
