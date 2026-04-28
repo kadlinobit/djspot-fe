@@ -64,8 +64,7 @@ async function createLike() {
         );
 
         if (result?.id) {
-            sound.value.likes = [result.id];
-            sound.value.like_count++;
+            sound.value = { ...sound.value, likes: [result.id], like_count: (sound.value.like_count || 0) + 1 };
         }
     } catch (e: any) {
         toast.add({
@@ -81,8 +80,7 @@ async function deleteLike() {
         await $directus.request(
             deleteItem('user_sound_like', sound.value.likes[0])
         );
-        sound.value.likes = [];
-        sound.value.like_count--;
+        sound.value = { ...sound.value, likes: [], like_count: (sound.value.like_count || 0) - 1 };
     } catch (e: any) {
         toast.add({
             title: e?.message || String(e),

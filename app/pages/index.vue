@@ -1,16 +1,14 @@
 <template>
-    <section class="section">
-        <div class="container">
-            <h1 class="title">{{ $i18n.t('welcome_message') }}</h1>
-            <p v-if="isLoggedIn">{{ remoteUserData }}</p>
-            <p v-else>User is not logged in!!!!</p>
-            <!-- <p>Status: {{ loginStatus }}</p>
-            <p>data: {{ JSON.stringify(data, null, 2) }}</p>
-            <p>lastRefreshedAt: {{ lastRefreshedAt }}</p>
-            <h2 class="subtitle">becem nuxt directus</h2>
-            <p>{{ useUser() }}</p> -->
-        </div>
-    </section>
+    <UContainer class="py-10">
+        <h1 class="title">{{ $i18n.t('welcome_message') }}</h1>
+        <p v-if="isLoggedIn">{{ remoteUserData }}</p>
+        <p v-else>User is not logged in!!!!</p>
+        <!-- <p>Status: {{ loginStatus }}</p>
+        <p>data: {{ JSON.stringify(data, null, 2) }}</p>
+        <p>lastRefreshedAt: {{ lastRefreshedAt }}</p>
+        <h2 class="subtitle">becem nuxt directus</h2>
+        <p>{{ useUser() }}</p> -->
+    </UContainer>
 </template>
 
 <script setup lang="ts">

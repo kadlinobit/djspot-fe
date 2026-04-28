@@ -1,17 +1,15 @@
 <template>
-    <section class="section">
-        <div class="container">
-            <h1 class="mb-6 text-2xl font-bold">
-                {{ $i18n.t('sound.add') }}
-            </h1>
-            <sound-form
-                :error-message="errorMessage"
-                :success-message="success"
-                :is-loading="isLoading"
-                @form-submit="createSound"
-            />
-        </div>
-    </section>
+    <UContainer class="py-10">
+        <h1 class="mb-6 text-2xl font-bold">
+            {{ $i18n.t('sound.add') }}
+        </h1>
+        <sound-form
+            :error-message="errorMessage"
+            :success-message="success"
+            :is-loading="isLoading"
+            @form-submit="createSound"
+        />
+    </UContainer>
 </template>
 
 <script setup lang="ts">
