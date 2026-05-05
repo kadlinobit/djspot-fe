@@ -15,6 +15,7 @@
             "most_liked": "Nejoblíbenější"
         },
         "reset_search": "Resetovat vyhledávání",
+        "no_results_help": "Zkus upravit filtry vyhledávání.",
         "radius": {
             "0": "+0 km",
             "25": "+25 km",
@@ -107,7 +108,9 @@
         "no_djs_found": "Bohužel, nenašli jsme žádné DJs.",
         "search_dj": "Hledat DJe...",
         "whole_czechia": "Celá ČR",
-        "total_found": "Celkem nalezeno {0} DJs"
+        "total_found": "Celkem nalezeno {0} DJs",
+        "follow_success": "Nyní sleduješ tohoto DJe!",
+        "unfollow_success": "Přestal jsi sledovat tohoto DJe."
     },
     "mix": {
         "type": "Set",
@@ -169,6 +172,7 @@
         "info": "Info",
         "all_types": "Všechny typy",
         "no_sounds_found": "Bohužel, nenašli jsme žádné sety ani tracky.",
+        "like": "Lajkovat",
         "liked_by_me": "Oblíbené",
         "total_found": "Celkem nalezeno {0} sounds",
         "slug_help": "URL slug je identifikátor, který se používá pro tvorbu URL adresy k tvému setu nebo tracku. Například pro audio s názvem 'Příklad' a URL slugem 'priklad' bude adresa 'http://www.djspot.cz/djs/jmeno-dje/sounds/priklad'."
@@ -176,7 +180,8 @@
     },
     "playlist": {
         "added_to_playlist": "Audio '{0}' přidáno do playlistu",
-        "removed_from_playlist": "Audio '{0}' odebráno z playlistu"
+        "removed_from_playlist": "Audio '{0}' odebráno z playlistu",
+        "empty": "Váš playlist je zatím prázdný."
     },
     "player": {
         "error_loading_file_message": "Ze zadané URL adresy se nepodařilo načíst audio.",
@@ -198,6 +203,9 @@
         "slug_changed_warning": "Měníš svoji URL adresu, což může způsobit problémy s odkazy na tvůj profil. Pokud si nejsi jistý, nech to tak jak je. (Původní hodnota je '{0}')",
         "image_type": "Obrázek musí být ve formátu JPG, JPEG nebo PNG",
         "genres_min_max": "Musíš vybrat alespoň 1 žánr (maximálně 3)"
+    },
+    "error": {
+        "title": "Chyba"
     },
     "Email is already taken.": "Tento email už existuje v naší databázi.",
     "Field \"email\" has to be unique." : "Bohužel tento email je již zabraný.",

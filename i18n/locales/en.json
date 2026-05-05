@@ -15,6 +15,7 @@
             "most_liked": "Most liked"
         },
         "reset_search": "Reset search",
+        "no_results_help": "Try adjusting your search filters.",
         "radius": {
             "0": "+0 km",
             "25": "+25 km",
@@ -107,7 +108,9 @@
         "no_djs_found": "Sorry, we couldn't find any DJs.",
         "search_dj": "Search DJ...",
         "whole_czechia": "Whole Czechia",
-        "total_found": "Total found {0} DJs"
+        "total_found": "Total found {0} DJs",
+        "follow_success": "You are now following this DJ!",
+        "unfollow_success": "You have unfollowed this DJ."
     },
     "mix": {
         "type": "Mix",
@@ -169,13 +172,15 @@
         "info": "Info",
         "all_types": "All types",
         "no_sounds_found": "Sorry, we couldn't find any sets or tracks.",
+        "like": "Like",
         "liked_by_me": "Liked",
         "total_found": "Total found {0} sounds",
         "slug_help": "The URL slug is an identifier used to create the URL address for your set or track. For example, for audio named 'Example' with URL slug 'example', the address will be 'http://www.djspot.cz/djs/dj-name/sounds/example'."
     },
     "playlist": {
         "added_to_playlist": "Audio '{0}' added to playlist",
-        "removed_from_playlist": "Audio '{0}' removed from playlist"
+        "removed_from_playlist": "Audio '{0}' removed from playlist",
+        "empty": "There is nothing in your playlist yet."
     },
     "player": {
         "error_loading_file_message": "Failed to load audio from the provided URL.",
@@ -197,6 +202,9 @@
         "slug_changed_warning": "You are changing your URL address, which may cause issues with links to your profile. If you are not sure, leave it as is. (Original value is '{0}')",
         "image_type": "Image must be in JPG, JPEG or PNG format",
         "genres_min_max": "You must select at least 1 genre (maximum 3)"
+    },
+    "error": {
+        "title": "Error"
     },
     "Email is already taken.": "This email is already taken.",
     "Field \"email\" has to be unique.": "Unfortunately this email is already taken.",

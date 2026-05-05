@@ -1,32 +1,48 @@
 <template>
     <USlideover v-model:open="mainStore.isSidebarOpen" side="left">
         <template #header>
-            <UDropdownMenu
-                :items="userMenuItems"
-                :content="{ align: 'center', collisionPadding: 12 }"
-                :ui="{ content: 'w-(--reka-dropdown-menu-trigger-width) min-w-48' }"
-            >
+            <div class="flex items-center gap-2 w-full">
+                <UDropdownMenu
+                    :items="userMenuItems"
+                    :content="{ align: 'center', collisionPadding: 12 }"
+                    :ui="{ content: 'w-(--reka-dropdown-menu-trigger-width) min-w-48' }"
+                    class="flex-1 min-w-0"
+                >
+                    <UButton
+                        icon="i-lucide-user"
+                        :label="userLabel"
+                        trailing-icon="i-lucide-chevrons-up-down"
+                        color="neutral"
+                        variant="ghost"
+                        square
+                        class="w-full data-[state=open]:bg-elevated overflow-hidden"
+                        :ui="{ trailingIcon: 'text-dimmed ms-auto' }"
+                    />
+                </UDropdownMenu>
                 <UButton
-                    icon="i-lucide-user"
-                    :label="userLabel"
-                    trailing-icon="i-lucide-chevrons-up-down"
+                    icon="i-lucide-x"
                     color="neutral"
                     variant="ghost"
-                    square
-                    class="w-full data-[state=open]:bg-elevated overflow-hidden"
-                    :ui="{ trailingIcon: 'text-dimmed ms-auto' }"
+                    aria-label="Close sidebar"
+                    @click="closeSidebar"
                 />
-            </UDropdownMenu>
+            </div>
         </template>
 
         <template #body>
-            <UNavigationMenu
-                :items="items"
-                :ui="{ root: 'flex flex-col gap-4' }"
-                orientation="vertical"
-                class="w-full"
-                @select="closeSidebar"
-            />
+            <div
+                class="h-full"
+                @touchstart.passive="onTouchStart"
+                @touchend.passive="onTouchEnd"
+            >
+                <UNavigationMenu
+                    :items="items"
+                    :ui="{ root: 'flex flex-col gap-4' }"
+                    orientation="vertical"
+                    class="w-full"
+                    @select="closeSidebar"
+                />
+            </div>
         </template>
     </USlideover>
 </template>
@@ -110,5 +126,17 @@ async function logout() {
 
 function closeSidebar() {
     mainStore.isSidebarOpen = false;
+}
+
+const touchStartX = ref(0);
+
+function onTouchStart(e: TouchEvent) {
+    if (e.touches[0]) touchStartX.value = e.touches[0].clientX;
+}
+
+function onTouchEnd(e: TouchEvent) {
+    if (!e.changedTouches[0]) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.value;
+    if (deltaX < -50) closeSidebar();
 }
 </script>

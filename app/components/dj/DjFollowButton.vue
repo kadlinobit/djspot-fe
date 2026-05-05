@@ -24,13 +24,14 @@ const { getIsLoggedIn } = useUserStore();
 const dj = defineModel<Dj>('dj');
 const isToggleFollowLoading = ref(false);
 
-const followButtonVariant = computed(() => {
-    if (!getIsLoggedIn()) return 'outline';
-    return dj?.value?.follows?.length ? 'solid' : 'outline';
+const followButtonColor = computed(() => {
+    if (!getIsLoggedIn()) return 'neutral';
+    return dj?.value?.follows?.length ? 'primary' : 'neutral';
 });
 
-const followButtonColor = computed(() => {
-    return 'neutral';
+const followButtonVariant = computed(() => {
+    if (!getIsLoggedIn()) return 'soft';
+    return dj?.value?.follows?.length ? 'solid' : 'soft';
 });
 
 async function onToggleFollow() {

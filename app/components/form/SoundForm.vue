@@ -117,11 +117,9 @@
                 :label="$i18n.t(`${state.type}.description`)"
                 name="description"
             >
-                <u-bm-editor
+                <UCustomEditor
                     v-model="state.description"
-                    :placeholder="
-                        $i18n.t(`${state.type}.description_placeholder`)
-                    "
+                    :placeholder="$i18n.t(`${state.type}.description_placeholder`)"
                 />
             </UFormField>
 
@@ -170,7 +168,7 @@ import type { ISoundForm } from '@/plugins/directus/collection';
 import UImageCropUpload, {
     type CropUploadModelValue
 } from '~/components/form/UImageCropUpload.vue';
-import UBmEditor from '~/components/form/UBmEditor.vue';
+import UCustomEditor from '~/components/form/UCustomEditor.vue';
 import SoundTypeSelector from '~/components/selectors/soundType.USelectMenu.vue';
 import Player from '~/components/audio/Player.client.vue';
 

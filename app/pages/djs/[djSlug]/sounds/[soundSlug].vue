@@ -115,23 +115,7 @@
                 >
                     <div class="flex items-center gap-4">
                         <sound-like-button v-model:sound="sound" />
-                        <UButton
-                            :variant="
-                                playlistStore.isSoundInPlaylist(sound)
-                                    ? 'solid'
-                                    : 'soft'
-                            "
-                            color="neutral"
-                            icon="i-heroicons-queue-list"
-                            size="md"
-                            @click="
-                                playlistStore.handleAddOrRemovePlaylistSound(
-                                    sound
-                                )
-                            "
-                        >
-                            Playlist
-                        </UButton>
+                        <sound-playlist-button :sound="sound" />
                     </div>
                     <div>
                         <UButton
@@ -174,13 +158,13 @@
 import _ from 'lodash';
 import DjInfoBox from '~/components/dj/DjInfoBox.vue';
 import SoundLikeButton from '~/components/sound/SoundLikeButton.vue';
+import SoundPlaylistButton from '~/components/sound/SoundPlaylistButton.vue';
 import CoverImage from '~/components/media/CoverImage.vue';
 import ButtonPlayPause from '~/components/audio/ButtonPlayPause.client.vue';
-import { usePlaylistStore, useUserStore } from '~/stores';
+import { useUserStore } from '~/stores';
 import { readItems } from '@directus/sdk';
 
 const { $i18n, $api, $marked, $time, $audio, $directus } = useNuxtApp();
-const playlistStore = usePlaylistStore();
 const route = useRoute();
 const { getUser } = useUserStore();
 

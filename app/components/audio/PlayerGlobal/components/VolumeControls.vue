@@ -30,7 +30,7 @@
                 color="primary"
                 variant="ghost"
                 icon="i-heroicons-queue-list"
-                @click.stop="() => mainStore.setIsPlaylistOpen(true)"
+                @click.stop="() => mainStore.toggleIsPlaylistOpen()"
             />
             <UButton
                 color="primary"

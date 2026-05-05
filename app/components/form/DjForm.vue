@@ -98,7 +98,7 @@
 
             <!-- Bio Editor -->
             <UFormField :label="$i18n.t('dj.bio')" name="bio">
-                <u-bm-editor v-model="state.bio" />
+                <UCustomEditor v-model="state.bio" />
             </UFormField>
 
             <!-- Action Buttons -->
@@ -138,7 +138,7 @@ import { useFormStore } from '~/stores';
 import UImageCropUpload, {
     type CropUploadModelValue
 } from '~/components/form/UImageCropUpload.vue';
-import UBmEditor from '~/components/form/UBmEditor.vue';
+import UCustomEditor from '~/components/form/UCustomEditor.vue';
 import type { IDjForm } from '~/plugins/directus/collection';
 
 const { $i18n, $api } = useNuxtApp();
