@@ -49,7 +49,7 @@
                                             class="h-4 w-4"
                                         />
                                         <span>{{
-                                            $audio.convertTimeHHMMSS(
+                                            convertTimeHHMMSS(
                                                 sound.duration
                                             )
                                         }}</span>
@@ -60,7 +60,7 @@
                                             class="h-4 w-4"
                                         />
                                         <span>{{
-                                            $time.fromNow(sound.created_at)
+                                            fromNow(sound.created_at)
                                         }}</span>
                                     </div>
                                 </div>
@@ -145,7 +145,7 @@
                         <div
                             v-if="item.key === 'description'"
                             class="prose dark:prose-invert max-w-none pt-6"
-                            v-html="$marked.markdownToHtml(sound.description)"
+                            v-html="markdownToHtml(sound.description)"
                         />
                     </template>
                 </UTabs>

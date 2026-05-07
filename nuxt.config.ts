@@ -43,8 +43,15 @@ export default defineNuxtConfig({
             link: [
                 { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
                 { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-                { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-                { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap' }
+                {
+                    rel: 'preconnect',
+                    href: 'https://fonts.gstatic.com',
+                    crossorigin: ''
+                },
+                {
+                    rel: 'stylesheet',
+                    href: 'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap'
+                }
             ]
         }
     },
@@ -53,10 +60,7 @@ export default defineNuxtConfig({
         '/directus/**': { proxy: proxyUrl }
     },
     plugins: [
-        { src: '~/plugins/audio.ts' },
         { src: '~/plugins/media.js' },
-        { src: '~/plugins/time.js' },
-        { src: '~/plugins/marked.js' },
         { src: '~/plugins/api/index.js' }
     ],
     components: true,
@@ -80,7 +84,7 @@ export default defineNuxtConfig({
     i18n: {
         defaultLocale: 'cs',
         strategy: 'no_prefix',
-detectBrowserLanguage: {
+        detectBrowserLanguage: {
             useCookie: true,
             cookieKey: 'i18n_locale',
             alwaysRedirect: false,

@@ -4,7 +4,8 @@ import {
     authentication,
     readMe,
     type AuthenticationStorage,
-    type DirectusUser
+    type DirectusUser,
+    realtime
 } from '@directus/sdk';
 
 import { useUserStore } from '#imports';
@@ -26,11 +27,14 @@ export default defineNuxtPlugin(() => {
 
     const storage = new NuxtCookieStorage() as AuthenticationStorage;
 
-    const url = import.meta.client ? window.location.origin : useRequestURL().origin;
+    const url = import.meta.client
+        ? window.location.origin
+        : useRequestURL().origin;
 
     const directus = createDirectus<ApiCollections>(`${url}/directus`)
         .with(authentication('cookie', { credentials: 'include', storage }))
-        .with(rest({ credentials: 'include' }));
+        .with(rest({ credentials: 'include' }))
+        .with(realtime());
 
     directus.request = new Proxy(directus.request, {
         apply: async (target, thisArg, args) => {

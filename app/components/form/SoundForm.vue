@@ -190,7 +190,7 @@ export interface ISoundFormSubmitData {
     successMessage?: string;
 }
 
-const { $i18n, $audio, $api } = useNuxtApp();
+const { $i18n, $api } = useNuxtApp();
 const router = useRouter();
 const { getUser } = useUserStore();
 const formStore = useFormStore();
@@ -239,7 +239,7 @@ async function verifyUniqueSlug(value: string) {
         props.initialData?.slug
     );
 }
-const debounceVerifyUniqueSlug = $api.tools.asyncDebounce(
+const debounceVerifyUniqueSlug = asyncDebounce(
     verifyUniqueSlug,
     1000
 );
@@ -253,7 +253,7 @@ async function verifyUniqueName(value: string) {
         props.initialData?.name
     );
 }
-const debounceVerifyUniqueName = $api.tools.asyncDebounce(
+const debounceVerifyUniqueName = asyncDebounce(
     verifyUniqueName,
     1000
 );
@@ -306,7 +306,7 @@ const debouncedGetAudioUrl = _.debounce(async () => {
         audioUrl.value = null;
         return;
     }
-    const audioUrls = await $audio.getAudioUrls(state.url);
+    const audioUrls = await $fetch<{ stream: string | null; download: string | null } | null>('/api/audio-url', { query: { url: state.url } });
     if (audioUrls && audioUrls.stream) {
         audioUrl.value = audioUrls.stream;
     } else {

@@ -197,7 +197,7 @@ async function verifyUniqueSlug(value: string) {
         props.initialData?.slug
     );
 }
-const debounceVerifyUniqueSlug = $api.tools.asyncDebounce(
+const debounceVerifyUniqueSlug = asyncDebounce(
     verifyUniqueSlug,
     1000
 );
@@ -211,7 +211,7 @@ async function verifyUniqueName(value: string) {
         props.initialData?.name
     );
 }
-const debounceVerifyUniqueName = $api.tools.asyncDebounce(
+const debounceVerifyUniqueName = asyncDebounce(
     verifyUniqueName,
     1000
 );

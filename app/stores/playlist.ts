@@ -1,36 +1,44 @@
 import { defineStore } from 'pinia';
 import { usePlayerStore } from './player';
+import type { ISoundDefault } from '~/plugins/directus/collection/sound';
+
+type PlaylistSound = Pick<ISoundDefault, 'duration' | 'dj' | 'id' | 'name' | 'type' | 'url'>;
 
 export const usePlaylistStore = defineStore(
     'playlist',
     () => {
-        const { $audio, $i18n } = useNuxtApp();
+        const { $i18n } = useNuxtApp();
         const toast = useToast();
         const playerStore = usePlayerStore();
 
-        const playlist = ref([]);
+        const playlist = ref<PlaylistSound[]>([]);
 
         // GETTERS
         const playlistSize = computed(() => {
             return playlist.value.length;
         });
-        const isSoundInPlaylist = (sound: Sound) => {
+        const isSoundInPlaylist = (sound: ISoundDefault) => {
             return playlist.value.some(
-                (playlistSound: Sound) => playlistSound.id === sound.id
+                (playlistSound: PlaylistSound) => playlistSound.id === sound.id
             );
         };
-        const soundIndexInPlaylist = (sound: Sound) => {
+        const soundIndexInPlaylist = (sound: ISoundDefault) => {
             return playlist.value.findIndex(
-                (playlistSound: Sound) => playlistSound.id === sound.id
+                (playlistSound: PlaylistSound) => playlistSound.id === sound.id
             );
         };
+
+        function formatSoundForPlaylist(sound: ISoundDefault) {
+            const { duration, dj, id, name, type, url } = sound;
+            return { duration, dj, id, name, type, url };
+        }
 
         // ACTIONS
         function setPlaylist(value) {
             playlist.value = value;
         }
 
-        function deleteSound(sound) {
+        function deleteSound(sound: PlaylistSound) {
             playlist.value = playlist.value.filter(
                 (playlistSound) => playlistSound.id !== sound.id
             );
@@ -42,29 +50,29 @@ export const usePlaylistStore = defineStore(
             });
         }
 
-        function addSoundToIndex(sound, index) {
+        function addSoundToIndex(sound: ISoundDefault, index: number) {
             playlist.value.splice(
                 index,
                 0,
-                $audio.formatSoundForPlaylist(sound)
+                formatSoundForPlaylist(sound)
             );
         }
 
-        function addSoundToEnd(sound) {
-            playlist.value.push($audio.formatSoundForPlaylist(sound));
+        function addSoundToEnd(sound: ISoundDefault) {
+            playlist.value.push(formatSoundForPlaylist(sound));
         }
 
-        function handlePlaySound(sound) {
+        function handlePlaySound(sound: ISoundDefault) {
             if (
                 !playlist.value.some(
                     (playlistSound) => playlistSound.id === sound.id
                 )
             ) {
-                let index;
-                if (playerStore.currentSound) {
+                let index = 0;
+                const currentSound = playerStore.currentSound;
+                if (currentSound) {
                     index = playlist.value.findIndex(
-                        (playlistSound) =>
-                            playlistSound.id === playerStore.currentSound.id
+                        (playlistSound) => playlistSound.id === currentSound.id
                     );
                     index = index !== -1 ? index + 1 : 0;
                 }
@@ -80,7 +88,7 @@ export const usePlaylistStore = defineStore(
             }
         }
 
-        function handleAddOrRemovePlaylistSound(sound) {
+        function handleAddOrRemovePlaylistSound(sound: ISoundDefault) {
             if (
                 !playlist.value.some(
                     (playlistSound) => playlistSound.id === sound.id

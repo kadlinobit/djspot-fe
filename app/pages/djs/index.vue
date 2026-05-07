@@ -134,9 +134,8 @@ import CityRadiusSelector from '~/components/selectors/cityRadius.USelectMenu.vu
 import GenreSelector from '~/components/selectors/genre.UInputMenu.vue';
 import { useFormStore, useUserStore } from '~/stores';
 import { readItems, aggregate } from '@directus/sdk';
-import type { Genre } from '~/plugins/directus/types';
 
-const { $i18n, $api, $geo, $directus } = useNuxtApp();
+const { $i18n, $api, $directus } = useNuxtApp();
 const route = useRoute();
 const router = useRouter();
 const formStore = useFormStore();
@@ -213,7 +212,7 @@ const requestFilter = computed(() => {
                     {
                         city: {
                             gps: {
-                                _intersects: $geo.getPointRadius(coordinates, search.radius)
+                                _intersects: getPointRadius(coordinates, search.radius)
                             }
                         }
                     }

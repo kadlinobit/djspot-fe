@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia';
 import { readItems } from '@directus/sdk';
 import _ from 'lodash';
-import type { City, Genre } from '~/plugins/directus/types';
+import { cityFieldSets, type ICityDefault } from '~/plugins/directus/collection/city';
+import { genreFieldSets, type IGenreDefault } from '~/plugins/directus/collection/genre';
 
 export const useFormStore = defineStore('form', () => {
     const { $directus } = useNuxtApp();
-    const cities = ref<City[]>([]);
-    const genres = ref<Genre[]>([]);
+    const cities = ref<ICityDefault[]>([]);
+    const genres = ref<IGenreDefault[]>([]);
     const djsPageSortOptions = ref([
         {
             value: 'name',
@@ -95,7 +96,7 @@ export const useFormStore = defineStore('form', () => {
     });
 
     // ACTIONS
-    function setCities(val: City[]) {
+    function setCities(val: ICityDefault[]) {
         cities.value = val;
     }
     /**
@@ -106,7 +107,7 @@ export const useFormStore = defineStore('form', () => {
     async function fetchCities(forceFetch: boolean = false) {
         if (!_.isEmpty(cities?.value) && !forceFetch) return;
         const citiesData = await $directus.request(
-            readItems('city', { limit: -1, sort: 'name' })
+            readItems('city', { limit: -1, sort: 'name', fields: cityFieldSets.default })
         );
         setCities(citiesData);
     }
@@ -119,7 +120,7 @@ export const useFormStore = defineStore('form', () => {
         return city?.gps || null;
     }
 
-    function setGenres(val: Genre[]) {
+    function setGenres(val: IGenreDefault[]) {
         genres.value = val;
     }
     /**
@@ -131,7 +132,7 @@ export const useFormStore = defineStore('form', () => {
         if (!_.isEmpty(genres?.value) && !forceFetch) return;
 
         const genresData = await $directus.request(
-            readItems('genre', { limit: -1 })
+            readItems('genre', { limit: -1, fields: genreFieldSets.default })
         );
         setGenres(genresData);
     }

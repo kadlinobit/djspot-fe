@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import _ from 'lodash';
 import { useUserStore, useMainStore } from '@/stores';
-import type { Dj } from '~/plugins/directus/types';
+import type { IDjDefault } from '~/plugins/directus/collection/dj';
 import { createItem, deleteItem } from '@directus/sdk';
 
 const { $i18n, $directus } = useNuxtApp();
@@ -21,7 +21,7 @@ const toast = useToast();
 const mainStore = useMainStore();
 const { getIsLoggedIn } = useUserStore();
 
-const dj = defineModel<Dj>('dj');
+const dj = defineModel<IDjDefault>('dj');
 const isToggleFollowLoading = ref(false);
 
 const followButtonColor = computed(() => {

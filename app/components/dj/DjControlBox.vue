@@ -18,8 +18,8 @@
 
 <script setup lang="ts">
 import DjFollowButton from '@/components/dj/DjFollowButton.vue';
-import type { Dj } from '~/plugins/directus/types';
+import type { IDjDefault } from '~/plugins/directus/collection/dj';
 
 const { $i18n } = useNuxtApp();
-const dj = defineModel<Dj>('dj');
+const dj = defineModel<IDjDefault>('dj');
 </script>

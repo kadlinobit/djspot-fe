@@ -43,8 +43,8 @@
                     @touchend="isSeeking = false"
                 />
                 <div class="flex items-center justify-between text-xs text-gray-500">
-                    <span>{{ $audio.convertTimeHHMMSS(currentSeconds) }}</span>
-                    <span>{{ $audio.convertTimeHHMMSS(durationSeconds) }}</span>
+                    <span>{{ convertTimeHHMMSS(currentSeconds) }}</span>
+                    <span>{{ convertTimeHHMMSS(durationSeconds) }}</span>
                 </div>
             </div>
             <div v-if="!isError && showVolume" class="flex-1 min-w-0 flex flex-col gap-1">
@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-const { $audio, $i18n } = useNuxtApp()
+const { $i18n } = useNuxtApp()
 
 interface Props {
     autoPlay?: boolean

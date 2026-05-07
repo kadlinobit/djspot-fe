@@ -16,7 +16,7 @@
 
         <div v-if="sound.duration" class="flex-shrink-0">
             <UBadge color="neutral" variant="soft" class="text-xs">
-                {{ $audio.convertTimeHHMMSS(sound.duration) }}
+                {{ convertTimeHHMMSS(sound.duration) }}
             </UBadge>
         </div>
         <div class="flex-shrink-0">

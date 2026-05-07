@@ -29,10 +29,10 @@
 
 <script setup lang="ts">
 import CoverImage from '~/components/media/CoverImage.vue';
-import type { Dj } from '~/plugins/directus/types';
+import type { IDjDefault } from '~/plugins/directus/collection/dj';
 
 interface Props {
-    dj: Dj;
+    dj: IDjDefault;
 }
 
 const props = defineProps<Props>();

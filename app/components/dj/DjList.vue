@@ -26,10 +26,10 @@
 import _ from 'lodash';
 import DjListItem from '~/components/dj/DjListItem.vue';
 import DjListItemSkeleton from '~/components/dj/DjListItemSkeleton.vue';
-import type { Dj } from '~/plugins/directus/types';
+import type { IDjDefault } from '~/plugins/directus/collection/dj';
 
 interface Props {
-    djs: Dj[];
+    djs: IDjDefault[];
 }
 
 const props = withDefaults(defineProps<Props>(), {

@@ -152,7 +152,6 @@ import SoundsPageList from '~/components/sound/SoundsPageList.vue';
 import SoundTypeSelector from '~/components/selectors/soundType.USelectMenu.vue';
 import { useFormStore, useUserStore } from '~/stores';
 import { readItems, aggregate } from '@directus/sdk';
-import type { Genre } from '~/plugins/directus/types';
 
 const { $i18n, $api, $directus } = useNuxtApp();
 const route = useRoute();

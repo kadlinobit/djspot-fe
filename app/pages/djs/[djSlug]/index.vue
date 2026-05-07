@@ -77,7 +77,7 @@
             <UContainer class="max-w-4xl">
                 <UTabs v-if="tabItems.length > 0" :items="tabItems" class="w-full">
                     <template #content="{ item }">
-                        <div v-if="item.key === 'bio'" class="prose dark:prose-invert max-w-none pt-6" v-html="$marked.markdownToHtml(dj.bio)" />
+                        <div v-if="item.key === 'bio'" class="prose dark:prose-invert max-w-none pt-6" v-html="markdownToHtml(dj.bio)" />
                         <div v-else-if="item.key === 'mixes'" class="pt-6">
                             <SoundList :sounds="mixes" />
                         </div>

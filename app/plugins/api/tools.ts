@@ -32,30 +32,6 @@ const tools = () => {
     }
 
     /**
-     * Throttles an async function in a way that can be awaited.
-     * By default throttle doesn't return a promise for async functions unless it's invoking them immediately. See CUR-4769 for details.
-     * https://github.com/lodash/lodash/issues/4700
-     * @param func async function to throttle calls for.
-     * @param wait same function as lodash.throttle's wait parameter.
-     *             Call this function at most this often.
-     * @returns a promise which will be resolved/ rejected only if the function is executed, with the result of the underlying call.
-     */
-    function asyncDebounce<F extends (...args: any[]) => Promise<any>>(
-        func: F,
-        wait?: number
-    ) {
-        const debounced = _.debounce((resolve, reject, args: Parameters<F>) => {
-            func(...args)
-                .then(resolve)
-                .catch(reject);
-        }, wait);
-        return (...args: Parameters<F>): ReturnType<F> =>
-            new Promise((resolve, reject) => {
-                debounced(resolve, reject, args);
-            }) as ReturnType<F>;
-    }
-
-    /**
      * Verifies that a field is unique in a DB collection
      * @param collection - collection name
      * @param fieldName - field name
@@ -95,7 +71,6 @@ const tools = () => {
         regEx,
         parseErrorMessage,
         generateUrlSlug,
-        asyncDebounce,
         verifyUnique
     };
 

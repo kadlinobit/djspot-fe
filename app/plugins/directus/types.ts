@@ -1,10 +1,15 @@
 import type { DirectusActivity } from '@directus/sdk';
 
 /** * Generated TypeScript types for Directus Schema * Generated on: 2025-09-17T11:02:13.265Z */
+export interface GeoPoint {
+    type: 'Point';
+    coordinates: [number, number];
+}
+
 export interface City {
     id: string;
     name: string;
-    gps: string;
+    gps: GeoPoint;
     district: string;
     region: string;
     zip: number;

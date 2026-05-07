@@ -8,7 +8,7 @@
     <div v-else class="flex items-center gap-4 relative">
         <div class="flex-shrink-0">
             <UBadge color="neutral" variant="soft">
-                {{ $audio.convertTimeHHMMSS(playerStore.currentSeconds) }}
+                {{ convertTimeHHMMSS(playerStore.currentSeconds) }}
             </UBadge>
         </div>
         <div v-if="playerStore.isLoading" class="flex-1 flex justify-center">
@@ -26,7 +26,7 @@
         </div>
         <div class="flex-shrink-0">
             <UBadge color="neutral" variant="soft">
-                {{ $audio.convertTimeHHMMSS(playerStore.durationSeconds) }}
+                {{ convertTimeHHMMSS(playerStore.durationSeconds) }}
             </UBadge>
         </div>
     </div>
@@ -35,5 +35,5 @@
 <script setup lang="ts">
 import { usePlayerStore } from '~/stores'
 const playerStore = usePlayerStore()
-const { $audio, $i18n } = useNuxtApp()
+const { $i18n } = useNuxtApp()
 </script>

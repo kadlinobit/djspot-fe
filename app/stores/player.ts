@@ -5,7 +5,6 @@ import type { ISoundDefault } from '~/plugins/directus/collection';
 export const usePlayerStore = defineStore(
     'player',
     () => {
-        const { $audio } = useNuxtApp();
 
         const currentSound = ref<ISoundDefault>();
         const file = ref<string | undefined>(undefined);
@@ -109,7 +108,7 @@ export const usePlayerStore = defineStore(
             setIsAutoplay(true);
 
             if (newSound.url) {
-                const audioUrls = await $audio.getAudioUrls(newSound.url);
+                const audioUrls = await $fetch<{ stream: string | null; download: string | null } | null>('/api/audio-url', { query: { url: newSound.url } });
                 if (audioUrls && audioUrls.stream) {
                     setCurrentSound(newSound);
                     setFile(audioUrls.stream);
