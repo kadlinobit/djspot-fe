@@ -1,0 +1,111 @@
+import type { DirectusNotification } from '@directus/sdk';
+import { readNotifications, updateNotification } from '@directus/sdk';
+
+const NOTIFICATION_FIELDS = [
+    'id',
+    'subject',
+    'message',
+    'timestamp',
+    'status',
+    'sender',
+    'collection',
+    'item'
+] as const;
+
+export const useNotificationsStore = defineStore('notifications', () => {
+    const notifications = ref<DirectusNotification[]>([]);
+    const unreadCount = computed(
+        () => notifications.value.filter((n) => n.status === 'inbox').length
+    );
+
+    let activeUnsubscribe: (() => void) | null = null;
+    let activeAbort: AbortController | null = null;
+
+    async function markAsRead(id: string) {
+        const { $directus } = useNuxtApp();
+        await $directus.request(updateNotification(id, { status: 'archived' }));
+        const n = notifications.value.find((n) => n.id === id);
+        if (n) n.status = 'archived';
+    }
+
+    async function connect(directus: ReturnType<typeof useNuxtApp>['$directus']) {
+        if (activeUnsubscribe) return;
+
+        try {
+            const existing = await directus.request(
+                readNotifications({
+                    fields: NOTIFICATION_FIELDS,
+                    sort: ['-timestamp'],
+                    limit: 50
+                })
+            );
+            notifications.value = existing as unknown as DirectusNotification[];
+
+            await directus.connect();
+
+            const { subscription, unsubscribe } = await directus.subscribe(
+                'directus_notifications' as never,
+                {
+                    event: 'create',
+                    query: {
+                        filter: { recipient: { _eq: '$CURRENT_USER' } },
+                        fields: NOTIFICATION_FIELDS
+                    }
+                }
+            );
+
+            activeUnsubscribe = unsubscribe;
+            activeAbort = new AbortController();
+            const { signal } = activeAbort;
+
+            (async () => {
+                try {
+                    for await (const message of subscription) {
+                        if (signal.aborted) break;
+                        if (message.event === 'create') {
+                            notifications.value.unshift(
+                                ...(message.data as DirectusNotification[])
+                            );
+                        }
+                    }
+                } catch {
+                    activeUnsubscribe = null;
+                }
+            })();
+        } catch (error) {
+            console.error('[Notifications] WebSocket connection failed:', error);
+        }
+    }
+
+    function disconnect(directus: ReturnType<typeof useNuxtApp>['$directus']) {
+        activeAbort?.abort();
+        activeAbort = null;
+        activeUnsubscribe?.();
+        activeUnsubscribe = null;
+        notifications.value = [];
+        directus.disconnect();
+    }
+
+    if (import.meta.client) {
+        const { $directus } = useNuxtApp();
+        const userStore = useUserStore();
+
+        watch(
+            () => userStore.isLoggedIn,
+            async (loggedIn) => {
+                if (loggedIn) {
+                    await connect($directus);
+                } else {
+                    disconnect($directus);
+                }
+            },
+            { immediate: true }
+        );
+    }
+
+    return {
+        notifications: readonly(notifications),
+        unreadCount,
+        markAsRead
+    };
+});

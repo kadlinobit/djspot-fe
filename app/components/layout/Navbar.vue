@@ -17,13 +17,7 @@
         <UNavigationMenu :items="items" />
 
         <template #right>
-            <UButton
-                v-if="getIsLoggedIn()"
-                icon="i-lucide-user"
-                variant="ghost"
-                color="neutral"
-                @click="mainStore.isSidebarOpen = !mainStore.isSidebarOpen"
-            />
+            <SidebarMenuButton v-if="getIsLoggedIn()" />
 
             <ThemeSwitch />
             <LanguageSelection />
@@ -51,6 +45,7 @@
 
 <script setup lang="ts">
 import LanguageSelection from '~/components/layout/LanguageSelection.client.vue';
+import SidebarMenuButton from '~/components/layout/SidebarMenuButton.vue';
 import ThemeSwitch from '~/components/layout/ThemeSwitch.vue';
 import { useMainStore, useUserStore } from '~/stores';
 

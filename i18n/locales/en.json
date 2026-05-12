@@ -71,6 +71,7 @@
         "register_success_message": "A confirmation link has been sent to your email account. Please click on the link to complete the registration process.",
         "email_confirmed": "Your account has been confirmed! You can now log in.",
         "logout_success": "You have been successfully logged out. See you later!",
+        "session_expired": "Something went wrong — you have been logged out.",
         "profile_update_success": "Your user profile has been saved successfully!",
         "account_activation": "Account activation",
         "activation_token_missing": "Activation token is missing, please make sure you clicked on the correct account activation link.",
@@ -172,6 +173,7 @@
         "info": "Info",
         "all_types": "All types",
         "no_sounds_found": "Sorry, we couldn't find any sets or tracks.",
+        "sound_not_found": "Sound not found",
         "like": "Like",
         "liked_by_me": "Liked",
         "total_found": "Total found {0} sounds",
@@ -202,6 +204,9 @@
         "slug_changed_warning": "You are changing your URL address, which may cause issues with links to your profile. If you are not sure, leave it as is. (Original value is '{0}')",
         "image_type": "Image must be in JPG, JPEG or PNG format",
         "genres_min_max": "You must select at least 1 genre (maximum 3)"
+    },
+    "notifications": {
+        "title": "Notifications"
     },
     "error": {
         "title": "Error"

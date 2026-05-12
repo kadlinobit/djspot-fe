@@ -14,6 +14,7 @@ import { userFieldSets } from './collection/index.js';
 
 export default defineNuxtPlugin(() => {
     const { setUser, setLoggedIn } = useUserStore();
+    const toast = useToast();
 
     class NuxtCookieStorage {
         cookie = useCookie('directus-data');
@@ -31,26 +32,54 @@ export default defineNuxtPlugin(() => {
         ? window.location.origin
         : useRequestURL().origin;
 
+    // /websocket is handled by server/routes/websocket.ts which proxies to Directus.
+    const wsUrl = import.meta.client
+        ? `${url.replace(/^http/, 'ws')}/websocket`
+        : undefined;
+
     const directus = createDirectus<ApiCollections>(`${url}/directus`)
         .with(authentication('cookie', { credentials: 'include', storage }))
         .with(rest({ credentials: 'include' }))
-        .with(realtime());
+        .with(realtime(wsUrl ? { url: wsUrl, authMode: 'strict' } : {}));
+
+    let isRefreshing = false;
 
     directus.request = new Proxy(directus.request, {
         apply: async (target, thisArg, args) => {
             try {
                 return await Reflect.apply(target, thisArg, args);
             } catch (error: any) {
+                const code = error?.errors?.[0]?.extensions?.code;
+                const status = error?.response?.status;
+                console.warn('[directus proxy] request failed', {
+                    code,
+                    status,
+                    isRefreshing
+                });
+
                 if (
-                    error?.errors?.[0]?.extensions?.code ===
-                    'INVALID_CREDENTIALS'
+                    !isRefreshing &&
+                    (code === 'INVALID_CREDENTIALS' ||
+                        code === 'TOKEN_EXPIRED' ||
+                        status === 401)
                 ) {
+                    isRefreshing = true;
                     try {
                         await directus.refresh();
                         return await Reflect.apply(target, thisArg, args);
                     } catch (e) {
-                        await logout();
+                        if (import.meta.client) {
+                            await logout();
+                            const { $i18n } = useNuxtApp();
+                            toast.add({
+                                title: $i18n.t('user.session_expired'),
+                                color: 'warning'
+                            });
+                            navigateTo('/');
+                        }
                         throw e;
+                    } finally {
+                        isRefreshing = false;
                     }
                 }
                 throw error;
@@ -85,9 +114,17 @@ export default defineNuxtPlugin(() => {
     }
 
     async function logout() {
-        await directus.logout();
         setLoggedIn(false);
         setUser(undefined);
+        // Clear the SDK's token storage immediately so getToken() stops returning the invalid token and breaks the retry cycle.
+        storage.set(null);
+        directus.stopRefreshing?.();
+        try {
+            await directus.logout();
+        } catch {
+            // Server-side session invalidation is best-effort;
+            // local state is already cleared above.
+        }
     }
 
     return {

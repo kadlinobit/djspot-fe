@@ -16,6 +16,7 @@ import SidebarMenu from '~/components/layout/SidebarMenu.client.vue';
 import BottomBar from '~/components/layout/BottomBar.client.vue';
 import LoginModal from '~/components/login/LoginModal.vue';
 
-import { useUserStore } from '~/stores';
+import { useUserStore, useNotificationsStore } from '~/stores';
 const { getIsLoggedIn } = useUserStore();
+useNotificationsStore();
 </script>
