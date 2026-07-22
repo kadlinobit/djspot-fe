@@ -12,11 +12,51 @@ const NOTIFICATION_FIELDS = [
     'item'
 ] as const;
 
+type NotificationParams = Record<string, string | number>;
+
+type TranslatableNotification = {
+    subject?: string | null;
+    message?: string | Record<string, unknown> | null;
+};
+
+function parseMessageParams(message: TranslatableNotification['message']): NotificationParams {
+    if (message == null || message === '') return {};
+    if (typeof message === 'object' && !Array.isArray(message)) {
+        return message as NotificationParams;
+    }
+    if (typeof message === 'string') {
+        try {
+            const parsed = JSON.parse(message);
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                return parsed as NotificationParams;
+            }
+        } catch {
+            // Plain-text legacy message — no params
+        }
+    }
+    return {};
+}
+
+export function translateNotification(n: TranslatableNotification) {
+    const { $i18n } = useNuxtApp();
+    const key = n.subject ?? '';
+    const params = parseMessageParams(n.message);
+    const subjectKey = `${key}.subject`;
+    const messageKey = `${key}.message`;
+
+    return {
+        subject: $i18n.te(subjectKey) ? $i18n.t(subjectKey, params) : (n.subject ?? ''),
+        message: $i18n.te(messageKey)
+            ? $i18n.t(messageKey, params)
+            : typeof n.message === 'string'
+              ? n.message
+              : ''
+    };
+}
+
 export const useNotificationsStore = defineStore('notifications', () => {
     const notifications = ref<DirectusNotification[]>([]);
-    const unreadCount = computed(
-        () => notifications.value.filter((n) => n.status === 'inbox').length
-    );
+    const unreadCount = computed(() => notifications.value.length);
 
     let activeUnsubscribe: (() => void) | null = null;
     let activeAbort: AbortController | null = null;
@@ -24,8 +64,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     async function markAsRead(id: string) {
         const { $directus } = useNuxtApp();
         await $directus.request(updateNotification(id, { status: 'archived' }));
-        const n = notifications.value.find((n) => n.id === id);
-        if (n) n.status = 'archived';
+        notifications.value = notifications.value.filter((n) => String(n.id) !== String(id));
     }
 
     async function connect(directus: ReturnType<typeof useNuxtApp>['$directus']) {
@@ -35,6 +74,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
             const existing = await directus.request(
                 readNotifications({
                     fields: NOTIFICATION_FIELDS,
+                    filter: { status: { _eq: 'inbox' } },
                     sort: ['-timestamp'],
                     limit: 50
                 })
@@ -64,7 +104,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
                         if (signal.aborted) break;
                         if (message.event === 'create') {
                             notifications.value.unshift(
-                                ...(message.data as DirectusNotification[])
+                                ...(message.data as unknown as DirectusNotification[])
                             );
                         }
                     }

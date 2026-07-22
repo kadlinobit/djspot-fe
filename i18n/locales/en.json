@@ -79,6 +79,7 @@
         "activation_success": "Your account '{0}' has been successfully activated! You will be redirected to the login page shortly."
     },
     "dj": {
+        "sidebar_title": "Your DJ",
         "profile": "DJ Profile",
         "create_profile": "Create DJ profile",
         "do_create_profile": "Create DJ profile",
@@ -206,7 +207,11 @@
         "genres_min_max": "You must select at least 1 genre (maximum 3)"
     },
     "notifications": {
-        "title": "Notifications"
+        "title": "Notifications",
+        "new_sound_uploaded": {
+            "subject": "New sound",
+            "message": "{djName} uploaded '{soundName}'"
+        }
     },
     "error": {
         "title": "Error"

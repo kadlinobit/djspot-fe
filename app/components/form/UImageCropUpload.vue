@@ -5,7 +5,7 @@
             class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800"
         >
             <img
-                :src="`${apiBaseURL}/assets/${currentImage}`"
+                :src="`/directus/assets/${currentImage}`"
                 class="block h-auto w-full"
             >
         </div>
@@ -92,8 +92,6 @@
 <script setup lang="ts">
 import { Cropper, type CropperResult } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
-
-const { apiBaseURL } = useRuntimeConfig().public;
 
 export type CroppedImage = { file: File | null; croppedImage?: CropperResult };
 export type CropUploadModelValue = CroppedImage | 'keep-current' | null;

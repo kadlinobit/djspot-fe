@@ -1,4 +1,7 @@
 <template>
+    <p class="text-dimmed px-2 text-xs font-semibold tracking-wider uppercase">
+        {{ $i18n.t('dj.sidebar_title') }}
+    </p>
     <UNavigationMenu
         :items="djItems"
         :ui="{ root: 'flex flex-col gap-4' }"

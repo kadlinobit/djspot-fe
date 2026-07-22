@@ -5,7 +5,7 @@
             class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800"
         >
             <img
-                :src="`${apiBaseURL}/assets/${currentImage}`"
+                :src="`/directus/assets/${currentImage}`"
                 class="block h-auto w-full"
             >
         </div>
@@ -75,8 +75,6 @@
 </template>
 
 <script setup lang="ts">
-const { apiBaseURL } = useRuntimeConfig().public;
-
 export type ImageUploadModelValue = File | 'keep-current' | null;
 
 interface Props {

@@ -109,27 +109,7 @@
                     </div>
                 </div>
 
-                <!-- Controls -->
-                <div
-                    class="mt-8 flex flex-col justify-between gap-4 border-t border-gray-800 pt-6 sm:flex-row sm:items-center"
-                >
-                    <div class="flex items-center gap-4">
-                        <sound-like-button v-model:sound="sound" />
-                        <sound-playlist-button :sound="sound" />
-                    </div>
-                    <div>
-                        <UButton
-                            :to="`/sounds/manage/edit/${sound.id}`"
-                            color="neutral"
-                            variant="outline"
-                            icon="i-heroicons-pencil-square"
-                            size="md"
-                            class="w-full justify-center sm:w-auto"
-                        >
-                            {{ $i18n.t('form.edit') }}
-                        </UButton>
-                    </div>
-                </div>
+                <sound-control-box v-model:sound="sound" />
             </UContainer>
         </div>
 
@@ -155,16 +135,14 @@
 </template>
 
 <script setup lang="ts">
-import _ from 'lodash';
 import DjInfoBox from '~/components/dj/DjInfoBox.vue';
-import SoundLikeButton from '~/components/sound/SoundLikeButton.vue';
-import SoundPlaylistButton from '~/components/sound/SoundPlaylistButton.vue';
+import SoundControlBox from '~/components/sound/SoundControlBox.vue';
 import CoverImage from '~/components/media/CoverImage.vue';
 import ButtonPlayPause from '~/components/audio/ButtonPlayPause.client.vue';
 import { useUserStore } from '~/stores';
 import { readItems } from '@directus/sdk';
 
-const { $i18n, $api, $marked, $time, $audio, $directus } = useNuxtApp();
+const { $i18n, $api, $directus } = useNuxtApp();
 const route = useRoute();
 const { getUser } = useUserStore();
 

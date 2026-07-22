@@ -79,6 +79,7 @@
         "activation_success": "Tvůj účet '{0}' byl úspěšně aktivován! Za chvíli budeš přesměrován na přihlašovací stránku."
     },
     "dj": {
+        "sidebar_title": "Tvůj DJ",
         "profile": "Profil DJe",
         "create_profile": "Vytvořit DJ profil",
         "do_create_profile": "Vytvoř DJ profil",
@@ -207,7 +208,11 @@
         "genres_min_max": "Musíš vybrat alespoň 1 žánr (maximálně 3)"
     },
     "notifications": {
-        "title": "Oznámení"
+        "title": "Oznámení",
+        "new_sound_uploaded": {
+            "subject": "Nový sound",
+            "message": "{djName} nahrál '{soundName}'"
+        }
     },
     "error": {
         "title": "Chyba"

@@ -1,7 +1,3 @@
-<!--
-TODO:
-- check if sound belongs to a user, if not, do not allow to see the form
--->
 <template>
     <UContainer class="py-10">
         <div v-if="fetchPending" class="flex justify-center py-12">
@@ -40,6 +36,10 @@ import ConfirmModal from '~/components/form/ConfirmModal.vue';
 import { readItem, updateItem, deleteItem } from '@directus/sdk';
 import { soundFieldSets, type ISoundForm } from '~/plugins/directus/collection';
 import { useUserStore } from '@/stores';
+
+definePageMeta({
+    middleware: ['authenticated', 'sound-owner']
+});
 
 const { $i18n, $api, $directus } = useNuxtApp();
 const toast = useToast();
