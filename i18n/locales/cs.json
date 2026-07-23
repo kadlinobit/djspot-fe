@@ -71,6 +71,7 @@
         "register_success_message": "Odkaz k potvrzení nového účtu byl právě odeslán na tvůj email - klikni na něj k dokončení registrace.",
         "email_confirmed": "Tvůj účet byl potvrzen! Teď se můžeš přihlásit.",
         "logout_success": "Byl jsi úspěšně odhlášen. Naviděnou příště!",
+        "session_expired": "Něco se pokazilo — byl jsi odhlášen.",
         "profile_update_success": "Tvůj uživatelský profil byl úspěšně uložen!",
         "account_activation": "Aktivace účtu",
         "activation_token_missing": "Aktivační token chybí, zkontroluj prosím, že jsi kliknul na správný link pro aktivaci účtu.",
@@ -78,6 +79,7 @@
         "activation_success": "Tvůj účet '{0}' byl úspěšně aktivován! Za chvíli budeš přesměrován na přihlašovací stránku."
     },
     "dj": {
+        "sidebar_title": "Tvůj DJ",
         "profile": "Profil DJe",
         "create_profile": "Vytvořit DJ profil",
         "do_create_profile": "Vytvoř DJ profil",
@@ -172,6 +174,7 @@
         "info": "Info",
         "all_types": "Všechny typy",
         "no_sounds_found": "Bohužel, nenašli jsme žádné sety ani tracky.",
+        "sound_not_found": "Sound nebyl nalezen",
         "like": "Lajkovat",
         "liked_by_me": "Oblíbené",
         "total_found": "Celkem nalezeno {0} sounds",
@@ -203,6 +206,13 @@
         "slug_changed_warning": "Měníš svoji URL adresu, což může způsobit problémy s odkazy na tvůj profil. Pokud si nejsi jistý, nech to tak jak je. (Původní hodnota je '{0}')",
         "image_type": "Obrázek musí být ve formátu JPG, JPEG nebo PNG",
         "genres_min_max": "Musíš vybrat alespoň 1 žánr (maximálně 3)"
+    },
+    "notifications": {
+        "title": "Oznámení",
+        "new_sound_uploaded": {
+            "subject": "Nový sound",
+            "message": "{djName} nahrál '{soundName}'"
+        }
     },
     "error": {
         "title": "Chyba"

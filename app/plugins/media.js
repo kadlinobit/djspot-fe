@@ -2,7 +2,6 @@
 import { defineNuxtPlugin } from '#app'
 
 export default defineNuxtPlugin((nuxtApp) => {
-    const { apiBaseURL } = useRuntimeConfig().public
 
     /**
      * Returns image URL in selected quality. If selected quality is not available, function returns

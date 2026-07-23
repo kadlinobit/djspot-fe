@@ -5,6 +5,11 @@ const proxyUrl = apiUrl.endsWith('/**')
 
 export default defineNuxtConfig({
     compatibilityDate: '2025-01-01',
+    nitro: {
+        experimental: {
+            websocket: true
+        }
+    },
     vite: {
         optimizeDeps: {
             include: [
@@ -59,10 +64,7 @@ export default defineNuxtConfig({
     routeRules: {
         '/directus/**': { proxy: proxyUrl }
     },
-    plugins: [
-        { src: '~/plugins/media.js' },
-        { src: '~/plugins/api/index.js' }
-    ],
+    plugins: [{ src: '~/plugins/media.js' }, { src: '~/plugins/api/index.js' }],
     components: true,
     modules: [
         '@nuxt/ui',

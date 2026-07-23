@@ -35,15 +35,18 @@ import DjForm, {
 } from '~/components/form/DjForm.vue';
 import ConfirmModal from '~/components/form/ConfirmModal.vue';
 import { deleteItem, readItem, updateItem } from '@directus/sdk';
-import { useUserStore } from '@/stores';
 import { djFieldSets, type IDjForm } from '~/plugins/directus/collection';
+
+definePageMeta({
+    middleware: ['authenticated', 'dj-owner']
+});
 
 const toast = useToast();
 const overlay = useOverlay();
-const { getUser } = useUserStore();
 
 const { $i18n, $api, $directus, $updateUser } = useNuxtApp();
 const router = useRouter();
+const route = useRoute();
 
 const error = ref();
 const success = ref();
@@ -58,11 +61,11 @@ const {
     data: initialData,
     pending: fetchPending
 } = useAsyncData('IDjFormQuery', async function () {
-    const djID = getUser()?.djs?.[0]?.id;
+    const djID = route.params.id;
     if (!djID) return;
 
     const data = await $directus.request(
-        readItem('dj', djID, { fields: djFieldSets.form })
+        readItem('dj', String(djID), { fields: djFieldSets.form })
     );
 
     return data;

@@ -4,24 +4,30 @@ import base64 from 'base-64';
 import utf8 from 'utf8';
 
 export interface AudioUrls {
-    stream: string | null;
-    download: string | null;
+    stream: string | undefined;
+    download: string | undefined;
 }
 
-function getDropboxUrls(parsedUrl: Url<Record<string, string | undefined>>): AudioUrls {
+function getDropboxUrls(
+    parsedUrl: Url<Record<string, string | undefined>>
+): AudioUrls {
     parsedUrl.set('query', { dl: 1 });
     const url = parsedUrl.toString();
     return { stream: url, download: url };
 }
 
-function getHearThisUrls(parsedUrl: Url<Record<string, string | undefined>>): AudioUrls {
+function getHearThisUrls(
+    parsedUrl: Url<Record<string, string | undefined>>
+): AudioUrls {
     return {
         stream: `https://hearthis.app${parsedUrl.pathname}listen`,
-        download: null
+        download: undefined
     };
 }
 
-function getOneDriveUrls(parsedUrl: Url<Record<string, string | undefined>>): AudioUrls {
+function getOneDriveUrls(
+    parsedUrl: Url<Record<string, string | undefined>>
+): AudioUrls {
     const base64value = base64.encode(utf8.encode(parsedUrl.toString()));
     const encodedUrl = base64value
         .replace(/=+$/, '')
