@@ -1,11 +1,11 @@
 import type {
     readItems,
-    type RestCommand,
-    type Query,
-    type CollectionType,
-    type RegularCollections,
-    type DirectusUser,
-    type MergeCoreCollection
+    RestCommand,
+    Query,
+    CollectionType,
+    RegularCollections,
+    DirectusUser,
+    MergeCoreCollection
 } from '@directus/sdk';
 import type { ApiCollections } from '../types';
 
