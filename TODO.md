@@ -11,12 +11,11 @@ Follow-ups from the Nuxt 4.5 upgrade.
 
 ## Medium priority
 
-- [ ] **Install local Iconify collections** to stop Nuxt Icon runtime fallback warnings:
+- [x] **Install local Iconify collections** to stop Nuxt Icon runtime fallback warnings:
   ```bash
   npm i -D @iconify-json/lucide @iconify-json/heroicons
   ```
-- [ ] **Bump `tailwindcss`** to `^4.3.2` (or latest 4.x) to align with `@nuxt/ui`’s `@tailwindcss/vite` / `@tailwindcss/postcss` expectations.
-- [ ] **Review `@sidebase/nuxt-auth`** — present in `devDependencies` but not registered in `nuxt.config` modules. Either wire it up or remove it.
+- [x] **Bump `tailwindcss`** to `^4.3.2` (or latest 4.x) to align with `@nuxt/ui`’s `@tailwindcss/vite` / `@tailwindcss/postcss` expectations.
 
 ## Low priority / monitor
 
